@@ -2,6 +2,14 @@
 
 Go implementation of XenofilteR for filtering host (mouse) reads from graft (human) sequencing data in tumor xenograft experiments.
 
+This project is a **Go reimplementation** of the original [XenofilteR](https://github.com/NKI-GCF/XenofilteR) R/Bioconductor package, with the following enhancements:
+
+- **Pure Go implementation** - No external dependencies like samtools or R
+- **Better performance** - Parallel processing with configurable worker count
+- **Native BAM I/O** - Custom pure Go BAM library (bamnative)
+- **Reference-based NM recalculation** - Recalculate edit distance using reference genome
+- **Bisulfite sequencing support** - Built-in support for BS-seq data
+
 ## Features
 
 - Pure Go implementation (no external dependencies like samtools)
