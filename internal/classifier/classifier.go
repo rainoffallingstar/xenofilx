@@ -1,8 +1,8 @@
 package classifier
 
 import (
-	"github.com/PeeperLab/xenofilter/internal/bamnative"
-	"github.com/PeeperLab/xenofilter/internal/config"
+	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilter-go/internal/config"
 )
 
 // Classifier provides read classification functionality
@@ -67,17 +67,19 @@ func (c *Classifier) Classify(humanRecords, mouseRecords []*bamnative.Record, is
 	return c.singleEndClassifier.ClassifyBatch(humanRecords, mouseRecords)
 }
 
-// ClassifyWithRef classifies reads using reference genome for NM calculation
-// refNames parameter maps RefID to reference sequence name
-func (c *Classifier) ClassifyWithRef(humanRecords, mouseRecords []*bamnative.Record, isPairedEnd bool, refNames map[int32]string) map[string]bool {
+// ClassifyWithRef classifies reads using reference genome for NM calculation.
+// graftRefNames maps graft BAM RefID → chromosome name.
+// hostRefNames maps host BAM RefID → chromosome name.
+// The two maps are kept separate because each BAM's RefIDs are independent.
+func (c *Classifier) ClassifyWithRef(humanRecords, mouseRecords []*bamnative.Record, isPairedEnd bool, graftRefNames, hostRefNames map[int32]string) map[string]bool {
 	if c.refReader == nil && c.hostRefReader == nil {
 		return c.Classify(humanRecords, mouseRecords, isPairedEnd)
 	}
 
 	// Create a new classifier with reference-aware scoring
 	calc := c.calculator
-	singleClf := NewSingleEndClassifierWithRef(calc, c.refReader, c.hostRefReader, c.config.MMThreshold, c.config.IsBisulfite, refNames)
-	pairedClf := NewPairedEndClassifierWithRef(calc, c.refReader, c.hostRefReader, c.config.MMThreshold, c.config.UnmappedPenalty, c.config.IsBisulfite, refNames)
+	singleClf := NewSingleEndClassifierWithRef(calc, c.refReader, c.hostRefReader, c.config.MMThreshold, c.config.IsBisulfite, graftRefNames, hostRefNames)
+	pairedClf := NewPairedEndClassifierWithRef(calc, c.refReader, c.hostRefReader, c.config.MMThreshold, c.config.UnmappedPenalty, c.config.IsBisulfite, graftRefNames, hostRefNames)
 
 	if isPairedEnd {
 		return pairedClf.ClassifyBatch(humanRecords, mouseRecords)

@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/PeeperLab/xenofilter/internal/bgzip"
+	"github.com/rainoffallingstar/xenofilter-go/internal/bgzip"
 )
 
 // Writer writes BAM files
@@ -57,11 +57,23 @@ func (w *Writer) writeHeader() error {
 	}
 
 	// Build header text
-	headerText := "@HD\tVN:1.5\tSO:coordinate\n"
+	sortOrder := w.header.SortOrder
+	if sortOrder == "" {
+		sortOrder = "unknown"
+	}
+	headerText := fmt.Sprintf("@HD\tVN:1.5\tSO:%s\n", sortOrder)
 
 	// Add reference sequences
 	for _, ref := range w.header.References {
 		headerText += fmt.Sprintf("@SQ\tSN:%s\tLN:%d\n", ref.Name, ref.Len)
+	}
+
+	// Preserve @RG and @PG lines from input
+	for _, rg := range w.header.RGLines {
+		headerText += rg + "\n"
+	}
+	for _, pg := range w.header.PGLines {
+		headerText += pg + "\n"
 	}
 
 	// Write header length (4 bytes)
@@ -133,8 +145,8 @@ func (w *Writer) Write(record *Record) error {
 		return fmt.Errorf("failed to write bin_mq_nl: %w", err)
 	}
 
-	// Write flag_nc (4 bytes): flag (upper 16 bits), ncigar (16 bits)
-	flagNC := uint32(record.Flags) << 16
+	// Write flag_nc (4 bytes): flag (upper 16 bits), ncigar (lower 16 bits)
+	flagNC := uint32(record.Flags)<<16 | uint32(len(record.Cigar))
 	if err := binary.Write(w.bgz, binary.LittleEndian, flagNC); err != nil {
 		return fmt.Errorf("failed to write flag_nc: %w", err)
 	}
@@ -167,12 +179,7 @@ func (w *Writer) Write(record *Record) error {
 		return fmt.Errorf("failed to write read name: %w", err)
 	}
 
-	// Write CIGAR
-	cigarLen := int32(len(record.Cigar))
-	if err := binary.Write(w.bgz, binary.LittleEndian, cigarLen); err != nil {
-		return fmt.Errorf("failed to write CIGAR length: %w", err)
-	}
-
+	// Write CIGAR operations (each is 4 bytes)
 	for _, cigar := range record.Cigar {
 		// Encode CIGAR: (length << 4) | op_code
 		opCode := cigarCharToNum(cigar.Op)
@@ -272,57 +279,104 @@ func (w *Writer) writeAuxField(aux *AuxField) error {
 		return err
 	}
 
-	// Write value
+	// Write value based on type
 	switch aux.Type {
-	case AuxTypeChar:
+	case AuxTypeChar: // 'A'
 		if v, ok := aux.Value.(string); ok && len(v) > 0 {
 			return w.bgz.WriteByte(v[0])
 		}
 		return w.bgz.WriteByte(0)
-	case AuxTypeInt8:
+
+	case AuxTypeInt8: // 'c'
 		if v, ok := aux.Value.(int8); ok {
 			return w.bgz.WriteByte(byte(v))
 		}
-	case AuxTypeUInt8:
+		// Try as byte (might be stored as byte from reading)
+		if v, ok := aux.Value.(byte); ok {
+			return w.bgz.WriteByte(v)
+		}
+		return w.bgz.WriteByte(0)
+
+	case AuxTypeUInt8: // 'C'
+		// byte is an alias for uint8 in Go
 		if v, ok := aux.Value.(uint8); ok {
 			return w.bgz.WriteByte(v)
 		}
-	case AuxTypeInt16:
+		if v, ok := aux.Value.(byte); ok {
+			return w.bgz.WriteByte(v)
+		}
+		return w.bgz.WriteByte(0)
+
+	case AuxTypeInt16: // 's'
 		if v, ok := aux.Value.(int16); ok {
 			return binary.Write(w.bgz, binary.LittleEndian, v)
 		}
-	case AuxTypeUInt16:
+		// Try as int (might be stored as int from reading)
+		if v, ok := aux.Value.(int); ok {
+			return binary.Write(w.bgz, binary.LittleEndian, int16(v))
+		}
+		// Write zero as fallback
+		return binary.Write(w.bgz, binary.LittleEndian, int16(0))
+
+	case AuxTypeUInt16: // 'S'
 		if v, ok := aux.Value.(uint16); ok {
 			return binary.Write(w.bgz, binary.LittleEndian, v)
 		}
-	case AuxTypeInt32:
+		// Try as uint (might be stored as uint from reading)
+		if v, ok := aux.Value.(uint); ok {
+			return binary.Write(w.bgz, binary.LittleEndian, uint16(v))
+		}
+		return binary.Write(w.bgz, binary.LittleEndian, uint16(0))
+
+	case AuxTypeInt32: // 'i'
 		if v, ok := aux.Value.(int32); ok {
 			return binary.Write(w.bgz, binary.LittleEndian, v)
 		}
-	case AuxTypeUInt32:
+		// Try as int (might be stored as int from reading)
+		if v, ok := aux.Value.(int); ok {
+			return binary.Write(w.bgz, binary.LittleEndian, int32(v))
+		}
+		return binary.Write(w.bgz, binary.LittleEndian, int32(0))
+
+	case AuxTypeUInt32: // 'I'
 		if v, ok := aux.Value.(uint32); ok {
 			return binary.Write(w.bgz, binary.LittleEndian, v)
 		}
-	case AuxTypeFloat:
+		// Try as uint (might be stored as uint from reading)
+		if v, ok := aux.Value.(uint); ok {
+			return binary.Write(w.bgz, binary.LittleEndian, uint32(v))
+		}
+		return binary.Write(w.bgz, binary.LittleEndian, uint32(0))
+
+	case AuxTypeFloat: // 'f'
 		if v, ok := aux.Value.(float32); ok {
 			bits := math.Float32bits(v)
 			return binary.Write(w.bgz, binary.LittleEndian, bits)
 		}
-	case AuxTypeString:
+		return binary.Write(w.bgz, binary.LittleEndian, uint32(0))
+
+	case AuxTypeString: // 'Z'
 		if v, ok := aux.Value.(string); ok {
 			data := append([]byte(v), 0)
 			_, err := w.bgz.Write(data)
 			return err
 		}
-	case AuxTypeHex:
+		// Write empty string as fallback
+		return w.bgz.WriteByte(0)
+
+	case AuxTypeHex: // 'H'
 		if v, ok := aux.Value.([]byte); ok {
 			data := append(v, 0)
 			_, err := w.bgz.Write(data)
 			return err
 		}
-	case AuxTypeArray:
+		// Write null terminator as fallback
+		return w.bgz.WriteByte(0)
+
+	case AuxTypeArray: // 'B'
 		if v, ok := aux.Value.([]byte); ok {
-			if err := w.bgz.WriteByte(aux.Type); err != nil {
+			// Write array element type
+			if err := w.bgz.WriteByte(aux.ArrayType); err != nil {
 				return err
 			}
 			if err := binary.Write(w.bgz, binary.LittleEndian, int32(len(v))); err != nil {
@@ -331,9 +385,16 @@ func (w *Writer) writeAuxField(aux *AuxField) error {
 			_, err := w.bgz.Write(v)
 			return err
 		}
-	}
+		// Write empty array as fallback
+		if err := w.bgz.WriteByte(0); err != nil { // array element type
+			return err
+		}
+		return binary.Write(w.bgz, binary.LittleEndian, int32(0))
 
-	return nil
+	default:
+		// Unknown type - skip but don't error
+		return nil
+	}
 }
 
 // encodeSeq encodes a DNA sequence to 2-bit format
@@ -367,13 +428,13 @@ func seqCharToNum(c byte) byte {
 	case 'C', 'c':
 		return 2
 	case 'G', 'g':
-		return 3
-	case 'T', 't':
 		return 4
+	case 'T', 't':
+		return 8
 	case 'N', 'n':
-		return 5
+		return 15
 	default:
-		return 5
+		return 15
 	}
 }
 
@@ -405,6 +466,12 @@ func cigarCharToNum(c byte) byte {
 // Close closes the writer
 func (w *Writer) Close() error {
 	return w.bgz.Close()
+}
+
+// VirtualOffset returns the BAI virtual offset of the next byte to be written
+// to the underlying BGZF stream.
+func (w *Writer) VirtualOffset() int64 {
+	return w.bgz.VirtualOffset()
 }
 
 // WriterAt is a wrapper around Writer that allows writing at a specific position

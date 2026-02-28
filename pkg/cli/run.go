@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/PeeperLab/xenofilter/internal/config"
-	"github.com/PeeperLab/xenofilter/internal/filter"
+	"github.com/rainoffallingstar/xenofilter-go/internal/config"
+	"github.com/rainoffallingstar/xenofilter-go/internal/filter"
 	"github.com/spf13/cobra"
 )
 

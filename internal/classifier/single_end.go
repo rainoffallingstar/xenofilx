@@ -1,7 +1,7 @@
 package classifier
 
 import (
-	"github.com/PeeperLab/xenofilter/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
 )
 
 // SingleEndClassifier classifies single-end reads
@@ -66,18 +66,20 @@ type SingleEndClassifierWithRef struct {
 	hostRefReader  *bamnative.FastaReader
 	threshold     int
 	isBisulfite   bool
-	refNames      map[int32]string
+	graftRefNames map[int32]string // RefID→name from graft BAM header
+	hostRefNames  map[int32]string // RefID→name from host BAM header
 }
 
 // NewSingleEndClassifierWithRef creates a new single-end classifier with reference genome support
-func NewSingleEndClassifierWithRef(calculator *EditDistanceCalculator, graftRefReader, hostRefReader *bamnative.FastaReader, threshold int, isBisulfite bool, refNames map[int32]string) *SingleEndClassifierWithRef {
+func NewSingleEndClassifierWithRef(calculator *EditDistanceCalculator, graftRefReader, hostRefReader *bamnative.FastaReader, threshold int, isBisulfite bool, graftRefNames, hostRefNames map[int32]string) *SingleEndClassifierWithRef {
 	return &SingleEndClassifierWithRef{
 		calculator:     calculator,
 		graftRefReader: graftRefReader,
 		hostRefReader:  hostRefReader,
 		threshold:     threshold,
 		isBisulfite:   isBisulfite,
-		refNames:       refNames,
+		graftRefNames: graftRefNames,
+		hostRefNames:  hostRefNames,
 	}
 }
 
@@ -88,10 +90,10 @@ func (s *SingleEndClassifierWithRef) ClassifyWithRef(humanRecord, mouseRecord *b
 	mouseRefName := ""
 
 	if humanRecord != nil && humanRecord.RefID >= 0 {
-		humanRefName = s.refNames[humanRecord.RefID]
+		humanRefName = s.graftRefNames[humanRecord.RefID]
 	}
 	if mouseRecord != nil && mouseRecord.RefID >= 0 {
-		mouseRefName = s.refNames[mouseRecord.RefID]
+		mouseRefName = s.hostRefNames[mouseRecord.RefID]
 	}
 
 	// If read only maps to human and below threshold, it's human

@@ -3,7 +3,7 @@ package classifier
 import (
 	"sync"
 
-	"github.com/PeeperLab/xenofilter/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
 )
 
 // EditDistanceCalculator calculates edit distance score (NM + I + Clips)
@@ -55,8 +55,8 @@ func (e *EditDistanceCalculator) CalculateWithRef(record *bamnative.Record, refN
 		nm = getNMTag(record, e.nmTag)
 	}
 
-	// 2. If NM is 0 or recalculate is set, calculate from reference
-	if nm == 0 || e.recalculate {
+	// 2. If NM tag is absent or recalculate is set, calculate from reference
+	if !bamnative.HasNM(record, e.nmTag) || e.recalculate {
 		// Try graft reference reader
 		if e.refReader != nil {
 			refSeq, ok := e.refReader.GetSequence(refName)
@@ -66,11 +66,11 @@ func (e *EditDistanceCalculator) CalculateWithRef(record *bamnative.Record, refN
 		}
 	}
 
-	// 3. Parse CIGAR for insertions and clips
-	inserts, clips := parseCigar(record.Cigar)
+	// 3. Parse CIGAR for clips (CalculateNM already includes insertions)
+	_, clips := parseCigar(record.Cigar)
 
 	// 4. Calculate total score
-	score := nm + inserts + clips
+	score := nm + clips
 	return score, nil
 }
 
@@ -82,8 +82,8 @@ func (e *EditDistanceCalculator) CalculateHostNM(record *bamnative.Record, refNa
 		nm = getNMTag(record, e.nmTag)
 	}
 
-	// 2. If NM is 0 or recalculate is set, calculate from host reference
-	if nm == 0 || e.recalculate {
+	// 2. If NM tag is absent or recalculate is set, calculate from host reference
+	if !bamnative.HasNM(record, e.nmTag) || e.recalculate {
 		if e.hostRefReader != nil {
 			refSeq, ok := e.hostRefReader.GetSequence(refName)
 			if ok {
@@ -92,11 +92,11 @@ func (e *EditDistanceCalculator) CalculateHostNM(record *bamnative.Record, refNa
 		}
 	}
 
-	// 3. Parse CIGAR for insertions and clips
-	inserts, clips := parseCigar(record.Cigar)
+	// 3. Parse CIGAR for clips (CalculateNM already includes insertions)
+	_, clips := parseCigar(record.Cigar)
 
 	// 4. Calculate total score
-	score := nm + inserts + clips
+	score := nm + clips
 	return score, nil
 }
 

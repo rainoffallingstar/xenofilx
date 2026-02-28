@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/PeeperLab/xenofilter/internal/bamnative"
-	"github.com/PeeperLab/xenofilter/internal/classifier"
-	"github.com/PeeperLab/xenofilter/internal/config"
+	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilter-go/internal/classifier"
+	"github.com/rainoffallingstar/xenofilter-go/internal/config"
 )
 
 // Sample represents a single sample to process
@@ -185,20 +185,23 @@ func Filter(sample Sample, cfg *config.Config) *SampleResult {
 		return result
 	}
 
-	// 5. Build reference name mapping (RefID -> name)
-	refNames := make(map[int32]string)
+	// 5. Build reference name mappings (RefID -> name), one per BAM header.
+	// Graft and host BAMs have independent RefID spaces; merging them into a
+	// single map causes RefID collisions when the two genomes differ in
+	// chromosome naming (e.g. hg38 "chr1" vs mm10 "1").
+	graftRefNames := make(map[int32]string)
 	header := graftReader.Header()
 	if header != nil && header.References != nil {
 		for _, ref := range header.References {
-			refNames[ref.ID] = ref.Name
+			graftRefNames[ref.ID] = ref.Name
 		}
 	}
 
-	// Add host references too
+	hostRefNames := make(map[int32]string)
 	hostHeader := hostReader.Header()
 	if hostHeader != nil && hostHeader.References != nil {
 		for _, ref := range hostHeader.References {
-			refNames[ref.ID] = ref.Name
+			hostRefNames[ref.ID] = ref.Name
 		}
 	}
 
@@ -208,8 +211,8 @@ func Filter(sample Sample, cfg *config.Config) *SampleResult {
 	// Check if reference genome is available for NM calculation
 	var humanReads map[string]bool
 	if cfg.ReferencePath != "" && (cfg.CalculateNM || cfg.IsBisulfite) {
-		// Use reference-based classification
-		humanReads = classifier.ClassifyWithRef(graftRecords, hostRecords, isPairedEnd, refNames)
+		// Use reference-based classification with separate maps per genome
+		humanReads = classifier.ClassifyWithRef(graftRecords, hostRecords, isPairedEnd, graftRefNames, hostRefNames)
 	} else {
 		humanReads = classifier.Classify(graftRecords, hostRecords, isPairedEnd)
 	}

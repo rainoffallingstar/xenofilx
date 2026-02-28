@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/PeeperLab/xenofilter/pkg/cli"
+	"github.com/rainoffallingstar/xenofilter-go/pkg/cli"
 )
 
 func main() {

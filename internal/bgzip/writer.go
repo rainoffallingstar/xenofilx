@@ -2,19 +2,20 @@ package bgzip
 
 import (
 	"bytes"
-	"compress/flate"
 	"fmt"
-	"hash/crc32"
 	"io"
 	"os"
+
+	kpgzip "github.com/klauspost/compress/gzip"
 )
 
 // Writer writes BGZF compressed data
 type Writer struct {
-	w         io.Writer
-	buf       *bytes.Buffer
-	blockSize int
-	closed    bool
+	w                 io.Writer
+	buf               *bytes.Buffer
+	blockSize         int
+	closed            bool
+	compressedWritten int64 // bytes written to the underlying file so far
 }
 
 // NewWriter creates a new BGZF writer
@@ -31,23 +32,37 @@ func NewWriter(path string) (*Writer, error) {
 	}, nil
 }
 
-// Write writes data to the internal buffer
+// Write writes data to the internal buffer, splitting across block boundaries
+// so that each BGZF block contains at most BGZF_MAX_BLOCK_SIZE uncompressed bytes.
+// htslib allocates exactly BGZF_MAX_BLOCK_SIZE bytes for decompression output;
+// blocks that exceed this limit cause inflate() to return Z_BUF_ERROR.
 func (z *Writer) Write(p []byte) (int, error) {
 	if z.closed {
 		return 0, fmt.Errorf("writer is closed")
 	}
 
-	z.buf.Write(p)
-	z.blockSize += len(p)
+	total := 0
+	for len(p) > 0 {
+		// How many bytes we can still add to the current block
+		space := BGZF_MAX_BLOCK_SIZE - z.blockSize
+		chunk := p
+		if len(chunk) > space {
+			chunk = p[:space]
+		}
 
-	// If buffer exceeds threshold, flush block
-	if z.blockSize >= BGZF_MAX_BLOCK_SIZE {
-		if err := z.flushBlock(); err != nil {
-			return 0, err
+		z.buf.Write(chunk)
+		z.blockSize += len(chunk)
+		p = p[len(chunk):]
+		total += len(chunk)
+
+		if z.blockSize >= BGZF_MAX_BLOCK_SIZE {
+			if err := z.flushBlock(); err != nil {
+				return total, err
+			}
 		}
 	}
 
-	return len(p), nil
+	return total, nil
 }
 
 // WriteByte writes a single byte
@@ -57,7 +72,20 @@ func (z *Writer) WriteByte(b byte) error {
 	return err
 }
 
-// flushBlock writes the current buffer as a BGZF block
+// flushBlock writes the current buffer as a BGZF block.
+//
+// It uses klauspost/compress/gzip so the DEFLATE payload is compatible with
+// htslib's zlib-based BGZF reader.  After compression we patch the two-byte
+// BSIZE field that lives inside the BC extra sub-field.
+//
+// Gzip block layout when FEXTRA is set with a 6-byte extra field:
+//
+//	Bytes  0-9   standard gzip header (ID1 ID2 CM FLG MTIME XFL OS)
+//	Bytes 10-11  XLEN = 6  (little-endian)
+//	Bytes 12-13  SI1='B' SI2='C'
+//	Bytes 14-15  SLEN = 2  (little-endian)
+//	Bytes 16-17  BSIZE placeholder  ← patched here
+//	Bytes 18+    DEFLATE data, CRC32, ISIZE
 func (z *Writer) flushBlock() error {
 	if z.buf.Len() == 0 {
 		return nil
@@ -65,89 +93,53 @@ func (z *Writer) flushBlock() error {
 
 	uncompressed := z.buf.Bytes()
 
-	// Compress using DEFLATE
+	// Compress using klauspost gzip with a BC extra-field placeholder.
 	var compressed bytes.Buffer
-	writer, err := flate.NewWriter(&compressed, flate.DefaultCompression)
+	gw, err := kpgzip.NewWriterLevel(&compressed, kpgzip.DefaultCompression)
 	if err != nil {
-		return fmt.Errorf("failed to create deflate writer: %w", err)
+		return fmt.Errorf("failed to create gzip writer: %w", err)
+	}
+	// Pre-allocate BC sub-field: SI1 SI2 SLEN(2) BSIZE(2, will be patched)
+	gw.Extra = []byte{
+		BGZF_SI1, BGZF_SI2,
+		byte(BGZF_SLEN), 0x00,
+		0x00, 0x00, // BSIZE placeholder
 	}
 
-	_, err = writer.Write(uncompressed)
-	if err != nil {
-		return fmt.Errorf("failed to compress: %w", err)
+	if _, err := gw.Write(uncompressed); err != nil {
+		return fmt.Errorf("failed to compress block: %w", err)
+	}
+	if err := gw.Close(); err != nil {
+		return fmt.Errorf("failed to close gzip writer: %w", err)
 	}
 
-	if err := writer.Close(); err != nil {
-		return fmt.Errorf("failed to close deflate writer: %w", err)
-	}
+	block := compressed.Bytes()
 
-	compressedData := compressed.Bytes()
+	// Patch BSIZE = (total block size) - 1
+	bsize := len(block) - 1
+	block[16] = byte(bsize & 0xff)
+	block[17] = byte((bsize >> 8) & 0xff)
 
-	// Build BGZF block
-	// Format:
-	// - 10 bytes: gzip header (ID1, ID2, CM, FLG, MTIME, XFL, OS)
-	// - 2 bytes: XLEN (extra field length) = 6
-	// - 6 bytes: BC subfield (SI1, SI2, SLEN, BSIZE)
-	// - compressed data
-	// - 8 bytes: CRC (4) + ISIZE (4)
-
-	// Calculate BSIZE: total BGZF block size - 1
-	// BSIZE = 10 + 2 + 6 + len(compressed) + 8 - 1 = 25 + len(compressed)
-	bsize := 25 + len(compressedData)
-
-	var block bytes.Buffer
-
-	// Write standard gzip header
-	block.WriteByte(0x1f) // ID1
-	block.WriteByte(0x8b) // ID2
-	block.WriteByte(0x08) // CM (DEFLATE)
-	block.WriteByte(0x04) // FLG (FEXTRA)
-	block.Write([]byte{0, 0, 0, 0}) // MTIME
-	block.WriteByte(0x00) // XFL
-	block.WriteByte(0xff) // OS
-
-	// Write XLEN (extra field length) = 6
-	block.WriteByte(0x06)
-	block.WriteByte(0x00)
-
-	// Write BC subfield
-	block.WriteByte(0x42) // 'B'
-	block.WriteByte(0x43) // 'C'
-	block.WriteByte(0x02) // SLEN = 2
-	block.WriteByte(0x00)
-	block.WriteByte(byte(bsize & 0xff))
-	block.WriteByte(byte((bsize >> 8) & 0xff))
-
-	// Write compressed data
-	block.Write(compressedData)
-
-	// Write CRC and ISIZE
-	crc := crc32.Checksum(uncompressed, crc32.MakeTable(crc32.IEEE))
-	block.WriteByte(byte(crc & 0xff))
-	block.WriteByte(byte((crc >> 8) & 0xff))
-	block.WriteByte(byte((crc >> 16) & 0xff))
-	block.WriteByte(byte((crc >> 24) & 0xff))
-
-	isize := len(uncompressed)
-	block.WriteByte(byte(isize & 0xff))
-	block.WriteByte(byte((isize >> 8) & 0xff))
-	block.WriteByte(byte((isize >> 16) & 0xff))
-	block.WriteByte(byte((isize >> 24) & 0xff))
-
-	// Write to output
-	_, err = z.w.Write(block.Bytes())
-	if err != nil {
+	if _, err := z.w.Write(block); err != nil {
 		return fmt.Errorf("failed to write BGZF block: %w", err)
 	}
+	z.compressedWritten += int64(len(block))
 
-	// Reset buffer
 	z.buf.Reset()
 	z.blockSize = 0
 
 	return nil
 }
 
-// Close closes the writer and flushes any remaining data
+// VirtualOffset returns the BAI virtual offset of the next byte to be written.
+// compressedWritten is the block start in the file; buf.Len() is the offset within
+// the current (not-yet-flushed) uncompressed block.
+func (z *Writer) VirtualOffset() int64 {
+	return (z.compressedWritten << 16) | int64(z.buf.Len())
+}
+
+// Close flushes remaining data, writes the BGZF EOF sentinel block, and
+// closes the underlying file.
 func (z *Writer) Close() error {
 	if z.closed {
 		return nil
@@ -160,11 +152,24 @@ func (z *Writer) Close() error {
 		}
 	}
 
+	// Write BGZF EOF sentinel block (SAM spec §4.1).
+	// This is a fixed 28-byte empty BGZF block required by all BGZF readers.
+	eofBlock := []byte{
+		0x1f, 0x8b, 0x08, 0x04, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0xff, 0x06, 0x00, 0x42, 0x43, 0x02, 0x00,
+		0x1b, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00,
+	}
+	if _, err := z.w.Write(eofBlock); err != nil {
+		return fmt.Errorf("failed to write BGZF EOF block: %w", err)
+	}
+
+	z.closed = true
+
 	// Close underlying writer if it implements io.Closer
 	if closer, ok := z.w.(io.Closer); ok {
 		return closer.Close()
 	}
 
-	z.closed = true
 	return nil
 }

@@ -9,7 +9,7 @@ import (
 
 // TestReadBAMHeader tests reading BAM header
 func TestReadBAMHeader(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -39,7 +39,7 @@ func TestReadBAMHeader(t *testing.T) {
 
 // TestReadBAMRecords tests reading BAM records
 func TestReadBAMRecords(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -105,7 +105,7 @@ func TestReadBAMRecords(t *testing.T) {
 
 // TestReadAllRecords tests reading all records in the file
 func TestReadAllRecords(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -166,7 +166,7 @@ func TestReadAllRecords(t *testing.T) {
 
 // TestCigarParsing tests CIGAR parsing
 func TestCigarParsing(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {

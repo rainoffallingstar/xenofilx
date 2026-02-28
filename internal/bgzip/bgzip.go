@@ -86,6 +86,13 @@ func (bg *Reader) Read(p []byte) (int, error) {
 
 		bg.buf = block.Data
 		bg.pos = 0
+
+		// BGZF EOF marker is a valid empty block (0 decompressed bytes).
+		// Return io.EOF now so callers don't loop on (0, nil).
+		if len(bg.buf) == 0 {
+			bg.eof = true
+			return 0, io.EOF
+		}
 	}
 
 	// Copy from buffer to p
@@ -97,9 +104,8 @@ func (bg *Reader) Read(p []byte) (int, error) {
 
 // readBlock reads and decompresses a single BGZF block
 func (bg *Reader) readBlock() (*Block, error) {
-	// Get current file offset BEFORE reading (this is the compressed offset of this block)
-	// We need to seek or track this separately since io.Reader doesn't expose position
-	// For now, we'll track it by reading from a section that can tell us position
+	// Save the compressed offset of this block's start before reading any bytes.
+	blockStart := bg.compressedOffset
 
 	// Read standard gzip header (10 bytes)
 	stdHeader := make([]byte, 10)
@@ -183,6 +189,10 @@ func (bg *Reader) readBlock() (*Block, error) {
 		return nil, ErrTruncated
 	}
 
+	// Update compressed offset tracking now that all bytes of this block are read.
+	bg.compressedOffset += int64(totalBlockSize)
+	bg.lastBlockSize = totalBlockSize
+
 	// Reconstruct complete gzip stream
 	gzipStream := bytes.NewBuffer(nil)
 	gzipStream.Write(stdHeader)   // 10 bytes
@@ -205,8 +215,21 @@ func (bg *Reader) readBlock() (*Block, error) {
 
 	return &Block{
 		Data:       decompressed,
+		Offset:     blockStart,
 		UncompSize: len(decompressed),
 	}, nil
+}
+
+// VirtualOffset returns the BAI virtual offset of the next byte to be read.
+// Call before Read()/ReadFull() to get voffBeg, after to get voffEnd.
+// voff = (compressed_block_start << 16) | offset_within_uncompressed_block
+func (bg *Reader) VirtualOffset() int64 {
+	if bg.buf == nil || bg.pos >= len(bg.buf) {
+		// Buffer exhausted; next byte is at the start of the next block.
+		return bg.compressedOffset << 16
+	}
+	blockStart := bg.compressedOffset - int64(bg.lastBlockSize)
+	return (blockStart << 16) | int64(bg.pos)
 }
 
 // WriteTo writes the decompressed data to w

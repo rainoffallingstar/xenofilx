@@ -10,6 +10,7 @@ import (
 // SortOptions contains options for BAM sorting
 type SortOptions struct {
 	OutputPath string // Output path for sorted BAM
+	ByName     bool   // Sort by query name instead of coordinate
 }
 
 // Sort sorts a BAM file by coordinate
@@ -53,7 +54,13 @@ func Sort(inputPath string, opts *SortOptions) error {
 	header := reader.Header()
 	// Update sort order in header
 	header.SortOrder = "coordinate"
-
+	if opts.ByName {
+		// Sort by query name instead
+		sort.Slice(records, func(i, j int) bool {
+			return records[i].Name < records[j].Name
+		})
+		header.SortOrder = "queryname"
+	}
 	writer, err := NewWriter(opts.OutputPath, header)
 	if err != nil {
 		return fmt.Errorf("failed to create writer: %w", err)

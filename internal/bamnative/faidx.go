@@ -257,8 +257,11 @@ func (fr *FastaReader) buildIndex() (map[string]*FastaIndexEntry, error) {
 	return entries, scanner.Err()
 }
 
-// buildIndexGzipped builds index for gzipped FASTA by loading into memory
-// For gzipped files, we cannot seek, so we load all sequences into memory
+// buildIndexGzipped builds index for gzipped FASTA by loading into memory.
+// For gzipped files we cannot seek, so we load all sequences into memory in a
+// single pass and store them directly into fr.cache.  Previous versions ran N
+// additional full-file scans (one per chromosome) after building the index,
+// making initialisation O(N²) – fixed here.
 func (fr *FastaReader) buildIndexGzipped() (map[string]*FastaIndexEntry, error) {
 	reader, closer, err := openFastaFile(fr.path)
 	if err != nil {
@@ -284,13 +287,14 @@ func (fr *FastaReader) buildIndexGzipped() (map[string]*FastaIndexEntry, error) 
 		}
 
 		if line[0] == '>' {
-			// Save previous sequence
+			// Flush previous sequence directly into cache (no second scan needed)
 			if currentName != "" {
 				entries[currentName] = &FastaIndexEntry{
 					Name:   currentName,
 					Length: int64(len(currentSeq)),
 					LineL:  0, // Not used for gzipped
 				}
+				fr.cache[currentName] = currentSeq
 			}
 
 			// Parse new sequence name
@@ -304,23 +308,14 @@ func (fr *FastaReader) buildIndexGzipped() (map[string]*FastaIndexEntry, error) 
 		}
 	}
 
-	// Save last sequence
+	// Flush last sequence
 	if currentName != "" {
 		entries[currentName] = &FastaIndexEntry{
 			Name:   currentName,
 			Length: int64(len(currentSeq)),
 			LineL:  0,
 		}
-	}
-
-	// Store all sequences in cache for gzipped files
-	for name, entry := range entries {
-		// Re-read to get sequence
-		seq, _ := fr.loadSequenceGzipped(name)
-		if seq != nil {
-			fr.cache[name] = seq
-		}
-		entry.Offset = 0 // Not used for gzipped
+		fr.cache[currentName] = currentSeq
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -434,6 +429,22 @@ func (fr *FastaReader) GetSequence(name string) ([]byte, bool) {
 	// For gzipped files, always use gzipped loader
 	if fr.isGzipped {
 		seq, ok = fr.loadSequenceGzipped(name)
+		if !ok {
+			// Two-directional "chr" prefix fallback so that mismatches between
+			// BAM header chromosome names and FASTA names are resolved:
+			//   "chr1" (BAM) + FASTA has "1"  → strip prefix
+			//   "1"    (BAM) + FASTA has "chr1" → add prefix
+			if strings.HasPrefix(name, "chr") {
+				altName := name[3:] // "chr1" → "1"
+				if seq, ok = fr.loadSequenceGzipped(altName); !ok {
+					altName = "chr" + name // last resort: "chrchr1"
+					seq, ok = fr.loadSequenceGzipped(altName)
+				}
+			} else {
+				altName := "chr" + name // "1" → "chr1"
+				seq, ok = fr.loadSequenceGzipped(altName)
+			}
+		}
 	} else if fr.entries != nil {
 		// Use index to seek to sequence
 		seq, ok = fr.loadSequenceByIndex(name)
@@ -456,13 +467,18 @@ func (fr *FastaReader) GetSequence(name string) ([]byte, bool) {
 func (fr *FastaReader) loadSequenceByIndex(name string) ([]byte, bool) {
 	entry, ok := fr.entries[name]
 	if !ok {
-		// Try with "chr" prefix variations
+		// Two-directional "chr" prefix fallback:
+		//   "chr1" (BAM) + FASTA has "1"   → strip prefix
+		//   "1"    (BAM) + FASTA has "chr1" → add prefix
 		if strings.HasPrefix(name, "chr") {
-			altName := name[3:]
+			altName := name[3:] // "chr1" → "1"
 			if entry, ok = fr.entries[altName]; !ok {
-				altName = "chr" + name
+				altName = "chr" + name // last resort: "chrchr1"
 				entry, ok = fr.entries[altName]
 			}
+		} else {
+			altName := "chr" + name // "1" → "chr1"
+			entry, ok = fr.entries[altName]
 		}
 		if !ok {
 			return nil, false

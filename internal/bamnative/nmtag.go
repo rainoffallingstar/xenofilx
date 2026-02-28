@@ -11,8 +11,8 @@ func CalculateNM(record *Record, ref []byte, isBisulfite bool) int {
 		return 0
 	}
 
-	// Convert read sequence from BAM format (4-bit encoded) to bytes
-	readSeq := decodeSeq(record.Seq)
+	// record.Seq is already decoded ASCII by the BAM reader; use it directly
+	readSeq := []byte(record.Seq)
 
 	// Get reference position (0-based in BAM)
 	refPos := int(record.Pos)
@@ -41,7 +41,9 @@ func CalculateNM(record *Record, ref []byte, isBisulfite bool) int {
 					// In bisulfite mode, C->T on read is not counted as mismatch
 					// if reference has C
 					if refBase == 'C' && readBase == 'T' {
-						// C->T conversion, not a mismatch
+						// forward strand: C->T conversion, not a mismatch
+					} else if refBase == 'G' && readBase == 'A' {
+						// reverse strand: G->A conversion (complement of C->T), not a mismatch
 					} else if refBase != readBase {
 						nm++
 					}
@@ -76,14 +78,11 @@ func CalculateNM(record *Record, ref []byte, isBisulfite bool) int {
 			refIdx += cigar.Len
 
 		case CigarSkip:
-			// N: skip (intron) in reference - treated as deletion
-			nm += cigar.Len
+			// N: intron skip - not counted in NM per SAM spec
 			refIdx += cigar.Len
 
 		case CigarSoftClip:
-			// S: soft clip - sequence present in read but not aligned
-			// Count as mismatches since they're not aligned to reference
-			nm += cigar.Len
+			// S: soft clip - not counted in NM; tracked separately as clips
 			readIdx += cigar.Len
 
 		case CigarHardClip:

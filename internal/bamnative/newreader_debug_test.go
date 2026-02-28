@@ -4,12 +4,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/PeeperLab/xenofilter/internal/bgzip"
+	"github.com/rainoffallingstar/xenofilter-go/internal/bgzip"
 )
 
 // TestNewReaderWithDebug tests NewReader with debug output
 func TestNewReaderWithDebug(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {

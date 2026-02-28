@@ -1,7 +1,7 @@
 package classifier
 
 import (
-	"github.com/PeeperLab/xenofilter/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
 )
 
 // ReadPair represents a pair of reads
@@ -110,11 +110,12 @@ type PairedEndClassifierWithRef struct {
 	threshold      int
 	unmappedPenalty int
 	isBisulfite    bool
-	refNames       map[int32]string
+	graftRefNames  map[int32]string // RefID→name from graft BAM header
+	hostRefNames   map[int32]string // RefID→name from host BAM header
 }
 
 // NewPairedEndClassifierWithRef creates a new paired-end classifier with reference genome support
-func NewPairedEndClassifierWithRef(calculator *EditDistanceCalculator, graftRefReader, hostRefReader *bamnative.FastaReader, threshold, unmappedPenalty int, isBisulfite bool, refNames map[int32]string) *PairedEndClassifierWithRef {
+func NewPairedEndClassifierWithRef(calculator *EditDistanceCalculator, graftRefReader, hostRefReader *bamnative.FastaReader, threshold, unmappedPenalty int, isBisulfite bool, graftRefNames, hostRefNames map[int32]string) *PairedEndClassifierWithRef {
 	return &PairedEndClassifierWithRef{
 		calculator:      calculator,
 		graftRefReader: graftRefReader,
@@ -122,7 +123,8 @@ func NewPairedEndClassifierWithRef(calculator *EditDistanceCalculator, graftRefR
 		threshold:       threshold,
 		unmappedPenalty: unmappedPenalty,
 		isBisulfite:    isBisulfite,
-		refNames:        refNames,
+		graftRefNames:  graftRefNames,
+		hostRefNames:   hostRefNames,
 	}
 }
 
@@ -135,16 +137,16 @@ func (p *PairedEndClassifierWithRef) ClassifyWithRef(humanPair, mousePair *ReadP
 	mouseRevRef := ""
 
 	if humanPair.Forward != nil && humanPair.Forward.RefID >= 0 {
-		humanFwdRef = p.refNames[humanPair.Forward.RefID]
+		humanFwdRef = p.graftRefNames[humanPair.Forward.RefID]
 	}
 	if humanPair.Reverse != nil && humanPair.Reverse.RefID >= 0 {
-		humanRevRef = p.refNames[humanPair.Reverse.RefID]
+		humanRevRef = p.graftRefNames[humanPair.Reverse.RefID]
 	}
 	if mousePair.Forward != nil && mousePair.Forward.RefID >= 0 {
-		mouseFwdRef = p.refNames[mousePair.Forward.RefID]
+		mouseFwdRef = p.hostRefNames[mousePair.Forward.RefID]
 	}
 	if mousePair.Reverse != nil && mousePair.Reverse.RefID >= 0 {
-		mouseRevRef = p.refNames[mousePair.Reverse.RefID]
+		mouseRevRef = p.hostRefNames[mousePair.Reverse.RefID]
 	}
 
 	// Calculate scores for human alignment (using graft reference)

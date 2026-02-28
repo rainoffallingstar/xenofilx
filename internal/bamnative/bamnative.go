@@ -10,7 +10,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/PeeperLab/xenofilter/internal/bgzip"
+	"github.com/rainoffallingstar/xenofilter-go/internal/bgzip"
 )
 
 var (
@@ -26,9 +26,11 @@ var (
 // Header represents the BAM file header
 type Header struct {
 	Version    string            // Version string (e.g., "1.0" or empty)
-	SortOrder  string            // Sort order (e.g., "coordinate", "unknown")
-	OtherLines map[string]string // Other header lines (@HD, @SQ, @RG, @PG, etc.)
+	SortOrder  string            // Sort order (e.g., "coordinate", "queryname", "unknown")
+	OtherLines map[string]string // Other header lines (non-@RG/@PG lines)
 	References []*Reference      // Reference sequences
+	RGLines    []string          // @RG lines (read group), preserved from input
+	PGLines    []string          // @PG lines (program), preserved from input
 }
 
 // Reference represents a reference sequence (chromosome)
@@ -91,9 +93,10 @@ const (
 
 // AuxField represents a BAM auxiliary field (tag-value pair)
 type AuxField struct {
-	Tag  string // 2-character tag
-	Type byte   // Value type (A, c, C, s, S, i, I, f, d, Z, H, B)
-	Value interface{}
+	Tag         string // 2-character tag
+	Type        byte   // Value type (A, c, C, s, S, i, I, f, d, Z, H, B)
+	ArrayType   byte   // For array types, the element type (0 if not an array)
+	Value       interface{}
 }
 
 // Aux type constants
@@ -152,6 +155,12 @@ func NewReader(r io.Reader) (*Reader, error) {
 // Read reads a single BAM record
 func (br *Reader) Read() (*Record, error) {
 	return readRecord(br.r, br.header)
+}
+
+// VirtualOffset returns the BAI virtual offset of the next byte to be read
+// from the underlying BGZF stream.
+func (br *Reader) VirtualOffset() int64 {
+	return br.r.VirtualOffset()
 }
 
 // Header returns the BAM header
@@ -229,6 +238,10 @@ func readHeader(r *bgzip.Reader) (*Header, error) {
 				ref.ID = int32(len(header.References))
 				header.References = append(header.References, ref)
 			}
+		case "@RG":
+			header.RGLines = append(header.RGLines, line)
+		case "@PG":
+			header.PGLines = append(header.PGLines, line)
 		default:
 			header.OtherLines[tag] = line
 		}
@@ -512,7 +525,7 @@ func readRecord(r *bgzip.Reader, header *Header) (*Record, error) {
 				return nil, ErrInvalidAux
 			}
 			aux.Value = buf[0:arrayLen]
-			aux.Type = arrayType // Store the array element type
+			aux.ArrayType = arrayType // Store the array element type
 			buf = buf[arrayLen:]
 		default:
 			// Skip unknown aux types - skip 1 byte and continue
@@ -615,13 +628,13 @@ func seqBaseToChar(b byte) byte {
 		return 'A'
 	case 2:
 		return 'C'
-	case 3:
-		return 'G'
 	case 4:
+		return 'G'
+	case 8:
 		return 'T'
-	case 5:
+	case 15:
 		return 'N'
 	default:
-		return 'N'
+		return 'N' // other IUPAC ambiguity codes
 	}
 }
