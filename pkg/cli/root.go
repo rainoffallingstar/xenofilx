@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var Version = "0.1.0"
+
 var rootCmd = &cobra.Command{
 	Use:   "xenofilter",
 	Short: "Filter mouse reads from human xenograft sequencing data",
@@ -14,9 +16,10 @@ var rootCmd = &cobra.Command{
 in tumor xenograft experiments. It uses edit distance classification based on
 NM tags and CIGAR strings to accurately separate reads by species.
 
-Example usage:
-  xenofilter run --graft sample_human.bam --host sample_mouse.bam --output ./filtered
-  xenofilter run --graft s1.bam s2.bam --host m1.bam m2.bam --output ./filtered --threads 4`,
+	Example usage:
+	  xenofilter run --graft sample_human.bam --host sample_mouse.bam --output ./filtered
+	  xenofilter run --graft s1.bam s2.bam --host m1.bam m2.bam --output ./filtered --threads 4`,
+	Version: Version,
 }
 
 func Execute() {
@@ -24,4 +27,8 @@ func Execute() {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+func init() {
+	rootCmd.SetVersionTemplate("xenofilter {{.Version}}\n")
 }
