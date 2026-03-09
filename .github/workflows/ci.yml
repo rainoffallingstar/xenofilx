@@ -1,0 +1,54 @@
+name: Xenofilter CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  test-and-bam-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          cache: true
+
+      - name: Run Go tests
+        run: |
+          go mod download
+          go test ./...
+
+      - name: Install samtools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y samtools
+
+      - name: Build xenofilter
+        run: |
+          CGO_ENABLED=0 go build -o ./xenofilter ./cmd/xenofilter
+
+      - name: BAM compatibility gate
+        run: |
+          set -euo pipefail
+          GRAFT="testdata/Test_hg19_NRAS.bam"
+          HOST="testdata/Test_mm10_NRAS.bam"
+          OUT_DIR="$(mktemp -d)"
+
+          samtools quickcheck "$GRAFT" "$HOST"
+          samtools view -H "$GRAFT" >/dev/null
+          samtools view -c "$GRAFT" >/dev/null
+
+          ./xenofilter run --graft "$GRAFT" --host "$HOST" --output "$OUT_DIR" --threads 1
+
+          OUT_BAM="$OUT_DIR/Test_hg19_NRAS_Filtered.bam"
+          test -f "$OUT_BAM"
+          test -f "$OUT_BAM.bai"
+          samtools quickcheck "$OUT_BAM"
+          samtools view -H "$OUT_BAM" >/dev/null
+          samtools view -c "$OUT_BAM" >/dev/null
