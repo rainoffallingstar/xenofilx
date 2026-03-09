@@ -2,6 +2,7 @@ package filter
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -13,24 +14,24 @@ import (
 
 // Sample represents a single sample to process
 type Sample struct {
-	GraftPath   string
-	HostPath    string
-	OutputName  string
+	GraftPath  string
+	HostPath   string
+	OutputName string
 }
 
 // SampleResult contains the results of processing a sample
 type SampleResult struct {
 	SampleName        string
 	TotalReads        int
-	GraftOnlyReads    int    // Reads only mapping to graft (human)
-	HostOnlyReads     int    // Reads only mapping to host (mouse)
-	BothReads         int    // Reads mapping to both
-	HumanReads        int    // From Both: classified as human (graft)
-	MouseReads        int    // From Both: classified as mouse (host)
-	DiscardedReads    int    // From Both: above threshold
-	HumanPercent      float64  // Percentage of human reads from Both
-	MousePercent      float64  // Percentage of mouse reads from Both
-	DiscardedPercent  float64  // Percentage discarded
+	GraftOnlyReads    int     // Reads only mapping to graft (human)
+	HostOnlyReads     int     // Reads only mapping to host (mouse)
+	BothReads         int     // Reads mapping to both
+	HumanReads        int     // From Both: classified as human (graft)
+	MouseReads        int     // From Both: classified as mouse (host)
+	DiscardedReads    int     // From Both: above threshold
+	HumanPercent      float64 // Percentage of human reads from Both
+	MousePercent      float64 // Percentage of mouse reads from Both
+	DiscardedPercent  float64 // Percentage discarded
 	TotalGraftPercent float64 // Total graft reads / Total reads
 	Threshold         int     // MM threshold used
 	Error             error
@@ -154,7 +155,11 @@ func Filter(sample Sample, cfg *config.Config) *SampleResult {
 	for {
 		rec, err := graftReader.Read()
 		if err != nil {
-			break
+			if err == io.EOF {
+				break
+			}
+			result.Error = fmt.Errorf("failed to read graft BAM record: %w", err)
+			return result
 		}
 		// Only keep primary alignments
 		if rec.RefID >= 0 && !rec.IsSecondary() {
@@ -166,7 +171,11 @@ func Filter(sample Sample, cfg *config.Config) *SampleResult {
 	for {
 		rec, err := hostReader.Read()
 		if err != nil {
-			break
+			if err == io.EOF {
+				break
+			}
+			result.Error = fmt.Errorf("failed to read host BAM record: %w", err)
+			return result
 		}
 		if rec.RefID >= 0 && !rec.IsSecondary() {
 			hostRecords = append(hostRecords, rec)
@@ -235,9 +244,9 @@ func Filter(sample Sample, cfg *config.Config) *SampleResult {
 	graftOnlyCount := 0
 	hostOnlyCount := 0
 	bothCount := 0
-	bothHumanCount := 0  // Both中被分类为human的
-	bothMouseCount := 0  // Both中被分类为mouse的 (above threshold)
-	graftOnlyHumanCount := 0  // GraftOnly中被分类为human的
+	bothHumanCount := 0      // Both中被分类为human的
+	bothMouseCount := 0      // Both中被分类为mouse的 (above threshold)
+	graftOnlyHumanCount := 0 // GraftOnly中被分类为human的
 
 	// Use records (not unique names) for accurate count
 	for _, rec := range graftRecords {

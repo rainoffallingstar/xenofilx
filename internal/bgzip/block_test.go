@@ -7,7 +7,7 @@ import (
 
 // TestDebugBGZFBlock tests reading a single BGZF block
 func TestDebugBGZFBlock(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {

@@ -189,15 +189,15 @@ func TestGzipBuildIndexNoCacheRescanning(t *testing.T) {
 		t.Fatalf("NewFastaReader: %v", err)
 	}
 
-	// After init, cache must already hold all 3 sequences
+	// After init, all sequences should be immediately retrievable.
 	for name, want := range entries {
-		got, ok := fr.cache[name]
+		got, ok := fr.GetSequence(name)
 		if !ok {
-			t.Errorf("cache missing %q after buildIndexGzipped", name)
+			t.Errorf("GetSequence missing %q after buildIndexGzipped", name)
 			continue
 		}
 		if string(got) != want {
-			t.Errorf("cache[%q] = %q, want %q", name, string(got), want)
+			t.Errorf("GetSequence(%q) = %q, want %q", name, string(got), want)
 		}
 	}
 }

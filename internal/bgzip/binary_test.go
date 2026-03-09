@@ -9,7 +9,7 @@ import (
 
 // TestBinaryReadBehavior tests binary.Read with BGZF reader
 func TestBinaryReadBehavior(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -67,7 +67,7 @@ func TestBinaryReadBehavior(t *testing.T) {
 
 // TestBufferedBinaryRead tests using buffered reader with binary.Read
 func TestBufferedBinaryRead(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 
 // TestDebugBGZFStructure tests BGZF structure reading
 func TestDebugBGZFStructure(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -75,7 +75,7 @@ func TestDebugBGZFStructure(t *testing.T) {
 
 // TestSimpleBGZFRead tests simple BGZF reading without full decompression
 func TestSimpleBGZFRead(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {

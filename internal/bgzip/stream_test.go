@@ -7,7 +7,7 @@ import (
 
 // TestReadStreamVsFile compares streaming vs file reading
 func TestReadStreamVsFile(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	// Method 1: Read entire file at once
 	fullData, err := ReadFile(path)

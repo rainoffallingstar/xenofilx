@@ -1,3 +1,6 @@
+//go:build elprep_debug
+// +build elprep_debug
+
 package main
 
 import (
@@ -8,7 +11,7 @@ import (
 )
 
 func main() {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	// Test reading BAM file with elPrep
 	file, err := os.Open(path)

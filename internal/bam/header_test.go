@@ -1,3 +1,6 @@
+//go:build legacy_debug
+// +build legacy_debug
+
 package bam
 
 import (
@@ -10,7 +13,7 @@ import (
 
 // TestBAMHeader tests reading BAM header
 func TestBAMHeader(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {

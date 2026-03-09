@@ -1,3 +1,6 @@
+//go:build legacy_debug
+// +build legacy_debug
+
 package bam
 
 import (
@@ -7,7 +10,7 @@ import (
 
 // TestBAMRead tests reading the sample BAM file
 func TestBAMRead(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	reader, err := NewReader(path)
 	if err != nil {

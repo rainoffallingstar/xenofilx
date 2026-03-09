@@ -8,7 +8,7 @@ import (
 
 // TestBGZFReader tests the BGZF reader with actual BAM file
 func TestBGZFReader(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -57,7 +57,7 @@ func TestBGZFReader(t *testing.T) {
 
 // TestReadMultipleBlocks tests reading multiple BGZF blocks
 func TestReadMultipleBlocks(t *testing.T) {
-	path := "D:/gerui/XenofilteR/inst/extdata/Test_hg19_NRAS.bam"
+	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)
 	if err != nil {
