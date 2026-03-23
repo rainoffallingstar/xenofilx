@@ -2,12 +2,43 @@ package bamnative
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/rainoffallingstar/xenofilter-go/internal/bgzip"
 )
+
+func summarizePreview(data []byte, maxLen int) string {
+	if len(data) == 0 {
+		return ""
+	}
+	if maxLen > len(data) {
+		maxLen = len(data)
+	}
+
+	var b strings.Builder
+	for _, c := range data[:maxLen] {
+		switch {
+		case c >= 32 && c <= 126:
+			b.WriteByte(c)
+		case c == '\n':
+			b.WriteString(`\n`)
+		case c == '\r':
+			b.WriteString(`\r`)
+		case c == '\t':
+			b.WriteString(`\t`)
+		default:
+			fmt.Fprintf(&b, `\x%02x`, c)
+		}
+	}
+	if len(data) > maxLen {
+		b.WriteString("...")
+	}
+	return b.String()
+}
 
 // TestCheckBAMStructure checks the actual BAM file structure
 func TestCheckBAMStructure(t *testing.T) {
@@ -32,10 +63,9 @@ func TestCheckBAMStructure(t *testing.T) {
 
 	t.Logf("Header text length: %d bytes (%.2f MB)", headerTextLen, float64(headerTextLen)/(1024*1024))
 
-	// Read first 1000 bytes preview
 	peekBuf := make([]byte, 1000)
 	totalPeek := 0
-	for totalPeek < 1000 {
+	for totalPeek < len(peekBuf) {
 		n, err := bgzf.Read(peekBuf[totalPeek:])
 		if err != nil || n == 0 {
 			break
@@ -43,8 +73,16 @@ func TestCheckBAMStructure(t *testing.T) {
 		totalPeek += n
 	}
 
+	preview := peekBuf[:totalPeek]
 	t.Logf("Read %d bytes for preview", totalPeek)
-	t.Logf("Preview: %s", string(peekBuf[:totalPeek]))
+	t.Logf("Preview summary (first 160 bytes, escaped): %s", summarizePreview(preview, 160))
+	if totalPeek > 0 {
+		hexLen := totalPeek
+		if hexLen > 32 {
+			hexLen = 32
+		}
+		t.Logf("Preview hex (first %d bytes): % x", hexLen, preview[:hexLen])
+	}
 }
 
 // TestCountBGZFBlocks counts BGZF blocks
