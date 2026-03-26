@@ -1,3 +1,6 @@
+//go:build legacy_debug
+// +build legacy_debug
+
 package bamnative
 
 import (
