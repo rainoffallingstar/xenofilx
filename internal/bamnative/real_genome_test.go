@@ -6,16 +6,16 @@ import (
 )
 
 // TestGetSequenceRealHg19 verifies that GetSequence("1") (NCBI naming, as in the
-// test BAM header) successfully resolves to the "chr1" chromosome in the real
-// hg19.fa file (UCSC naming) via the bidirectional chr prefix fallback.
+// test BAM header) successfully resolves to the "chr1" chromosome in the local
+// hg19_nras_mini.fa snippet (UCSC naming) via the bidirectional chr prefix fallback.
 //
-// This test is skipped when the reference genome is not available so it does
-// not block CI environments without the large file.
+// The local mini FASTA contains only the NRAS region, not the full chromosome,
+// so this test verifies chr prefix resolution and DNA content without
+// chromosome-level coordinate checks.
 func TestGetSequenceRealHg19(t *testing.T) {
 	const hg19Path = "../../testdata/hg19_nras_mini.fa"
-	// Normalised path used for error messages only; actual open uses hg19Path.
 	if _, err := os.Stat(hg19Path); err != nil {
-		t.Skipf("hg19.fa not accessible (%v), skipping real-genome test", err)
+		t.Skipf("hg19 mini FASTA not accessible (%v), skipping real-genome test", err)
 	}
 
 	fr, err := NewFastaReader(hg19Path)
@@ -23,36 +23,24 @@ func TestGetSequenceRealHg19(t *testing.T) {
 		t.Fatalf("NewFastaReader: %v", err)
 	}
 
-	// The test BAM uses NCBI chromosome names ("1"), while hg19.fa uses UCSC
-	// names ("chr1"). Verify the fallback resolves correctly.
+	// The test BAM uses NCBI chromosome names ("1"), while the mini FASTA uses
+	// UCSC names ("chr1"). Verify the fallback resolves correctly.
 	seq, ok := fr.GetSequence("1")
 	if !ok {
-		t.Fatal("GetSequence(\"1\") returned false: chr prefix fallback not working for indexed FASTA")
+		t.Fatal("GetSequence(\"1\") returned false: chr prefix fallback not working")
 	}
 	if len(seq) == 0 {
 		t.Fatal("GetSequence(\"1\") returned empty sequence")
 	}
-	t.Logf("chr1 length = %d bp", len(seq))
+	t.Logf("chr1 sequence length = %d bp", len(seq))
 
-	// Sanity: the NRAS region is on chr1 ~115250825-115258917.
-	// Verify the sequence at that region is within bounds and non-empty.
-	const nrasStart = 115250825
-	const nrasEnd = 115258917
-	if int(nrasEnd) > len(seq) {
-		t.Fatalf("chr1 sequence length %d shorter than expected NRAS end %d", len(seq), nrasEnd)
-	}
-	region := seq[nrasStart:nrasEnd]
-	if len(region) == 0 {
-		t.Fatal("NRAS region is empty")
-	}
-	t.Logf("NRAS region (chr1:%d-%d) first 20 bp: %s", nrasStart, nrasEnd, string(region[:20]))
-
-	// Verify it contains DNA bases only
-	for i, b := range region[:100] {
+	// Verify it contains DNA bases only.
+	for i, b := range seq {
 		switch b {
 		case 'A', 'C', 'G', 'T', 'N', 'a', 'c', 'g', 't', 'n':
 		default:
-			t.Errorf("unexpected byte %q at NRAS position %d", b, i)
+			t.Errorf("unexpected byte %q at position %d", b, i)
+			break
 		}
 	}
 }
