@@ -12,7 +12,7 @@ import (
 // This test is skipped when the reference genome is not available so it does
 // not block CI environments without the large file.
 func TestGetSequenceRealHg19(t *testing.T) {
-	const hg19Path = "../../testdata/../../../methrix-cli/testdata/genomes/hg19.fa"
+	const hg19Path = "../../testdata/hg19_nras_mini.fa"
 	// Normalised path used for error messages only; actual open uses hg19Path.
 	if _, err := os.Stat(hg19Path); err != nil {
 		t.Skipf("hg19.fa not accessible (%v), skipping real-genome test", err)

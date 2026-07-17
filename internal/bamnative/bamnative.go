@@ -1,3 +1,6 @@
+// This package is a thin re-export of bamdriver-go/pkg/bamnative.
+// Kept for backward compatibility; new code should import bamdriver-go directly.
+
 package bamnative
 
 import (

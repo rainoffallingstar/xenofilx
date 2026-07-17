@@ -1,3 +1,6 @@
+// This package is a thin re-export of bamdriver-go/pkg/bgzip.
+// Kept for backward compatibility; new code should import bamdriver-go directly.
+
 package bgzip
 
 import (
