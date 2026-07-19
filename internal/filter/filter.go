@@ -161,8 +161,9 @@ func Filter(sample Sample, cfg *config.Config) *SampleResult {
 			result.Error = fmt.Errorf("failed to read graft BAM record: %w", err)
 			return result
 		}
-		// Only keep primary alignments
-		if rec.RefID >= 0 && !rec.IsSecondary() {
+		// Keep only mapped primary alignments. Secondary and supplementary
+		// alignments cannot represent independent fragments.
+		if rec.RefID >= 0 && !rec.IsSecondary() && rec.Flags&bamnative.FlagSupplementary == 0 {
 			graftRecords = append(graftRecords, rec)
 		}
 	}
@@ -177,7 +178,7 @@ func Filter(sample Sample, cfg *config.Config) *SampleResult {
 			result.Error = fmt.Errorf("failed to read host BAM record: %w", err)
 			return result
 		}
-		if rec.RefID >= 0 && !rec.IsSecondary() {
+		if rec.RefID >= 0 && !rec.IsSecondary() && rec.Flags&bamnative.FlagSupplementary == 0 {
 			hostRecords = append(hostRecords, rec)
 		}
 	}
@@ -214,82 +215,79 @@ func Filter(sample Sample, cfg *config.Config) *SampleResult {
 		}
 	}
 
-	// 6. Classify reads
-	classifier := classifier.NewClassifier(cfg)
-
-	// Check if reference genome is available for NM calculation
-	var humanReads map[string]bool
-	if cfg.ReferencePath != "" && (cfg.CalculateNM || cfg.IsBisulfite) {
-		// Use reference-based classification with separate maps per genome
-		humanReads = classifier.ClassifyWithRef(graftRecords, hostRecords, isPairedEnd, graftRefNames, hostRefNames)
-	} else {
-		humanReads = classifier.Classify(graftRecords, hostRecords, isPairedEnd)
+	// 6. Classify unique fragments.
+	classificationEngine, err := classifier.NewClassifier(cfg)
+	if err != nil {
+		result.Error = fmt.Errorf("failed to initialize classifier: %w", err)
+		return result
 	}
 
-	// 7. Calculate statistics
-	result.TotalReads = len(graftRecords)
+	var classifications map[string]classifier.Classification
+	if cfg.CalculateNM || cfg.IsBisulfite {
+		classifications, err = classificationEngine.ClassifyWithRef(
+			graftRecords,
+			hostRecords,
+			isPairedEnd,
+			graftRefNames,
+			hostRefNames,
+		)
+	} else {
+		classifications, err = classificationEngine.Classify(graftRecords, hostRecords, isPairedEnd)
+	}
+	if err != nil {
+		result.Error = fmt.Errorf("failed to classify fragments: %w", err)
+		return result
+	}
 
-	// Build lookup sets for overlap analysis
+	// 7. Calculate fragment-level statistics over the union of graft and host
+	// read names. This prevents paired records and host-only fragments from
+	// distorting the denominator.
 	graftNameSet := make(map[string]bool)
-	for _, rec := range graftRecords {
-		graftNameSet[rec.Name] = true
+	for _, record := range graftRecords {
+		graftNameSet[record.Name] = true
 	}
 	hostNameSet := make(map[string]bool)
-	for _, rec := range hostRecords {
-		hostNameSet[rec.Name] = true
+	for _, record := range hostRecords {
+		hostNameSet[record.Name] = true
+	}
+	allFragmentNames := make(map[string]bool)
+	for name := range graftNameSet {
+		allFragmentNames[name] = true
+	}
+	for name := range hostNameSet {
+		allFragmentNames[name] = true
 	}
 
-	// Count GraftOnly (only in graft), HostOnly (only in host), Both (in both)
-	// by record count (not unique names) for paired-end data
-	graftOnlyCount := 0
-	hostOnlyCount := 0
-	bothCount := 0
-	bothHumanCount := 0      // Both中被分类为human的
-	bothMouseCount := 0      // Both中被分类为mouse的 (above threshold)
-	graftOnlyHumanCount := 0 // GraftOnly中被分类为human的
-
-	// Use records (not unique names) for accurate count
-	for _, rec := range graftRecords {
-		inHost := hostNameSet[rec.Name]
-		if inHost {
-			bothCount++
-			// Check classification
-			if humanReads[rec.Name] {
-				bothHumanCount++
-			} else {
-				bothMouseCount++
-			}
-		} else {
-			graftOnlyCount++
-			// Check if this graft-only read is classified as human
-			if humanReads[rec.Name] {
-				graftOnlyHumanCount++
-			}
+	for name := range allFragmentNames {
+		inGraft := graftNameSet[name]
+		inHost := hostNameSet[name]
+		switch {
+		case inGraft && inHost:
+			result.BothReads++
+		case inGraft:
+			result.GraftOnlyReads++
+		case inHost:
+			result.HostOnlyReads++
 		}
-	}
-	for _, rec := range hostRecords {
-		inGraft := graftNameSet[rec.Name]
-		if !inGraft {
-			hostOnlyCount++
+
+		switch classifications[name] {
+		case classifier.ClassificationGraft:
+			result.HumanReads++
+		case classifier.ClassificationHost:
+			result.MouseReads++
+		default:
+			result.DiscardedReads++
 		}
 	}
 
-	result.GraftOnlyReads = graftOnlyCount
-	result.HostOnlyReads = hostOnlyCount
-	result.BothReads = bothCount
-	result.HumanReads = graftOnlyHumanCount + bothHumanCount
-	result.MouseReads = hostOnlyCount + bothMouseCount
-	result.DiscardedReads = (graftOnlyCount - graftOnlyHumanCount) + bothMouseCount
-
+	result.TotalReads = len(allFragmentNames)
 	if result.TotalReads > 0 {
-		result.HumanPercent = float64(result.HumanReads) / float64(result.TotalReads) * 100
-		result.MousePercent = float64(result.MouseReads) / float64(result.TotalReads) * 100
-		result.DiscardedPercent = float64(result.DiscardedReads) / float64(result.TotalReads) * 100
-		// Total graft = GraftOnly中分类为human的 + Both中分类为human的
-		result.TotalGraftPercent = float64(graftOnlyHumanCount+bothHumanCount) / float64(result.TotalReads) * 100
+		denominator := float64(result.TotalReads)
+		result.HumanPercent = float64(result.HumanReads) / denominator * 100
+		result.MousePercent = float64(result.MouseReads) / denominator * 100
+		result.DiscardedPercent = float64(result.DiscardedReads) / denominator * 100
+		result.TotalGraftPercent = result.HumanPercent
 	}
-
-	// Set threshold used
 	result.Threshold = cfg.MMThreshold
 
 	// 7. Write filtered BAM
@@ -302,10 +300,10 @@ func Filter(sample Sample, cfg *config.Config) *SampleResult {
 		return result
 	}
 
-	// Write only filtered records
-	for _, rec := range graftRecords {
-		if humanReads[rec.Name] {
-			if err := filteredWriter.Write(rec); err != nil {
+	// Write only primary graft records from fragments classified as graft.
+	for _, record := range graftRecords {
+		if classifications[record.Name] == classifier.ClassificationGraft {
+			if err := filteredWriter.Write(record); err != nil {
 				result.Error = fmt.Errorf("failed to write filtered BAM: %w", err)
 				return result
 			}

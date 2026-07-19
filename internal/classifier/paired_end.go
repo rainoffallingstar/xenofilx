@@ -1,24 +1,26 @@
 package classifier
 
 import (
+	"fmt"
+
 	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
 )
 
-// ReadPair represents a pair of reads
+// ReadPair contains the unique primary alignments for one fragment.
 type ReadPair struct {
 	Name    string
 	Forward *bamnative.Record
 	Reverse *bamnative.Record
 }
 
-// PairedEndClassifier classifies paired-end reads
+// PairedEndClassifier classifies paired-end fragments.
 type PairedEndClassifier struct {
 	calculator      *EditDistanceCalculator
-	threshold       int // MM_threshold
-	unmappedPenalty int // Unmapped_penalty
+	threshold       int
+	unmappedPenalty int
 }
 
-// NewPairedEndClassifier creates a new paired-end classifier
+// NewPairedEndClassifier creates a paired-end classifier.
 func NewPairedEndClassifier(calculator *EditDistanceCalculator, threshold, unmappedPenalty int) *PairedEndClassifier {
 	return &PairedEndClassifier{
 		calculator:      calculator,
@@ -27,185 +29,230 @@ func NewPairedEndClassifier(calculator *EditDistanceCalculator, threshold, unmap
 	}
 }
 
-// Classify determines if a read pair belongs to graft (true) or host (false)
-// Returns true if read pair should be classified as human (graft)
-func (p *PairedEndClassifier) Classify(humanPair, mousePair *ReadPair) bool {
-	// Calculate scores for human alignment
-	humanFwdScore := p.scoreRecord(humanPair.Forward)
-	humanRevScore := p.scoreRecord(humanPair.Reverse)
+func (classifier *PairedEndClassifier) classify(graftPair, hostPair *ReadPair) (Classification, error) {
+	if pairHasNoAlignments(graftPair) {
+		if !pairHasNoAlignments(hostPair) {
+			return ClassificationHost, nil
+		}
+		return ClassificationDiscarded, nil
+	}
 
-	// Calculate scores for mouse alignment
-	mouseFwdScore := p.scoreRecord(mousePair.Forward)
-	mouseRevScore := p.scoreRecord(mousePair.Reverse)
+	graftForwardScore, err := classifier.scoreRecord(graftPair.Forward)
+	if err != nil {
+		return ClassificationDiscarded, err
+	}
+	graftReverseScore, err := classifier.scoreRecord(graftPair.Reverse)
+	if err != nil {
+		return ClassificationDiscarded, err
+	}
+	if graftForwardScore >= classifier.threshold || graftReverseScore >= classifier.threshold {
+		return ClassificationDiscarded, nil
+	}
+	if pairHasNoAlignments(hostPair) {
+		return ClassificationGraft, nil
+	}
 
-	// Calculate average scores
-	humanAvg := (humanFwdScore + humanRevScore) / 2
-	mouseAvg := (mouseFwdScore + mouseRevScore) / 2
+	hostForwardScore, err := classifier.scoreRecord(hostPair.Forward)
+	if err != nil {
+		return ClassificationDiscarded, err
+	}
+	hostReverseScore, err := classifier.scoreRecord(hostPair.Reverse)
+	if err != nil {
+		return ClassificationDiscarded, err
+	}
 
-	// Check if both reads below threshold
-	aboveThreshold := humanFwdScore < p.threshold && humanRevScore < p.threshold
-
-	// Assign to human if: better score AND both reads below threshold
-	return humanAvg < mouseAvg && aboveThreshold
+	graftAverage := (graftForwardScore + graftReverseScore) / 2
+	hostAverage := (hostForwardScore + hostReverseScore) / 2
+	if graftAverage < hostAverage {
+		return ClassificationGraft, nil
+	}
+	if hostAverage < graftAverage {
+		return ClassificationHost, nil
+	}
+	return ClassificationDiscarded, nil
 }
 
-// scoreRecord calculates score for a record, using penalty if nil (unmapped)
-func (p *PairedEndClassifier) scoreRecord(record *bamnative.Record) int {
+func (classifier *PairedEndClassifier) scoreRecord(record *bamnative.Record) (int, error) {
 	if record == nil {
-		return p.unmappedPenalty
+		return classifier.unmappedPenalty, nil
 	}
-	score, _ := p.calculator.Calculate(record)
-	return score
+	return classifier.calculator.Calculate(record)
 }
 
-// BuildPairs groups records into read pairs
-func BuildPairs(records []*bamnative.Record) map[string]*ReadPair {
-	pairs := make(map[string]*ReadPair)
-
-	for _, rec := range records {
-		name := rec.Name
-
-		if pairs[name] == nil {
-			pairs[name] = &ReadPair{Name: name}
-		}
-
-		if rec.IsFirstInPair() {
-			pairs[name].Forward = rec
-		} else if rec.IsSecondInPair() {
-			pairs[name].Reverse = rec
-		}
-	}
-
-	return pairs
+// ClassifyResults classifies the union of graft and host fragment names.
+func (classifier *PairedEndClassifier) ClassifyResults(graftRecords, hostRecords []*bamnative.Record) (map[string]Classification, error) {
+	return classifyUniquePairs(graftRecords, hostRecords, classifier.classify)
 }
 
-// ClassifyBatch classifies multiple read pairs and returns pair names that belong to human
-func (p *PairedEndClassifier) ClassifyBatch(humanRecords, mouseRecords []*bamnative.Record) map[string]bool {
-	humanReads := make(map[string]bool)
-
-	// Build read pairs
-	humanPairs := BuildPairs(humanRecords)
-	mousePairs := BuildPairs(mouseRecords)
-
-	// Classify each human pair
-	for name, humanPair := range humanPairs {
-		mousePair, exists := mousePairs[name]
-		if !exists {
-			mousePair = &ReadPair{Name: name} // No mouse mapping
-		}
-
-		if p.Classify(humanPair, mousePair) {
-			humanReads[name] = true
-		}
-	}
-
-	return humanReads
-}
-
-// PairedEndClassifierWithRef classifies paired-end reads using reference genome
+// PairedEndClassifierWithRef classifies paired-end fragments using reference genomes.
 type PairedEndClassifierWithRef struct {
 	calculator      *EditDistanceCalculator
-	graftRefReader *bamnative.FastaReader
-	hostRefReader  *bamnative.FastaReader
-	threshold      int
+	threshold       int
 	unmappedPenalty int
-	isBisulfite    bool
-	graftRefNames  map[int32]string // RefID→name from graft BAM header
-	hostRefNames   map[int32]string // RefID→name from host BAM header
+	graftRefNames   map[int32]string
+	hostRefNames    map[int32]string
 }
 
-// NewPairedEndClassifierWithRef creates a new paired-end classifier with reference genome support
-func NewPairedEndClassifierWithRef(calculator *EditDistanceCalculator, graftRefReader, hostRefReader *bamnative.FastaReader, threshold, unmappedPenalty int, isBisulfite bool, graftRefNames, hostRefNames map[int32]string) *PairedEndClassifierWithRef {
+// NewPairedEndClassifierWithRef creates a reference-aware paired-end classifier.
+func NewPairedEndClassifierWithRef(
+	calculator *EditDistanceCalculator,
+	graftRefReader, hostRefReader *bamnative.FastaReader,
+	threshold, unmappedPenalty int,
+	isBisulfite bool,
+	graftRefNames, hostRefNames map[int32]string,
+) *PairedEndClassifierWithRef {
 	return &PairedEndClassifierWithRef{
 		calculator:      calculator,
-		graftRefReader: graftRefReader,
-		hostRefReader:  hostRefReader,
 		threshold:       threshold,
 		unmappedPenalty: unmappedPenalty,
-		isBisulfite:    isBisulfite,
-		graftRefNames:  graftRefNames,
-		hostRefNames:   hostRefNames,
+		graftRefNames:   graftRefNames,
+		hostRefNames:    hostRefNames,
 	}
 }
 
-// ClassifyWithRef determines if a read pair belongs to graft using reference genome
-func (p *PairedEndClassifierWithRef) ClassifyWithRef(humanPair, mousePair *ReadPair) bool {
-	// Get reference names
-	humanFwdRef := ""
-	humanRevRef := ""
-	mouseFwdRef := ""
-	mouseRevRef := ""
-
-	if humanPair.Forward != nil && humanPair.Forward.RefID >= 0 {
-		humanFwdRef = p.graftRefNames[humanPair.Forward.RefID]
-	}
-	if humanPair.Reverse != nil && humanPair.Reverse.RefID >= 0 {
-		humanRevRef = p.graftRefNames[humanPair.Reverse.RefID]
-	}
-	if mousePair.Forward != nil && mousePair.Forward.RefID >= 0 {
-		mouseFwdRef = p.hostRefNames[mousePair.Forward.RefID]
-	}
-	if mousePair.Reverse != nil && mousePair.Reverse.RefID >= 0 {
-		mouseRevRef = p.hostRefNames[mousePair.Reverse.RefID]
+func (classifier *PairedEndClassifierWithRef) classify(graftPair, hostPair *ReadPair) (Classification, error) {
+	if pairHasNoAlignments(graftPair) {
+		if !pairHasNoAlignments(hostPair) {
+			return ClassificationHost, nil
+		}
+		return ClassificationDiscarded, nil
 	}
 
-	// Calculate scores for human alignment (using graft reference)
-	humanFwdScore := p.scoreRecordWithRef(humanPair.Forward, humanFwdRef, true)
-	humanRevScore := p.scoreRecordWithRef(humanPair.Reverse, humanRevRef, true)
+	graftForwardScore, err := classifier.scoreRecord(graftPair.Forward, true)
+	if err != nil {
+		return ClassificationDiscarded, err
+	}
+	graftReverseScore, err := classifier.scoreRecord(graftPair.Reverse, true)
+	if err != nil {
+		return ClassificationDiscarded, err
+	}
+	if graftForwardScore >= classifier.threshold || graftReverseScore >= classifier.threshold {
+		return ClassificationDiscarded, nil
+	}
+	if pairHasNoAlignments(hostPair) {
+		return ClassificationGraft, nil
+	}
 
-	// Calculate scores for mouse alignment (using host reference)
-	mouseFwdScore := p.scoreRecordWithRef(mousePair.Forward, mouseFwdRef, false)
-	mouseRevScore := p.scoreRecordWithRef(mousePair.Reverse, mouseRevRef, false)
+	hostForwardScore, err := classifier.scoreRecord(hostPair.Forward, false)
+	if err != nil {
+		return ClassificationDiscarded, err
+	}
+	hostReverseScore, err := classifier.scoreRecord(hostPair.Reverse, false)
+	if err != nil {
+		return ClassificationDiscarded, err
+	}
 
-	// Calculate average scores
-	humanAvg := (humanFwdScore + humanRevScore) / 2
-	mouseAvg := (mouseFwdScore + mouseRevScore) / 2
-
-	// Check if both reads below threshold
-	aboveThreshold := humanFwdScore < p.threshold && humanRevScore < p.threshold
-
-	// Assign to human if: better score AND both reads below threshold
-	return humanAvg < mouseAvg && aboveThreshold
+	graftAverage := (graftForwardScore + graftReverseScore) / 2
+	hostAverage := (hostForwardScore + hostReverseScore) / 2
+	if graftAverage < hostAverage {
+		return ClassificationGraft, nil
+	}
+	if hostAverage < graftAverage {
+		return ClassificationHost, nil
+	}
+	return ClassificationDiscarded, nil
 }
 
-// scoreRecordWithRef calculates score for a record using reference genome
-func (p *PairedEndClassifierWithRef) scoreRecordWithRef(record *bamnative.Record, refName string, isGraft bool) int {
+func (classifier *PairedEndClassifierWithRef) scoreRecord(record *bamnative.Record, isGraft bool) (int, error) {
 	if record == nil {
-		return p.unmappedPenalty
+		return classifier.unmappedPenalty, nil
 	}
 	if isGraft {
-		score, _ := p.calculator.CalculateWithRef(record, refName)
-		return score
-	} else {
-		score, _ := p.calculator.CalculateHostNM(record, refName)
-		return score
+		return classifier.calculator.CalculateWithRef(record, classifier.graftRefNames[record.RefID])
 	}
+	return classifier.calculator.CalculateHostNM(record, classifier.hostRefNames[record.RefID])
 }
 
-// ClassifyBatchWithRef classifies multiple read pairs using reference genome
-func (p *PairedEndClassifierWithRef) ClassifyBatchWithRef(humanRecords, mouseRecords []*bamnative.Record) map[string]bool {
-	humanReads := make(map[string]bool)
-
-	// Build read pairs
-	humanPairs := BuildPairs(humanRecords)
-	mousePairs := BuildPairs(mouseRecords)
-
-	// Classify each human pair
-	for name, humanPair := range humanPairs {
-		mousePair, exists := mousePairs[name]
-		if !exists {
-			mousePair = &ReadPair{Name: name} // No mouse mapping
-		}
-
-		if p.ClassifyWithRef(humanPair, mousePair) {
-			humanReads[name] = true
-		}
-	}
-
-	return humanReads
+// ClassifyResults classifies the union of graft and host fragment names using references.
+func (classifier *PairedEndClassifierWithRef) ClassifyResults(graftRecords, hostRecords []*bamnative.Record) (map[string]Classification, error) {
+	return classifyUniquePairs(graftRecords, hostRecords, classifier.classify)
 }
 
-// ClassifyBatch is an alias for ClassifyBatchWithRef for compatibility
-func (p *PairedEndClassifierWithRef) ClassifyBatch(humanRecords, mouseRecords []*bamnative.Record) map[string]bool {
-	return p.ClassifyBatchWithRef(humanRecords, mouseRecords)
+func classifyUniquePairs(
+	graftRecords, hostRecords []*bamnative.Record,
+	classify func(*ReadPair, *ReadPair) (Classification, error),
+) (map[string]Classification, error) {
+	graftPairs, ambiguousGraftNames := BuildPairs(graftRecords)
+	hostPairs, ambiguousHostNames := BuildPairs(hostRecords)
+	allNames := make(map[string]bool)
+	for name := range graftPairs {
+		allNames[name] = true
+	}
+	for name := range hostPairs {
+		allNames[name] = true
+	}
+	for name := range ambiguousGraftNames {
+		allNames[name] = true
+	}
+	for name := range ambiguousHostNames {
+		allNames[name] = true
+	}
+
+	results := make(map[string]Classification, len(allNames))
+	for name := range allNames {
+		if ambiguousGraftNames[name] || ambiguousHostNames[name] {
+			results[name] = ClassificationDiscarded
+			continue
+		}
+		classification, err := classify(graftPairs[name], hostPairs[name])
+		if err != nil {
+			return nil, fmt.Errorf("failed to classify paired fragment %q: %w", name, err)
+		}
+		results[name] = classification
+	}
+	return results, nil
+}
+
+// BuildPairs groups unique primary mapped R1/R2 records by fragment name.
+func BuildPairs(records []*bamnative.Record) (map[string]*ReadPair, map[string]bool) {
+	pairs := make(map[string]*ReadPair)
+	ambiguousNames := make(map[string]bool)
+	for _, record := range records {
+		if !isPrimaryMappedRecord(record) {
+			continue
+		}
+		isFirstMate := record.IsFirstInPair()
+		isSecondMate := record.IsSecondInPair()
+		if !record.IsPaired() || isFirstMate == isSecondMate {
+			ambiguousNames[record.Name] = true
+			delete(pairs, record.Name)
+			continue
+		}
+		if ambiguousNames[record.Name] {
+			continue
+		}
+
+		pair := pairs[record.Name]
+		if pair == nil {
+			pair = &ReadPair{Name: record.Name}
+			pairs[record.Name] = pair
+		}
+		if isFirstMate {
+			if pair.Forward != nil {
+				ambiguousNames[record.Name] = true
+				delete(pairs, record.Name)
+				continue
+			}
+			pair.Forward = record
+			continue
+		}
+		if pair.Reverse != nil {
+			ambiguousNames[record.Name] = true
+			delete(pairs, record.Name)
+			continue
+		}
+		pair.Reverse = record
+	}
+	return pairs, ambiguousNames
+}
+
+func isPrimaryMappedRecord(record *bamnative.Record) bool {
+	if record == nil || record.RefID < 0 || record.IsUnmapped() || record.IsSecondary() {
+		return false
+	}
+	return record.Flags&bamnative.FlagSupplementary == 0
+}
+
+func pairHasNoAlignments(pair *ReadPair) bool {
+	return pair == nil || (pair.Forward == nil && pair.Reverse == nil)
 }

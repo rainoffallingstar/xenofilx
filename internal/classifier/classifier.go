@@ -1,93 +1,115 @@
 package classifier
 
 import (
+	"fmt"
+
 	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
 	"github.com/rainoffallingstar/xenofilter-go/internal/config"
 )
 
-// Classifier provides read classification functionality
+// Classifier provides fragment classification functionality.
 type Classifier struct {
 	config              *config.Config
 	calculator          *EditDistanceCalculator
-	refGenome           *bamnative.FastaIndex
 	refReader           *bamnative.FastaReader
-	hostRefGenome       *bamnative.FastaIndex
 	hostRefReader       *bamnative.FastaReader
 	singleEndClassifier *SingleEndClassifier
 	pairedEndClassifier *PairedEndClassifier
 }
 
-// NewClassifier creates a new classifier with the given configuration
-func NewClassifier(cfg *config.Config) *Classifier {
-	var calc *EditDistanceCalculator
-	var refReader *bamnative.FastaReader
-	var hostRefReader *bamnative.FastaReader
+// NewClassifier creates a classifier and validates configured reference files.
+func NewClassifier(configuration *config.Config) (*Classifier, error) {
+	var graftReferenceReader *bamnative.FastaReader
+	var hostReferenceReader *bamnative.FastaReader
+	var err error
 
-	// Load graft reference genome if provided
-	if cfg.ReferencePath != "" {
-		var err error
-		refReader, err = bamnative.NewFastaReader(cfg.ReferencePath)
+	if configuration.ReferencePath != "" {
+		graftReferenceReader, err = bamnative.NewFastaReader(configuration.ReferencePath)
 		if err != nil {
-			refReader = nil
+			return nil, fmt.Errorf("failed to load graft reference %q: %w", configuration.ReferencePath, err)
+		}
+	}
+	if configuration.HostRefPath != "" {
+		hostReferenceReader, err = bamnative.NewFastaReader(configuration.HostRefPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load host reference %q: %w", configuration.HostRefPath, err)
 		}
 	}
 
-	// Load host reference genome if provided
-	if cfg.HostRefPath != "" {
-		var err error
-		hostRefReader, err = bamnative.NewFastaReader(cfg.HostRefPath)
-		if err != nil {
-			hostRefReader = nil
-		}
+	referenceScoringRequested := configuration.CalculateNM || configuration.IsBisulfite
+	if referenceScoringRequested && graftReferenceReader == nil {
+		return nil, fmt.Errorf("graft reference is required when NM recalculation or bisulfite scoring is enabled")
+	}
+	if referenceScoringRequested && hostReferenceReader == nil {
+		return nil, fmt.Errorf("host reference is required when NM recalculation or bisulfite scoring is enabled")
 	}
 
-	// Create calculator with or without reference genome
-	if (refReader != nil || hostRefReader != nil) && (cfg.CalculateNM || cfg.IsBisulfite) {
-		calc = NewEditDistanceCalculatorWithRef(cfg.NMTag, refReader, hostRefReader, cfg.CalculateNM, cfg.IsBisulfite)
-	} else {
-		calc = NewEditDistanceCalculator(cfg.NMTag)
+	calculator := NewEditDistanceCalculator(configuration.NMTag)
+	if referenceScoringRequested {
+		calculator = NewEditDistanceCalculatorWithRef(
+			configuration.NMTag,
+			graftReferenceReader,
+			hostReferenceReader,
+			configuration.CalculateNM,
+			configuration.IsBisulfite,
+		)
 	}
 
 	return &Classifier{
-		config:              cfg,
-		calculator:         calc,
-		refReader:         refReader,
-		hostRefReader:     hostRefReader,
-		singleEndClassifier: NewSingleEndClassifier(calc, cfg.MMThreshold),
-		pairedEndClassifier: NewPairedEndClassifier(calc, cfg.MMThreshold, cfg.UnmappedPenalty),
-	}
+		config:              configuration,
+		calculator:          calculator,
+		refReader:           graftReferenceReader,
+		hostRefReader:       hostReferenceReader,
+		singleEndClassifier: NewSingleEndClassifier(calculator, configuration.MMThreshold),
+		pairedEndClassifier: NewPairedEndClassifier(calculator, configuration.MMThreshold, configuration.UnmappedPenalty),
+	}, nil
 }
 
-// Classify classifies reads based on paired-end status
-// Returns a map of read names that should be classified as human (graft)
-func (c *Classifier) Classify(humanRecords, mouseRecords []*bamnative.Record, isPairedEnd bool) map[string]bool {
+// Classify classifies fragments using NM tags already present in BAM records.
+func (classifier *Classifier) Classify(graftRecords, hostRecords []*bamnative.Record, isPairedEnd bool) (map[string]Classification, error) {
 	if isPairedEnd {
-		return c.pairedEndClassifier.ClassifyBatch(humanRecords, mouseRecords)
+		return classifier.pairedEndClassifier.ClassifyResults(graftRecords, hostRecords)
 	}
-	return c.singleEndClassifier.ClassifyBatch(humanRecords, mouseRecords)
+	return classifier.singleEndClassifier.ClassifyResults(graftRecords, hostRecords)
 }
 
-// ClassifyWithRef classifies reads using reference genome for NM calculation.
-// graftRefNames maps graft BAM RefID → chromosome name.
-// hostRefNames maps host BAM RefID → chromosome name.
-// The two maps are kept separate because each BAM's RefIDs are independent.
-func (c *Classifier) ClassifyWithRef(humanRecords, mouseRecords []*bamnative.Record, isPairedEnd bool, graftRefNames, hostRefNames map[int32]string) map[string]bool {
-	if c.refReader == nil && c.hostRefReader == nil {
-		return c.Classify(humanRecords, mouseRecords, isPairedEnd)
+// ClassifyWithRef classifies fragments using independent graft and host reference-name maps.
+func (classifier *Classifier) ClassifyWithRef(
+	graftRecords, hostRecords []*bamnative.Record,
+	isPairedEnd bool,
+	graftRefNames, hostRefNames map[int32]string,
+) (map[string]Classification, error) {
+	if classifier.refReader == nil || classifier.hostRefReader == nil {
+		return nil, fmt.Errorf("both graft and host reference readers are required for reference-aware classification")
 	}
-
-	// Create a new classifier with reference-aware scoring
-	calc := c.calculator
-	singleClf := NewSingleEndClassifierWithRef(calc, c.refReader, c.hostRefReader, c.config.MMThreshold, c.config.IsBisulfite, graftRefNames, hostRefNames)
-	pairedClf := NewPairedEndClassifierWithRef(calc, c.refReader, c.hostRefReader, c.config.MMThreshold, c.config.UnmappedPenalty, c.config.IsBisulfite, graftRefNames, hostRefNames)
 
 	if isPairedEnd {
-		return pairedClf.ClassifyBatch(humanRecords, mouseRecords)
+		pairedClassifier := NewPairedEndClassifierWithRef(
+			classifier.calculator,
+			classifier.refReader,
+			classifier.hostRefReader,
+			classifier.config.MMThreshold,
+			classifier.config.UnmappedPenalty,
+			classifier.config.IsBisulfite,
+			graftRefNames,
+			hostRefNames,
+		)
+		return pairedClassifier.ClassifyResults(graftRecords, hostRecords)
 	}
-	return singleClf.ClassifyBatch(humanRecords, mouseRecords)
+
+	singleClassifier := NewSingleEndClassifierWithRef(
+		classifier.calculator,
+		classifier.refReader,
+		classifier.hostRefReader,
+		classifier.config.MMThreshold,
+		classifier.config.IsBisulfite,
+		graftRefNames,
+		hostRefNames,
+	)
+	return singleClassifier.ClassifyResults(graftRecords, hostRecords)
 }
 
-// GetCalculator returns the edit distance calculator
-func (c *Classifier) GetCalculator() *EditDistanceCalculator {
-	return c.calculator
+// GetCalculator returns the edit-distance calculator.
+func (classifier *Classifier) GetCalculator() *EditDistanceCalculator {
+	return classifier.calculator
 }

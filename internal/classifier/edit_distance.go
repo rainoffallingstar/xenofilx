@@ -1,166 +1,208 @@
 package classifier
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
 )
 
-// EditDistanceCalculator calculates edit distance score (NM + I + Clips)
+// EditDistanceCalculator calculates edit distance score (NM + I + Clips).
 type EditDistanceCalculator struct {
-	nmTag           string                      // Tag name for mismatch count (default: "NM")
-	refReader       *bamnative.FastaReader     // Graft reference reader
-	hostRefReader   *bamnative.FastaReader     // Host reference reader
-	recalculate    bool                        // Force recalculate NM tag
-	isBisulfite    bool                        // Bisulfite sequencing mode
+	nmTag         string
+	refReader     *bamnative.FastaReader
+	hostRefReader *bamnative.FastaReader
+	recalculate   bool
+	isBisulfite   bool
 }
 
-// NewEditDistanceCalculator creates a new calculator
+// NewEditDistanceCalculator creates a new calculator.
 func NewEditDistanceCalculator(nmTag string) *EditDistanceCalculator {
-	return &EditDistanceCalculator{
-		nmTag: nmTag,
-	}
+	return &EditDistanceCalculator{nmTag: nmTag}
 }
 
-// NewEditDistanceCalculatorWithRef creates a new calculator with reference genome
+// NewEditDistanceCalculatorWithRef creates a new calculator with reference genomes.
 func NewEditDistanceCalculatorWithRef(nmTag string, refReader, hostRefReader *bamnative.FastaReader, recalculate bool, isBisulfite bool) *EditDistanceCalculator {
 	return &EditDistanceCalculator{
 		nmTag:         nmTag,
 		refReader:     refReader,
 		hostRefReader: hostRefReader,
-		recalculate:  recalculate,
-		isBisulfite:  isBisulfite,
+		recalculate:   recalculate,
+		isBisulfite:   isBisulfite,
 	}
 }
 
-// Calculate computes the edit distance score for a single record
-// Score = NM tag (mismatches) + Insertions (I in CIGAR) + Soft Clips (S in CIGAR)
-func (e *EditDistanceCalculator) Calculate(record *bamnative.Record) (int, error) {
-	// 1. Extract NM tag (mismatches)
-	nm := getNMTag(record, e.nmTag)
-
-	// 2. Parse CIGAR for insertions and clips
-	inserts, clips := parseCigar(record.Cigar)
-
-	// 4. Calculate total score
-	score := nm + inserts + clips
-	return score, nil
-}
-
-// CalculateWithRef computes edit distance using reference genome for NM
-func (e *EditDistanceCalculator) CalculateWithRef(record *bamnative.Record, refName string) (int, error) {
-	// 1. Try to get NM from tag first if not recalculating
-	nm := 0
-	if !e.recalculate {
-		nm = getNMTag(record, e.nmTag)
+// Calculate computes NM + insertions + clips using the configured NM tag.
+func (calculator *EditDistanceCalculator) Calculate(record *bamnative.Record) (int, error) {
+	if record == nil {
+		return 0, fmt.Errorf("cannot score a nil alignment")
 	}
 
-	// 2. If NM tag is absent or recalculate is set, calculate from reference
-	if !bamnative.HasNM(record, e.nmTag) || e.recalculate {
-		// Try graft reference reader
-		if e.refReader != nil {
-			refSeq, ok := e.refReader.GetSequence(refName)
-			if ok {
-				nm = bamnative.CalculateNM(record, refSeq, e.isBisulfite)
+	nm, err := getNMTag(record, calculator.nmTag)
+	if err != nil {
+		return 0, err
+	}
+	insertions, clips := parseCigar(record.Cigar)
+	return nm + insertions + clips, nil
+}
+
+// CalculateWithRef computes edit distance using the graft reference genome when needed.
+func (calculator *EditDistanceCalculator) CalculateWithRef(record *bamnative.Record, refName string) (int, error) {
+	return calculator.calculateWithReference(record, refName, calculator.refReader)
+}
+
+// CalculateHostNM computes edit distance using the host reference genome when needed.
+func (calculator *EditDistanceCalculator) CalculateHostNM(record *bamnative.Record, refName string) (int, error) {
+	return calculator.calculateWithReference(record, refName, calculator.hostRefReader)
+}
+
+func (calculator *EditDistanceCalculator) calculateWithReference(record *bamnative.Record, refName string, referenceReader *bamnative.FastaReader) (int, error) {
+	if record == nil {
+		return 0, fmt.Errorf("cannot score a nil alignment")
+	}
+
+	if !calculator.recalculate && bamnative.HasNM(record, calculator.nmTag) {
+		nm, err := getNMTag(record, calculator.nmTag)
+		if err != nil {
+			return 0, err
+		}
+		_, clips := parseCigar(record.Cigar)
+		return nm + clips, nil
+	}
+
+	if referenceReader == nil {
+		return 0, fmt.Errorf("cannot calculate NM for read %q: reference reader is unavailable", record.Name)
+	}
+	if refName == "" {
+		return 0, fmt.Errorf("cannot calculate NM for read %q: reference name is empty", record.Name)
+	}
+
+	referenceSequence, exists := referenceReader.GetSequence(refName)
+	if !exists {
+		return 0, fmt.Errorf("cannot calculate NM for read %q: reference contig %q was not found", record.Name, refName)
+	}
+	if err := validateReferenceCalculation(record, referenceSequence); err != nil {
+		return 0, fmt.Errorf("cannot calculate NM for read %q on %q: %w", record.Name, refName, err)
+	}
+
+	nm := bamnative.CalculateNM(record, referenceSequence, calculator.isBisulfite)
+	_, clips := parseCigar(record.Cigar)
+	return nm + clips, nil
+}
+
+func validateReferenceCalculation(record *bamnative.Record, referenceSequence []byte) error {
+	if record.RefID < 0 || record.IsUnmapped() {
+		return fmt.Errorf("alignment is unmapped")
+	}
+	if record.Pos < 0 {
+		return fmt.Errorf("alignment position is negative")
+	}
+	if len(record.Seq) == 0 {
+		return fmt.Errorf("read sequence is empty")
+	}
+	if len(record.Cigar) == 0 {
+		return fmt.Errorf("CIGAR is empty")
+	}
+
+	readPosition := 0
+	referencePosition := int(record.Pos)
+	for _, operation := range record.Cigar {
+		if operation.Len <= 0 {
+			return fmt.Errorf("CIGAR operation %q has invalid length %d", operation.Op, operation.Len)
+		}
+
+		switch operation.Op {
+		case bamnative.CigarMatch, bamnative.CigarEqual, bamnative.CigarMismatch:
+			if operation.Len > len(record.Seq)-readPosition {
+				return fmt.Errorf("CIGAR consumes beyond read sequence")
 			}
+			if referencePosition < 0 || operation.Len > len(referenceSequence)-referencePosition {
+				return fmt.Errorf("CIGAR consumes beyond reference sequence")
+			}
+			readPosition += operation.Len
+			referencePosition += operation.Len
+		case bamnative.CigarInsertion, bamnative.CigarSoftClip:
+			if operation.Len > len(record.Seq)-readPosition {
+				return fmt.Errorf("CIGAR consumes beyond read sequence")
+			}
+			readPosition += operation.Len
+		case bamnative.CigarDeletion, bamnative.CigarSkip:
+			if referencePosition < 0 || operation.Len > len(referenceSequence)-referencePosition {
+				return fmt.Errorf("CIGAR consumes beyond reference sequence")
+			}
+			referencePosition += operation.Len
+		case bamnative.CigarHardClip, bamnative.CigarPadding:
+		default:
+			return fmt.Errorf("CIGAR contains unsupported operation %q", operation.Op)
 		}
 	}
 
-	// 3. Parse CIGAR for clips (CalculateNM already includes insertions)
-	_, clips := parseCigar(record.Cigar)
-
-	// 4. Calculate total score
-	score := nm + clips
-	return score, nil
+	if readPosition != len(record.Seq) {
+		return fmt.Errorf("CIGAR consumes %d read bases, sequence contains %d", readPosition, len(record.Seq))
+	}
+	return nil
 }
 
-// CalculateHostNM computes edit distance using host reference genome
-func (e *EditDistanceCalculator) CalculateHostNM(record *bamnative.Record, refName string) (int, error) {
-	// 1. Try to get NM from tag first if not recalculating
-	nm := 0
-	if !e.recalculate {
-		nm = getNMTag(record, e.nmTag)
-	}
-
-	// 2. If NM tag is absent or recalculate is set, calculate from host reference
-	if !bamnative.HasNM(record, e.nmTag) || e.recalculate {
-		if e.hostRefReader != nil {
-			refSeq, ok := e.hostRefReader.GetSequence(refName)
-			if ok {
-				nm = bamnative.CalculateNM(record, refSeq, e.isBisulfite)
-			}
-		}
-	}
-
-	// 3. Parse CIGAR for clips (CalculateNM already includes insertions)
-	_, clips := parseCigar(record.Cigar)
-
-	// 4. Calculate total score
-	score := nm + clips
-	return score, nil
-}
-
-// CalculateBatch calculates scores for multiple records in parallel
-func (e *EditDistanceCalculator) CalculateBatch(records []*bamnative.Record) ([]int, error) {
+// CalculateBatch calculates scores for multiple records in parallel.
+func (calculator *EditDistanceCalculator) CalculateBatch(records []*bamnative.Record) ([]int, error) {
 	scores := make([]int, len(records))
-	var wg sync.WaitGroup
-	var mu sync.Mutex
+	var waitGroup sync.WaitGroup
+	var firstError error
+	var mutex sync.Mutex
 
-	for i, record := range records {
-		wg.Add(1)
-		go func(idx int, rec *bamnative.Record) {
-			defer wg.Done()
-			score, err := e.Calculate(rec)
+	for index, record := range records {
+		waitGroup.Add(1)
+		go func(scoreIndex int, alignment *bamnative.Record) {
+			defer waitGroup.Done()
+			score, err := calculator.Calculate(alignment)
+			mutex.Lock()
+			defer mutex.Unlock()
 			if err != nil {
-				// Log error but continue with score 0
-				score = 0
+				if firstError == nil {
+					firstError = err
+				}
+				return
 			}
-			mu.Lock()
-			scores[idx] = score
-			mu.Unlock()
-		}(i, record)
+			scores[scoreIndex] = score
+		}(index, record)
 	}
-	wg.Wait()
+	waitGroup.Wait()
 
-	return scores, nil
+	return scores, firstError
 }
 
-// getNMTag extracts NM tag from a record
-func getNMTag(record *bamnative.Record, tagName string) int {
-	aux := record.GetAuxField(tagName)
-	if aux == nil {
-		return 0
+func getNMTag(record *bamnative.Record, tagName string) (int, error) {
+	auxiliaryField := record.GetAuxField(tagName)
+	if auxiliaryField == nil {
+		return 0, fmt.Errorf("read %q is missing %s tag", record.Name, tagName)
 	}
 
-	switch v := aux.Value.(type) {
+	switch value := auxiliaryField.Value.(type) {
 	case int8:
-		return int(v)
+		return int(value), nil
 	case int16:
-		return int(v)
+		return int(value), nil
 	case int32:
-		return int(v)
+		return int(value), nil
 	case uint8:
-		return int(v)
+		return int(value), nil
 	case uint16:
-		return int(v)
+		return int(value), nil
 	case uint32:
-		return int(v)
+		return int(value), nil
 	default:
-		return 0
+		return 0, fmt.Errorf("read %q has non-integer %s tag", record.Name, tagName)
 	}
 }
 
-// parseCigar parses CIGAR string and returns insert count and clip count
-func parseCigar(cigar []bamnative.CigarOp) (inserts, clips int) {
-	for _, op := range cigar {
-		switch op.Op {
+func parseCigar(cigar []bamnative.CigarOp) (insertions, clips int) {
+	for _, operation := range cigar {
+		switch operation.Op {
 		case bamnative.CigarInsertion:
-			inserts += op.Len
-		case bamnative.CigarSoftClip:
-			clips += op.Len
-		case bamnative.CigarHardClip:
-			clips += op.Len
+			insertions += operation.Len
+		case bamnative.CigarSoftClip, bamnative.CigarHardClip:
+			clips += operation.Len
 		}
 	}
-	return
+	return insertions, clips
 }
