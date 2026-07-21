@@ -3,7 +3,7 @@ module github.com/rainoffallingstar/xenofilter-go
 go 1.23
 
 require (
-	github.com/rainoffallingstar/bamdriver-go v0.1.2-0.20260720015351-82f0d20b2967
+	github.com/rainoffallingstar/bamdriver-go v0.1.2-0.20260721055359-a22f77784fc4
 	github.com/spf13/cobra v1.8.0
 )
 
