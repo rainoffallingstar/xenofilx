@@ -92,6 +92,9 @@ func SortAndIndexIfNeeded(inputPath, outputPath string) error {
 func CalculateNM(record *Record, ref []byte, isBisulfite bool) int {
 	return driver.CalculateNM(record, ref, isBisulfite)
 }
+func CalculateNMChecked(record *Record, ref []byte, isBisulfite bool) (int, error) {
+	return driver.CalculateNMChecked(record, ref, isBisulfite)
+}
 func HasNM(record *Record, tagName string) bool        { return driver.HasNM(record, tagName) }
 func FastqToSeq(seq string) []byte                     { return driver.FastqToSeq(seq) }
 func NewFastaReader(path string) (*FastaReader, error) { return driver.NewFastaReader(path) }

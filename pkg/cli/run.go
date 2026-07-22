@@ -25,10 +25,12 @@ var (
 	threads         int
 
 	// Reference and NM calculation flags
-	graftRefPath string
-	hostRefPath  string
+	graftRefPath  string
+	hostRefPath   string
 	recalculateNM bool
-	isBisulfite  bool
+	isBisulfite   bool
+
+	filterSamples = filter.FilterParallel
 )
 
 var runCmd = &cobra.Command{
@@ -50,7 +52,7 @@ func init() {
 
 	// Optional flags
 	runCmd.Flags().IntVarP(&mmThreshold, "mm-threshold", "m", 4,
-		"Maximum mismatches for graft classification (default: 4)")
+		"Exclusive XenofilteR score cutoff; graft scores must be below this value (default: 4)")
 	runCmd.Flags().IntVarP(&unmappedPenalty, "unmapped-penalty", "u", 8,
 		"Penalty score for unmapped reads in paired-end data (default: 8)")
 	runCmd.Flags().StringVarP(&nmTag, "nm-tag", "n", "NM",
@@ -130,6 +132,10 @@ func runFilter(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	if err := filter.ValidateSampleOutputs(samples, cfg.OutputDir); err != nil {
+		return fmt.Errorf("invalid sample outputs: %w", err)
+	}
+
 	// Print configuration
 	fmt.Fprintf(os.Stderr, "XenofilteR Go - Running with configuration:\n")
 	fmt.Fprintf(os.Stderr, "  MM_threshold: %d\n", mmThreshold)
@@ -154,16 +160,18 @@ func runFilter(cmd *cobra.Command, args []string) error {
 
 	// Run filtering
 	fmt.Fprintf(os.Stderr, "Processing samples...\n")
-	results := filter.FilterParallel(samples, cfg)
+	results := filterSamples(samples, cfg)
 
 	// Print results
 	fmt.Fprintf(os.Stderr, "\n=== Sample Results ===\n")
 	fmt.Fprintf(os.Stderr, "%-20s %8s %8s %8s %8s %12s %12s %12s %12s %8s\n",
 		"Sample", "Total", "GraftOnly", "HostOnly", "Both", "Graft(%)", "Host(%)", "Discard(%)", "TotalGraft(%)", "Thresh")
 	fmt.Fprintf(os.Stderr, "-----------------------------------------------------------------------------------------------\n")
+	failedSampleMessages := make([]string, 0)
 	for _, result := range results {
 		if result.Error != nil {
 			fmt.Fprintf(os.Stderr, "ERROR: %s - %v\n", result.SampleName, result.Error)
+			failedSampleMessages = append(failedSampleMessages, fmt.Sprintf("%s: %v", result.SampleName, result.Error))
 			continue
 		}
 		fmt.Fprintf(os.Stderr, "%-20s %8d %8d %8d %8d %11.2f%% %11.2f%% %11.2f%% %11.2f%% %8d\n",
@@ -184,6 +192,11 @@ func runFilter(cmd *cobra.Command, args []string) error {
 			continue
 		}
 		fmt.Fprintf(os.Stderr, "%s - Output: %s\n", result.SampleName, result.OutputPath)
+	}
+
+	if len(failedSampleMessages) > 0 {
+		return fmt.Errorf("%d of %d samples failed: %s",
+			len(failedSampleMessages), len(results), strings.Join(failedSampleMessages, "; "))
 	}
 
 	return nil

@@ -85,7 +85,7 @@ go build -o xenofilter.exe ./cmd/xenofilter
 --graft, -g          Path(s) to graft (human) BAM files (required)
 --host, -t           Path(s) to host (mouse) BAM files (required)
 --output, -o         Output directory for filtered BAM files (required)
---mm-threshold, -m   Maximum mismatches for graft classification (default: 4)
+--mm-threshold, -m   Exclusive XenofilteR score cutoff; graft scores must be lower than this value (default: 4)
 --unmapped-penalty   Penalty score for unmapped reads (default: 8)
 --nm-tag             BAM tag name for edit distance (default: NM)
 --threads, -j       Number of parallel processing threads (default: 1)

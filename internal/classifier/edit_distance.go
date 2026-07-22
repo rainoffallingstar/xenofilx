@@ -2,12 +2,11 @@ package classifier
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
 )
 
-// EditDistanceCalculator calculates edit distance score (NM + I + Clips).
+// EditDistanceCalculator calculates the original XenofilteR score: NM + insertions + soft clips.
 type EditDistanceCalculator struct {
 	nmTag         string
 	refReader     *bamnative.FastaReader
@@ -32,7 +31,7 @@ func NewEditDistanceCalculatorWithRef(nmTag string, refReader, hostRefReader *ba
 	}
 }
 
-// Calculate computes NM + insertions + clips using the configured NM tag.
+// Calculate computes the original XenofilteR score using the configured NM tag.
 func (calculator *EditDistanceCalculator) Calculate(record *bamnative.Record) (int, error) {
 	if record == nil {
 		return 0, fmt.Errorf("cannot score a nil alignment")
@@ -42,8 +41,8 @@ func (calculator *EditDistanceCalculator) Calculate(record *bamnative.Record) (i
 	if err != nil {
 		return 0, err
 	}
-	insertions, clips := parseCigar(record.Cigar)
-	return nm + insertions + clips, nil
+	insertions, softClips := parseCigar(record.Cigar)
+	return nm + insertions + softClips, nil
 }
 
 // CalculateWithRef computes edit distance using the graft reference genome when needed.
@@ -61,13 +60,13 @@ func (calculator *EditDistanceCalculator) calculateWithReference(record *bamnati
 		return 0, fmt.Errorf("cannot score a nil alignment")
 	}
 
-	if !calculator.recalculate && bamnative.HasNM(record, calculator.nmTag) {
+	if !calculator.recalculate && !calculator.isBisulfite && bamnative.HasNM(record, calculator.nmTag) {
 		nm, err := getNMTag(record, calculator.nmTag)
 		if err != nil {
 			return 0, err
 		}
-		_, clips := parseCigar(record.Cigar)
-		return nm + clips, nil
+		insertions, softClips := parseCigar(record.Cigar)
+		return nm + insertions + softClips, nil
 	}
 
 	if referenceReader == nil {
@@ -85,9 +84,12 @@ func (calculator *EditDistanceCalculator) calculateWithReference(record *bamnati
 		return 0, fmt.Errorf("cannot calculate NM for read %q on %q: %w", record.Name, refName, err)
 	}
 
-	nm := bamnative.CalculateNM(record, referenceSequence, calculator.isBisulfite)
-	_, clips := parseCigar(record.Cigar)
-	return nm + clips, nil
+	nm, err := bamnative.CalculateNMChecked(record, referenceSequence, calculator.isBisulfite)
+	if err != nil {
+		return 0, fmt.Errorf("failed to calculate NM for read %q on %q: %w", record.Name, refName, err)
+	}
+	insertions, softClips := parseCigar(record.Cigar)
+	return nm + insertions + softClips, nil
 }
 
 func validateReferenceCalculation(record *bamnative.Record, referenceSequence []byte) error {
@@ -143,34 +145,6 @@ func validateReferenceCalculation(record *bamnative.Record, referenceSequence []
 	return nil
 }
 
-// CalculateBatch calculates scores for multiple records in parallel.
-func (calculator *EditDistanceCalculator) CalculateBatch(records []*bamnative.Record) ([]int, error) {
-	scores := make([]int, len(records))
-	var waitGroup sync.WaitGroup
-	var firstError error
-	var mutex sync.Mutex
-
-	for index, record := range records {
-		waitGroup.Add(1)
-		go func(scoreIndex int, alignment *bamnative.Record) {
-			defer waitGroup.Done()
-			score, err := calculator.Calculate(alignment)
-			mutex.Lock()
-			defer mutex.Unlock()
-			if err != nil {
-				if firstError == nil {
-					firstError = err
-				}
-				return
-			}
-			scores[scoreIndex] = score
-		}(index, record)
-	}
-	waitGroup.Wait()
-
-	return scores, firstError
-}
-
 func getNMTag(record *bamnative.Record, tagName string) (int, error) {
 	auxiliaryField := record.GetAuxField(tagName)
 	if auxiliaryField == nil {
@@ -195,14 +169,14 @@ func getNMTag(record *bamnative.Record, tagName string) (int, error) {
 	}
 }
 
-func parseCigar(cigar []bamnative.CigarOp) (insertions, clips int) {
+func parseCigar(cigar []bamnative.CigarOp) (insertions, softClips int) {
 	for _, operation := range cigar {
 		switch operation.Op {
 		case bamnative.CigarInsertion:
 			insertions += operation.Len
-		case bamnative.CigarSoftClip, bamnative.CigarHardClip:
-			clips += operation.Len
+		case bamnative.CigarSoftClip:
+			softClips += operation.Len
 		}
 	}
-	return insertions, clips
+	return insertions, softClips
 }

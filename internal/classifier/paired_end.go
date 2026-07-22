@@ -61,12 +61,12 @@ func (classifier *PairedEndClassifier) classify(graftPair, hostPair *ReadPair) (
 		return ClassificationDiscarded, err
 	}
 
-	graftAverage := (graftForwardScore + graftReverseScore) / 2
-	hostAverage := (hostForwardScore + hostReverseScore) / 2
-	if graftAverage < hostAverage {
+	graftTotal := graftForwardScore + graftReverseScore
+	hostTotal := hostForwardScore + hostReverseScore
+	if graftTotal < hostTotal {
 		return ClassificationGraft, nil
 	}
-	if hostAverage < graftAverage {
+	if hostTotal < graftTotal {
 		return ClassificationHost, nil
 	}
 	return ClassificationDiscarded, nil
@@ -142,12 +142,12 @@ func (classifier *PairedEndClassifierWithRef) classify(graftPair, hostPair *Read
 		return ClassificationDiscarded, err
 	}
 
-	graftAverage := (graftForwardScore + graftReverseScore) / 2
-	hostAverage := (hostForwardScore + hostReverseScore) / 2
-	if graftAverage < hostAverage {
+	graftTotal := graftForwardScore + graftReverseScore
+	hostTotal := hostForwardScore + hostReverseScore
+	if graftTotal < hostTotal {
 		return ClassificationGraft, nil
 	}
-	if hostAverage < graftAverage {
+	if hostTotal < graftTotal {
 		return ClassificationHost, nil
 	}
 	return ClassificationDiscarded, nil

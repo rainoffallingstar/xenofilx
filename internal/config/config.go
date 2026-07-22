@@ -5,7 +5,7 @@ import "fmt"
 // Config holds all configuration parameters for XenofilteR
 type Config struct {
 	// User parameters
-	MMThreshold     int    // Maximum mismatches for graft classification (default: 4)
+	MMThreshold     int    // Exclusive score cutoff; graft scores must be lower than this value
 	UnmappedPenalty int    // Penalty for unmapped reads in paired-end (default: 8)
 	NMTag           string // BAM tag for edit distance (default: "NM")
 
@@ -15,9 +15,9 @@ type Config struct {
 
 	// Reference and NM calculation
 	ReferencePath string // Path to graft (human) reference genome FASTA file
-	HostRefPath  string // Path to host (mouse) reference genome FASTA file
-	CalculateNM  bool   // Force recalculation of NM tag
-	IsBisulfite  bool   // Enable bisulfite sequencing mode
+	HostRefPath   string // Path to host (mouse) reference genome FASTA file
+	CalculateNM   bool   // Force recalculation of NM tag
+	IsBisulfite   bool   // Enable bisulfite sequencing mode
 }
 
 // DefaultConfig returns default configuration
@@ -25,8 +25,8 @@ func DefaultConfig() *Config {
 	return &Config{
 		MMThreshold:     4,
 		UnmappedPenalty: 8,
-		NMTag:          "NM",
-		ThreadCount:    1,
+		NMTag:           "NM",
+		ThreadCount:     1,
 	}
 }
 

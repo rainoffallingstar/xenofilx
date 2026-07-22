@@ -19,10 +19,17 @@ jobs:
           go-version: "1.23"
           cache: true
 
-      - name: Run Go tests
+      - name: Run Go quality gates
         run: |
           go mod download
-          go test ./...
+          go test -count=1 ./...
+          go vet ./...
+          go test -race -count=1 ./...
+
+      - name: Run vulnerability scan
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          "$(go env GOPATH)/bin/govulncheck" ./...
 
       - name: Install samtools
         run: |
@@ -52,3 +59,7 @@ jobs:
           samtools quickcheck "$OUT_BAM"
           samtools view -H "$OUT_BAM" >/dev/null
           samtools view -c "$OUT_BAM" >/dev/null
+          samtools view -H "$OUT_BAM" | awk '$1 == "@HD" && $0 !~ /SO:coordinate/ { exit 1 }'
+          FIRST_REF="$(samtools view -H "$OUT_BAM" | awk '$1 == "@SQ" { sub(/^SN:/, "", $2); print $2; exit }')"
+          test -n "$FIRST_REF"
+          samtools view "$OUT_BAM" "${FIRST_REF}:1-1000000" >/dev/null

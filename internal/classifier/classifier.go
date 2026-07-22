@@ -109,6 +109,36 @@ func (classifier *Classifier) ClassifyWithRef(
 	return singleClassifier.ClassifyResults(graftRecords, hostRecords)
 }
 
+// ClassifyFragment classifies one read-name group without retaining results for other fragments.
+func (classifier *Classifier) ClassifyFragment(
+	fragmentName string,
+	graftRecords, hostRecords []*bamnative.Record,
+	isPairedEnd bool,
+	graftRefNames, hostRefNames map[int32]string,
+) (Classification, error) {
+	var classifications map[string]Classification
+	var err error
+	if classifier.config.CalculateNM || classifier.config.IsBisulfite {
+		classifications, err = classifier.ClassifyWithRef(
+			graftRecords,
+			hostRecords,
+			isPairedEnd,
+			graftRefNames,
+			hostRefNames,
+		)
+	} else {
+		classifications, err = classifier.Classify(graftRecords, hostRecords, isPairedEnd)
+	}
+	if err != nil {
+		return ClassificationDiscarded, err
+	}
+	classification, exists := classifications[fragmentName]
+	if !exists {
+		return ClassificationDiscarded, fmt.Errorf("classifier produced no result for fragment %q", fragmentName)
+	}
+	return classification, nil
+}
+
 // GetCalculator returns the edit-distance calculator.
 func (classifier *Classifier) GetCalculator() *EditDistanceCalculator {
 	return classifier.calculator
