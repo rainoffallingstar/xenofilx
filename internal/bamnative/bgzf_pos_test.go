@@ -7,8 +7,15 @@ import (
 	"github.com/rainoffallingstar/xenofilter-go/internal/bgzip"
 )
 
-// TestBGZFReaderPosition tests BGZF reader positioning
+// TestBGZFReaderPosition tests BGZF reader positioning.
+// This test performs many small reads against a real BAM fixture and can take
+// over 50 seconds under the race detector. Skip it in -short mode so CI race
+// runs stay within timeout.
 func TestBGZFReaderPosition(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping slow BGZF position test in short mode")
+	}
+
 	path := "../../testdata/Test_hg19_NRAS.bam"
 
 	f, err := os.Open(path)

@@ -9,6 +9,7 @@ on:
 jobs:
   test-and-bam-gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,7 +25,10 @@ jobs:
           go mod download
           go test -count=1 ./...
           go vet ./...
-          go test -race -count=1 ./...
+          # Race detector is slow on bamnative real-BAM tests; use -short to
+          # skip TestBGZFReaderPosition (50+ seconds alone under race) while
+          # still exercising all correctness and concurrency assertions.
+          go test -race -count=1 -short ./...
 
       - name: Run vulnerability scan
         run: |
