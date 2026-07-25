@@ -2,7 +2,7 @@ package config
 
 import "fmt"
 
-// Config holds all configuration parameters for XenofilteR
+// Config holds all configuration parameters for xenofilx.
 type Config struct {
 	// User parameters
 	MMThreshold     int    // Exclusive score cutoff; graft scores must be lower than this value

@@ -1,6 +1,6 @@
-# XenofilteR Go
+# xenofilx
 
-Go implementation of XenofilteR for filtering host (mouse) reads from graft (human) sequencing data in tumor xenograft experiments.
+xenofilx is a Go implementation of the original XenofilteR algorithm for filtering host (mouse) reads from graft (human) sequencing data in tumor xenograft experiments.
 
 This project is a **Go reimplementation** of the original [XenofilteR](https://github.com/NKI-GCF/XenofilteR) R/Bioconductor package, with the following enhancements:
 
@@ -33,21 +33,21 @@ This project is a **Go reimplementation** of the original [XenofilteR](https://g
 ## Building
 
 ```bash
-cd xenofilter
-go build -o xenofilter.exe ./cmd/xenofilter
+cd xenofilx
+go build -ldflags "-X github.com/rainoffallingstar/xenofilx/pkg/cli.Version=0.1.0" -o xenofilx ./cmd/xenofilx
 ```
 
 ## Usage
 
 ```bash
 # Basic usage
-./xenofilter run \
+./xenofilx run \
   --graft sample_human.bam \
   --host sample_mouse.bam \
   --output ./filtered
 
 # With reference genome for NM recalculation
-./xenofilter run \
+./xenofilx run \
   --graft sample_human.bam \
   --host sample_mouse.bam \
   --output ./filtered \
@@ -56,7 +56,7 @@ go build -o xenofilter.exe ./cmd/xenofilter
   --recalculate-nm
 
 # Bisulfite sequencing mode
-./xenofilter run \
+./xenofilx run \
   --graft sample_human.bam \
   --host sample_mouse.bam \
   --output ./filtered \
@@ -65,14 +65,14 @@ go build -o xenofilter.exe ./cmd/xenofilter
   --bisulfite
 
 # Multiple samples with parallel processing
-./xenofilter run \
+./xenofilx run \
   --graft s1.bam s2.bam \
   --host m1.bam m2.bam \
   --output ./filtered \
   --threads 4
 
 # Custom threshold
-./xenofilter run \
+./xenofilx run \
   --graft sample_human.bam \
   --host sample_mouse.bam \
   --output ./filtered \

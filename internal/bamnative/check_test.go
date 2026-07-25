@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bgzip"
+	"github.com/rainoffallingstar/xenofilx/internal/bgzip"
 )
 
 func summarizePreview(data []byte, maxLen int) string {

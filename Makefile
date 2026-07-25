@@ -1,8 +1,15 @@
-.PHONY: build test clean install
+.PHONY: build test test-coverage clean install build-linux build-mac build-windows
 
-# Build the xenofilter binary
+BINARY := xenofilx
+COMMAND := ./cmd/xenofilx
+VERSION ?= 0.1.0
+VERSION_PACKAGE := github.com/rainoffallingstar/xenofilx/pkg/cli
+LDFLAGS := -X $(VERSION_PACKAGE).Version=$(VERSION)
+
+# Build the xenofilx binary
 build:
-	go build -o bin/xenofilter ./cmd/xenofilter
+	mkdir -p bin
+	go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY) $(COMMAND)
 
 # Run tests
 test:
@@ -13,9 +20,9 @@ test-coverage:
 	go test -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
 
-# Install xenofilter to GOPATH/bin
+# Install xenofilx to GOPATH/bin
 install:
-	go install ./cmd/xenofilter
+	go install -ldflags "$(LDFLAGS)" $(COMMAND)
 
 # Clean build artifacts
 clean:
@@ -24,10 +31,13 @@ clean:
 
 # Cross-compilation
 build-linux:
-	GOOS=linux GOARCH=amd64 go build -o bin/xenofilter-linux-amd64 ./cmd/xenofilter
+	mkdir -p bin
+	GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY)-linux-amd64 $(COMMAND)
 
 build-mac:
-	GOOS=darwin GOARCH=amd64 go build -o bin/xenofilter-darwin-amd64 ./cmd/xenofilter
+	mkdir -p bin
+	GOOS=darwin GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY)-darwin-amd64 $(COMMAND)
 
 build-windows:
-	GOOS=windows GOARCH=amd64 go build -o bin/xenofilter-windows-amd64.exe ./cmd/xenofilter
+	mkdir -p bin
+	GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o bin/$(BINARY)-windows-amd64.exe $(COMMAND)

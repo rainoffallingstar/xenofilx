@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilx/internal/bamnative"
 )
 
 func TestBuildPairsExcludesSupplementaryAndRejectsDuplicatePrimaryMate(t *testing.T) {

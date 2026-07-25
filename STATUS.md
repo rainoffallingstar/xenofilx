@@ -1,4 +1,4 @@
-# XenofilteR Go 实现状态
+# xenofilx 实现状态
 
 ## 已完成的工作
 
@@ -32,7 +32,7 @@
 
 ### 6. CLI 接口 ✅
 ```
-xenofilter run \
+xenofilx run \
   --graft <files> \
   --host <files> \
   --output <dir> \
@@ -59,8 +59,8 @@ xenofilter run \
 ## 项目文件结构
 
 ```
-xenofilter/
-├── cmd/xenofilter/main.go        # CLI 入口
+xenofilx/
+├── cmd/xenofilx/main.go        # CLI 入口
 ├── internal/
 │   ├── bamnative/              # BAM I/O 纯 Go 实现
 │   │   ├── bamnative.go        # BAM 读写核心

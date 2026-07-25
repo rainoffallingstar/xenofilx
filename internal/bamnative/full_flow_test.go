@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bgzip"
+	"github.com/rainoffallingstar/xenofilx/internal/bgzip"
 )
 
 // TestFullReadFlow tests the complete reading flow

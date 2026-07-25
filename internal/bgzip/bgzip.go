@@ -1,12 +1,12 @@
-// This package is a thin re-export of bamdriver-go/pkg/bgzip.
-// Kept for backward compatibility; new code should import bamdriver-go directly.
+// This package is a thin re-export of bamdriver/pkg/bgzip.
+// Kept as the internal compatibility boundary; new code should import bamdriver directly.
 
 package bgzip
 
 import (
 	"io"
 
-	driver "github.com/rainoffallingstar/bamdriver-go/pkg/bgzip"
+	driver "github.com/rainoffallingstar/bamdriver/pkg/bgzip"
 )
 
 var (

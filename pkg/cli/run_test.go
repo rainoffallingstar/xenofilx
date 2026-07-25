@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/config"
-	"github.com/rainoffallingstar/xenofilter-go/internal/filter"
+	"github.com/rainoffallingstar/xenofilx/internal/config"
+	"github.com/rainoffallingstar/xenofilx/internal/filter"
 )
 
 func TestRunFilterRejectsDuplicateOutputNamesBeforeFiltering(t *testing.T) {

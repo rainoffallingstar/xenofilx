@@ -6,7 +6,7 @@ package bamnative
 import (
 	"testing"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bgzip"
+	"github.com/rainoffallingstar/xenofilx/internal/bgzip"
 )
 
 // TestReadRecordDebug debugs record reading step by step

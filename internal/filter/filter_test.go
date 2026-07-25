@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
-	"github.com/rainoffallingstar/xenofilter-go/internal/config"
+	"github.com/rainoffallingstar/xenofilx/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilx/internal/config"
 )
 
 func TestValidateSampleOutputsRejectsDuplicateNames(t *testing.T) {
@@ -487,7 +487,7 @@ func writeLargeNameSortedFixtureBAM(t *testing.T, bamPath string, recordCount in
 	t.Helper()
 
 	header := &bamnative.Header{
-		SortOrder: "queryname",
+		SortOrder:  "queryname",
 		References: []*bamnative.Reference{{ID: 0, Name: "chr1", Len: 1000}},
 	}
 	writer, err := bamnative.NewWriter(bamPath, header)

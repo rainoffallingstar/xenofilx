@@ -3,8 +3,8 @@ package classifier
 import (
 	"fmt"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
-	"github.com/rainoffallingstar/xenofilter-go/internal/config"
+	"github.com/rainoffallingstar/xenofilx/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilx/internal/config"
 )
 
 // Classifier provides fragment classification functionality.

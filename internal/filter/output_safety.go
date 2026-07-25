@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
-	"github.com/rainoffallingstar/xenofilter-go/internal/config"
+	"github.com/rainoffallingstar/xenofilx/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilx/internal/config"
 )
 
 var (
@@ -89,7 +89,7 @@ func acquireOutputLock(outputPath string) (*outputLock, error) {
 	lockFile, err := os.OpenFile(lockPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
 	if err != nil {
 		if errors.Is(err, os.ErrExist) {
-			return nil, fmt.Errorf("output path %q is locked by another xenofilter process", outputPath)
+			return nil, fmt.Errorf("output path %q is locked by another xenofilx process", outputPath)
 		}
 		return nil, fmt.Errorf("create output lock %q: %w", lockPath, err)
 	}

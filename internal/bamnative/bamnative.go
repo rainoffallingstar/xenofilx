@@ -1,12 +1,12 @@
-// This package is a thin re-export of bamdriver-go/pkg/bamnative.
-// Kept for backward compatibility; new code should import bamdriver-go directly.
+// This package is a thin re-export of bamdriver/pkg/bamnative.
+// Kept as the internal compatibility boundary; new code should import bamdriver directly.
 
 package bamnative
 
 import (
 	"io"
 
-	driver "github.com/rainoffallingstar/bamdriver-go/pkg/bamnative"
+	driver "github.com/rainoffallingstar/bamdriver/pkg/bamnative"
 )
 
 var (

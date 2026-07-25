@@ -10,15 +10,15 @@ import (
 var Version = "0.1.0"
 
 var rootCmd = &cobra.Command{
-	Use:   "xenofilter",
+	Use:   "xenofilx",
 	Short: "Filter mouse reads from human xenograft sequencing data",
-	Long: `XenofilteR filters host (mouse) reads from graft (human) sequencing data
+	Long: `xenofilx filters host (mouse) reads from graft (human) sequencing data
 in tumor xenograft experiments. It uses edit distance classification based on
 NM tags and CIGAR strings to accurately separate reads by species.
 
 	Example usage:
-	  xenofilter run --graft sample_human.bam --host sample_mouse.bam --output ./filtered
-	  xenofilter run --graft s1.bam s2.bam --host m1.bam m2.bam --output ./filtered --threads 4`,
+	  xenofilx run --graft sample_human.bam --host sample_mouse.bam --output ./filtered
+	  xenofilx run --graft s1.bam s2.bam --host m1.bam m2.bam --output ./filtered --threads 4`,
 	Version: Version,
 }
 
@@ -30,5 +30,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.SetVersionTemplate("xenofilter {{.Version}}\n")
+	rootCmd.SetVersionTemplate("xenofilx {{.Version}}\n")
 }

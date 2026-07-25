@@ -81,7 +81,7 @@ func TestGetSequenceRealMm10(t *testing.T) {
 // when called with the real hg19 reference and test BAM records.
 func TestCalculateNMWithRealReads(t *testing.T) {
 	const bamPath = "../../testdata/Test_hg19_NRAS.bam"
-	const hg19Path = "/public3/home/scg9946/methrix-cli/testdata/genomes/hg19.fa"
+	const hg19Path = "/public3/home/scg9946/methx/testdata/genomes/hg19.fa"
 
 	for _, p := range []string{bamPath, hg19Path} {
 		if _, err := os.Stat(p); err != nil {

@@ -1,4 +1,4 @@
-name: Xenofilter CI
+name: xenofilx CI
 
 on:
   push:
@@ -40,9 +40,9 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y samtools
 
-      - name: Build xenofilter
+      - name: Build xenofilx
         run: |
-          CGO_ENABLED=0 go build -o ./xenofilter ./cmd/xenofilter
+          CGO_ENABLED=0 go build -o ./xenofilx ./cmd/xenofilx
 
       - name: BAM compatibility gate
         run: |
@@ -55,7 +55,7 @@ jobs:
           samtools view -H "$GRAFT" >/dev/null
           samtools view -c "$GRAFT" >/dev/null
 
-          ./xenofilter run --graft "$GRAFT" --host "$HOST" --output "$OUT_DIR" --threads 1
+          ./xenofilx run --graft "$GRAFT" --host "$HOST" --output "$OUT_DIR" --threads 1
 
           OUT_BAM="$OUT_DIR/Test_hg19_NRAS_Filtered.bam"
           test -f "$OUT_BAM"

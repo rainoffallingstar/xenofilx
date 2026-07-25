@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/rainoffallingstar/xenofilter-go/pkg/cli"
+	"github.com/rainoffallingstar/xenofilx/pkg/cli"
 )
 
 func main() {

@@ -1,9 +1,9 @@
-module github.com/rainoffallingstar/xenofilter-go
+module github.com/rainoffallingstar/xenofilx
 
 go 1.23
 
 require (
-	github.com/rainoffallingstar/bamdriver-go v0.1.2-0.20260721055359-a22f77784fc4
+	github.com/rainoffallingstar/bamdriver v0.1.2-0.20260725115234-fb3209b53ca3
 	github.com/spf13/cobra v1.8.0
 )
 

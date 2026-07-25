@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bgzip"
+	"github.com/rainoffallingstar/xenofilx/internal/bgzip"
 )
 
 // TestBAMHeaderInfo checks BAM header information

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/config"
-	"github.com/rainoffallingstar/xenofilter-go/internal/filter"
+	"github.com/rainoffallingstar/xenofilx/internal/config"
+	"github.com/rainoffallingstar/xenofilx/internal/filter"
 	"github.com/spf13/cobra"
 )
 
@@ -137,7 +137,7 @@ func runFilter(cmd *cobra.Command, args []string) error {
 	}
 
 	// Print configuration
-	fmt.Fprintf(os.Stderr, "XenofilteR Go - Running with configuration:\n")
+	fmt.Fprintf(os.Stderr, "xenofilx - Running with configuration:\n")
 	fmt.Fprintf(os.Stderr, "  MM_threshold: %d\n", mmThreshold)
 	fmt.Fprintf(os.Stderr, "  Unmapped_penalty: %d\n", unmappedPenalty)
 	fmt.Fprintf(os.Stderr, "  NM_tag: %s\n", nmTag)

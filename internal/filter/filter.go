@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
-	"github.com/rainoffallingstar/xenofilter-go/internal/classifier"
-	"github.com/rainoffallingstar/xenofilter-go/internal/config"
+	"github.com/rainoffallingstar/xenofilx/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilx/internal/classifier"
+	"github.com/rainoffallingstar/xenofilx/internal/config"
 )
 
 const (
@@ -84,7 +84,7 @@ func Filter(sample Sample, configuration *config.Config) *SampleResult {
 	result.Threshold = configuration.MMThreshold
 	sortMemoryLimitBytes := sortMemoryLimitForWorkers(effectiveFilterWorkerCount(configuration.ThreadCount))
 
-	temporaryDirectory, err := os.MkdirTemp("", "xenofilter-*")
+	temporaryDirectory, err := os.MkdirTemp("", "xenofilx-*")
 	if err != nil {
 		result.Error = fmt.Errorf("failed to create temporary directory: %w", err)
 		return result

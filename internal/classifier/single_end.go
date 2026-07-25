@@ -3,7 +3,7 @@ package classifier
 import (
 	"fmt"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilx/internal/bamnative"
 )
 
 // Classification is the mutually exclusive outcome for one fragment name.

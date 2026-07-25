@@ -3,7 +3,7 @@ package classifier
 import (
 	"fmt"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilx/internal/bamnative"
 )
 
 // EditDistanceCalculator calculates the original XenofilteR score: NM + insertions + soft clips.

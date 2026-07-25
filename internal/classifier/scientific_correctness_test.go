@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bamnative"
+	"github.com/rainoffallingstar/xenofilx/internal/bamnative"
 )
 
 func TestBisulfiteScoringRecalculatesExistingNMTag(t *testing.T) {

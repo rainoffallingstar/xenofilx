@@ -3,7 +3,7 @@ package bamnative
 import (
 	"testing"
 
-	"github.com/rainoffallingstar/xenofilter-go/internal/bgzip"
+	"github.com/rainoffallingstar/xenofilx/internal/bgzip"
 )
 
 // TestBAMMagic checks BAM magic number
