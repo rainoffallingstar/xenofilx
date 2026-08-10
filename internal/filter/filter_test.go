@@ -13,6 +13,16 @@ import (
 	"github.com/rainoffallingstar/xenofilx/internal/config"
 )
 
+func TestFilterRejectsNilConfiguration(t *testing.T) {
+	result := Filter(Sample{OutputName: "filtered.bam"}, nil)
+	if result.Error == nil {
+		t.Fatal("Filter accepted a nil configuration")
+	}
+	if !strings.Contains(result.Error.Error(), "configuration is required") {
+		t.Fatalf("unexpected nil configuration error: %v", result.Error)
+	}
+}
+
 func TestValidateSampleOutputsRejectsDuplicateNames(t *testing.T) {
 	err := ValidateSampleOutputs([]Sample{
 		{OutputName: "sample.bam"},
@@ -401,6 +411,31 @@ func TestFilterParallelMatchesSequentialResults(t *testing.T) {
 		t.Fatalf("sequential filter failed: %v", sequentialResult.Error)
 	}
 	sequentialNames := readFixtureRecordNames(t, filepath.Join(sequentialOutputDirectory, "baseline.bam"))
+
+	singleSampleParallelDirectory := filepath.Join(rootDirectory, "single-sample-parallel")
+	singleSampleParallelConfiguration := newFixtureConfig(singleSampleParallelDirectory)
+	singleSampleParallelConfiguration.ThreadCount = 4
+	singleSampleParallelResult := Filter(Sample{
+		GraftPath:  graftPath,
+		HostPath:   hostPath,
+		OutputName: "parallel-single.bam",
+	}, singleSampleParallelConfiguration)
+	if singleSampleParallelResult.Error != nil {
+		t.Fatalf("single-sample parallel filter failed: %v", singleSampleParallelResult.Error)
+	}
+	if singleSampleParallelResult.TotalReads != sequentialResult.TotalReads ||
+		singleSampleParallelResult.HumanReads != sequentialResult.HumanReads ||
+		singleSampleParallelResult.MouseReads != sequentialResult.MouseReads ||
+		singleSampleParallelResult.DiscardedReads != sequentialResult.DiscardedReads {
+		t.Fatalf("single-sample parallel result differs from sequential result: %#v versus %#v", singleSampleParallelResult, sequentialResult)
+	}
+	singleSampleParallelNames := readFixtureRecordNames(t, singleSampleParallelResult.OutputPath)
+	if strings.Join(singleSampleParallelNames, "\n") != strings.Join(sequentialNames, "\n") {
+		t.Fatal("single-sample parallel output differs from sequential output")
+	}
+	if !bamnative.HasIndex(singleSampleParallelResult.OutputPath) {
+		t.Fatal("single-sample parallel output does not have a BAM index")
+	}
 
 	parallelOutputDirectory := filepath.Join(rootDirectory, "parallel")
 	parallelConfiguration := newFixtureConfig(parallelOutputDirectory)

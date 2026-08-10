@@ -95,6 +95,9 @@ func CalculateNM(record *Record, ref []byte, isBisulfite bool) int {
 func CalculateNMChecked(record *Record, ref []byte, isBisulfite bool) (int, error) {
 	return driver.CalculateNMChecked(record, ref, isBisulfite)
 }
+func CalculateNMCheckedWindow(record *Record, reference []byte, referenceStart int64, isBisulfite bool) (int, error) {
+	return driver.CalculateNMCheckedWindow(record, reference, referenceStart, isBisulfite)
+}
 func HasNM(record *Record, tagName string) bool        { return driver.HasNM(record, tagName) }
 func FastqToSeq(seq string) []byte                     { return driver.FastqToSeq(seq) }
 func NewFastaReader(path string) (*FastaReader, error) { return driver.NewFastaReader(path) }

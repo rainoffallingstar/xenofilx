@@ -66,9 +66,167 @@ type primaryNameGroupReader struct {
 	pending *bamnative.Record
 }
 
-// Filter filters reads from a single sample with memory bounded by the external
-// sort budget and the largest individual read-name group.
+type classificationJob struct {
+	order        int
+	fragmentName string
+	graftRecords []*bamnative.Record
+	hostRecords  []*bamnative.Record
+	isPairedEnd  bool
+	graftPresent bool
+	hostPresent  bool
+}
+
+type classificationResult struct {
+	order          int
+	graftRecords   []*bamnative.Record
+	graftPresent   bool
+	hostPresent    bool
+	classification classifier.Classification
+	err            error
+}
+
+type orderedGroupProcessor struct {
+	classificationEngine *classifier.Classifier
+	configuration        *config.Config
+	graftReferenceNames  map[int32]string
+	hostReferenceNames   map[int32]string
+	selectedGraftWriter  *bamnative.Writer
+	result               *SampleResult
+	jobs                 chan classificationJob
+	completed            chan classificationResult
+	inFlight             chan struct{}
+	workerWaitGroup      sync.WaitGroup
+	collectorDone        chan struct{}
+	firstError           error
+}
+
+func newOrderedGroupProcessor(
+	workerCount int,
+	classificationEngine *classifier.Classifier,
+	configuration *config.Config,
+	graftReferenceNames map[int32]string,
+	hostReferenceNames map[int32]string,
+	selectedGraftWriter *bamnative.Writer,
+	result *SampleResult,
+) *orderedGroupProcessor {
+	if workerCount < 1 {
+		workerCount = 1
+	}
+	queueCapacity := workerCount * 2
+	processor := &orderedGroupProcessor{
+		classificationEngine: classificationEngine,
+		configuration:        configuration,
+		graftReferenceNames:  graftReferenceNames,
+		hostReferenceNames:   hostReferenceNames,
+		selectedGraftWriter:  selectedGraftWriter,
+		result:               result,
+		jobs:                 make(chan classificationJob, queueCapacity),
+		completed:            make(chan classificationResult, queueCapacity),
+		inFlight:             make(chan struct{}, queueCapacity),
+		collectorDone:        make(chan struct{}),
+	}
+	for workerIndex := 0; workerIndex < workerCount; workerIndex++ {
+		processor.workerWaitGroup.Add(1)
+		go processor.runWorker()
+	}
+	go func() {
+		processor.workerWaitGroup.Wait()
+		close(processor.completed)
+	}()
+	go processor.collectResults()
+	return processor
+}
+
+func (processor *orderedGroupProcessor) submit(job classificationJob) {
+	processor.inFlight <- struct{}{}
+	processor.jobs <- job
+}
+
+func (processor *orderedGroupProcessor) finish() error {
+	close(processor.jobs)
+	<-processor.collectorDone
+	return processor.firstError
+}
+
+func (processor *orderedGroupProcessor) runWorker() {
+	defer processor.workerWaitGroup.Done()
+	for job := range processor.jobs {
+		classification, err := classifyRecordGroup(
+			processor.classificationEngine,
+			processor.configuration,
+			job.fragmentName,
+			job.graftRecords,
+			job.hostRecords,
+			job.isPairedEnd,
+			processor.graftReferenceNames,
+			processor.hostReferenceNames,
+		)
+		processor.completed <- classificationResult{
+			order:          job.order,
+			graftRecords:   job.graftRecords,
+			graftPresent:   job.graftPresent,
+			hostPresent:    job.hostPresent,
+			classification: classification,
+			err:            err,
+		}
+	}
+}
+
+func (processor *orderedGroupProcessor) collectResults() {
+	defer close(processor.collectorDone)
+	pendingResults := make(map[int]classificationResult)
+	nextOrder := 0
+	for completedResult := range processor.completed {
+		pendingResults[completedResult.order] = completedResult
+		for {
+			orderedResult, exists := pendingResults[nextOrder]
+			if !exists {
+				break
+			}
+			if orderedResult.err != nil && processor.firstError == nil {
+				processor.firstError = orderedResult.err
+			}
+			updateFragmentStatistics(processor.result, orderedResult.graftPresent, orderedResult.hostPresent, orderedResult.classification)
+			if orderedResult.err == nil && orderedResult.classification == classifier.ClassificationGraft {
+				for _, record := range orderedResult.graftRecords {
+					if err := processor.selectedGraftWriter.Write(record); err != nil && processor.firstError == nil {
+						processor.firstError = fmt.Errorf("failed to write temporary filtered BAM: %w", err)
+					}
+				}
+			}
+			delete(pendingResults, nextOrder)
+			nextOrder++
+			<-processor.inFlight
+		}
+	}
+}
+
+// Filter filters one sample with readers created for this invocation.
 func Filter(sample Sample, configuration *config.Config) *SampleResult {
+	if configuration == nil {
+		return &SampleResult{
+			SampleName: sample.OutputName,
+			Error:      fmt.Errorf("configuration is required"),
+		}
+	}
+	return filterWithReferenceReaders(
+		sample,
+		configuration,
+		nil,
+		filterTotalSortMemoryBudgetBytes,
+		effectiveFilterWorkerCount(configuration.ThreadCount),
+	)
+}
+
+// filterWithReferenceReaders filters one sample and reuses optional immutable
+// reference readers created by FilterParallel.
+func filterWithReferenceReaders(
+	sample Sample,
+	configuration *config.Config,
+	referenceReaders *classifier.ReferenceReaders,
+	sortMemoryLimitBytes int64,
+	classificationWorkerCount int,
+) *SampleResult {
 	result := &SampleResult{SampleName: sample.OutputName}
 	if configuration == nil {
 		result.Error = fmt.Errorf("configuration is required")
@@ -82,7 +240,6 @@ func Filter(sample Sample, configuration *config.Config) *SampleResult {
 	}
 	result.OutputPath = outputPath
 	result.Threshold = configuration.MMThreshold
-	sortMemoryLimitBytes := sortMemoryLimitForWorkers(effectiveFilterWorkerCount(configuration.ThreadCount))
 
 	temporaryDirectory, err := os.MkdirTemp("", "xenofilx-*")
 	if err != nil {
@@ -116,7 +273,16 @@ func Filter(sample Sample, configuration *config.Config) *SampleResult {
 	}
 	defer hostFile.Close()
 
-	classificationEngine, err := classifier.NewClassifier(configuration)
+	var classificationEngine *classifier.Classifier
+	if referenceReaders == nil {
+		referenceReaders, err = classifier.LoadReferenceReaders(configuration)
+		if err != nil {
+			result.Error = fmt.Errorf("failed to initialize classifier: %w", err)
+			return result
+		}
+		defer referenceReaders.Close()
+	}
+	classificationEngine, err = classifier.NewClassifierWithReferenceReaders(configuration, referenceReaders)
 	if err != nil {
 		result.Error = fmt.Errorf("failed to initialize classifier: %w", err)
 		return result
@@ -142,6 +308,7 @@ func Filter(sample Sample, configuration *config.Config) *SampleResult {
 		graftReferenceNames,
 		hostReferenceNames,
 		result,
+		classificationWorkerCount,
 	)
 	closeErr := selectedGraftWriter.Close()
 	if processErr != nil {
@@ -265,6 +432,7 @@ func processNameSortedGroups(
 	graftReferenceNames map[int32]string,
 	hostReferenceNames map[int32]string,
 	result *SampleResult,
+	classificationWorkerCount int,
 ) (bool, error) {
 	graftGroups := &primaryNameGroupReader{reader: graftReader}
 	hostGroups := &primaryNameGroupReader{reader: hostReader}
@@ -280,6 +448,22 @@ func processNameSortedGroups(
 
 	overlapFound := false
 	modeValidator := &alignmentModeValidator{}
+	if classificationWorkerCount < 1 {
+		classificationWorkerCount = 1
+	}
+	var parallelProcessor *orderedGroupProcessor
+	if classificationWorkerCount > 1 {
+		parallelProcessor = newOrderedGroupProcessor(
+			classificationWorkerCount,
+			classificationEngine,
+			configuration,
+			graftReferenceNames,
+			hostReferenceNames,
+			selectedGraftWriter,
+			result,
+		)
+	}
+	groupOrder := 0
 	for graftGroup != nil || hostGroup != nil {
 		var fragmentName string
 		var graftRecords []*bamnative.Record
@@ -319,6 +503,19 @@ func processNameSortedGroups(
 		if err != nil {
 			return false, err
 		}
+		if parallelProcessor != nil {
+			parallelProcessor.submit(classificationJob{
+				order:        groupOrder,
+				fragmentName: fragmentName,
+				graftRecords: graftRecords,
+				hostRecords:  hostRecords,
+				isPairedEnd:  isPairedEnd,
+				graftPresent: len(graftRecords) > 0,
+				hostPresent:  len(hostRecords) > 0,
+			})
+			groupOrder++
+			continue
+		}
 		classification, err := classifyRecordGroup(
 			classificationEngine,
 			configuration,
@@ -343,6 +540,9 @@ func processNameSortedGroups(
 		}
 	}
 
+	if parallelProcessor != nil {
+		return overlapFound, parallelProcessor.finish()
+	}
 	return overlapFound, nil
 }
 
@@ -575,8 +775,25 @@ func FilterParallel(samples []Sample, configuration *config.Config) []*SampleRes
 		return results
 	}
 
-	var waitGroup sync.WaitGroup
+	referenceReaders, err := classifier.LoadReferenceReaders(configuration)
+	if err != nil {
+		for sampleIndex, sample := range samples {
+			results[sampleIndex] = &SampleResult{SampleName: sample.OutputName, Error: err}
+		}
+		return results
+	}
+
 	workerCount := effectiveFilterWorkerCount(configuration.ThreadCount)
+	concurrentSampleCount := workerCount
+	if len(samples) < concurrentSampleCount {
+		concurrentSampleCount = len(samples)
+	}
+	sortMemoryLimitBytes := sortMemoryLimitForWorkers(concurrentSampleCount)
+	classificationWorkerCount := workerCount / concurrentSampleCount
+	if classificationWorkerCount < 1 {
+		classificationWorkerCount = 1
+	}
+	var waitGroup sync.WaitGroup
 	workerSlots := make(chan struct{}, workerCount)
 	for sampleIndex, sample := range samples {
 		waitGroup.Add(1)
@@ -584,10 +801,23 @@ func FilterParallel(samples []Sample, configuration *config.Config) []*SampleRes
 			defer waitGroup.Done()
 			workerSlots <- struct{}{}
 			defer func() { <-workerSlots }()
-			results[resultIndex] = Filter(sampleToFilter, configuration)
+			results[resultIndex] = filterWithReferenceReaders(
+				sampleToFilter,
+				configuration,
+				referenceReaders,
+				sortMemoryLimitBytes,
+				classificationWorkerCount,
+			)
 		}(sampleIndex, sample)
 	}
 
 	waitGroup.Wait()
+	if err := referenceReaders.Close(); err != nil {
+		for _, result := range results {
+			if result != nil && result.Error == nil {
+				result.Error = fmt.Errorf("failed to close reference readers: %w", err)
+			}
+		}
+	}
 	return results
 }

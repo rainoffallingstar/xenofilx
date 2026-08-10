@@ -76,15 +76,24 @@ func (calculator *EditDistanceCalculator) calculateWithReference(record *bamnati
 		return 0, fmt.Errorf("cannot calculate NM for read %q: reference name is empty", record.Name)
 	}
 
-	referenceSequence, exists := referenceReader.GetSequence(refName)
-	if !exists {
-		return 0, fmt.Errorf("cannot calculate NM for read %q: reference contig %q was not found", record.Name, refName)
+	referenceStart := int64(record.Pos)
+	referenceSpan, err := calculateReferenceSpan(record.Cigar)
+	if err != nil {
+		return 0, fmt.Errorf("cannot calculate NM for read %q on %q: %w", record.Name, refName, err)
 	}
-	if err := validateReferenceCalculation(record, referenceSequence); err != nil {
+	referenceEnd := referenceStart + int64(referenceSpan)
+	if referenceEnd < referenceStart {
+		return 0, fmt.Errorf("cannot calculate NM for read %q on %q: reference span overflows", record.Name, refName)
+	}
+	referenceSequence, exists := referenceReader.GetRegion(refName, referenceStart, referenceEnd)
+	if !exists {
+		return 0, fmt.Errorf("cannot calculate NM for read %q: reference interval %q:%d-%d was not found", record.Name, refName, referenceStart, referenceEnd)
+	}
+	if err := validateReferenceCalculation(record, referenceSequence, referenceStart); err != nil {
 		return 0, fmt.Errorf("cannot calculate NM for read %q on %q: %w", record.Name, refName, err)
 	}
 
-	nm, err := bamnative.CalculateNMChecked(record, referenceSequence, calculator.isBisulfite)
+	nm, err := bamnative.CalculateNMCheckedWindow(record, referenceSequence, referenceStart, calculator.isBisulfite)
 	if err != nil {
 		return 0, fmt.Errorf("failed to calculate NM for read %q on %q: %w", record.Name, refName, err)
 	}
@@ -92,12 +101,15 @@ func (calculator *EditDistanceCalculator) calculateWithReference(record *bamnati
 	return nm + insertions + softClips, nil
 }
 
-func validateReferenceCalculation(record *bamnative.Record, referenceSequence []byte) error {
+func validateReferenceCalculation(record *bamnative.Record, referenceSequence []byte, referenceStart int64) error {
 	if record.RefID < 0 || record.IsUnmapped() {
 		return fmt.Errorf("alignment is unmapped")
 	}
 	if record.Pos < 0 {
 		return fmt.Errorf("alignment position is negative")
+	}
+	if int64(record.Pos) < referenceStart {
+		return fmt.Errorf("alignment starts before the reference window")
 	}
 	if len(record.Seq) == 0 {
 		return fmt.Errorf("read sequence is empty")
@@ -107,7 +119,7 @@ func validateReferenceCalculation(record *bamnative.Record, referenceSequence []
 	}
 
 	readPosition := 0
-	referencePosition := int(record.Pos)
+	referencePosition := int(int64(record.Pos) - referenceStart)
 	for _, operation := range record.Cigar {
 		if operation.Len <= 0 {
 			return fmt.Errorf("CIGAR operation %q has invalid length %d", operation.Op, operation.Len)
@@ -143,6 +155,29 @@ func validateReferenceCalculation(record *bamnative.Record, referenceSequence []
 		return fmt.Errorf("CIGAR consumes %d read bases, sequence contains %d", readPosition, len(record.Seq))
 	}
 	return nil
+}
+
+func calculateReferenceSpan(cigar []bamnative.CigarOp) (int, error) {
+	referenceSpan := 0
+	for _, operation := range cigar {
+		if operation.Len <= 0 {
+			return 0, fmt.Errorf("CIGAR operation %q has invalid length %d", operation.Op, operation.Len)
+		}
+		switch operation.Op {
+		case bamnative.CigarMatch, bamnative.CigarEqual, bamnative.CigarMismatch, bamnative.CigarDeletion, bamnative.CigarSkip:
+			if operation.Len > int(^uint(0)>>1)-referenceSpan {
+				return 0, fmt.Errorf("CIGAR reference span overflows")
+			}
+			referenceSpan += operation.Len
+		case bamnative.CigarInsertion, bamnative.CigarSoftClip, bamnative.CigarHardClip, bamnative.CigarPadding:
+		default:
+			return 0, fmt.Errorf("CIGAR contains unsupported operation %q", operation.Op)
+		}
+	}
+	if referenceSpan == 0 {
+		return 0, fmt.Errorf("CIGAR consumes no reference bases")
+	}
+	return referenceSpan, nil
 }
 
 func getNMTag(record *bamnative.Record, tagName string) (int, error) {

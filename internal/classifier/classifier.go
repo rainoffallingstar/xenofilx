@@ -17,23 +17,76 @@ type Classifier struct {
 	pairedEndClassifier *PairedEndClassifier
 }
 
-// NewClassifier creates a classifier and validates configured reference files.
-func NewClassifier(configuration *config.Config) (*Classifier, error) {
-	var graftReferenceReader *bamnative.FastaReader
-	var hostReferenceReader *bamnative.FastaReader
-	var err error
+type ReferenceReaders struct {
+	Graft *bamnative.FastaReader
+	Host  *bamnative.FastaReader
+}
 
+// Close releases the reference files shared by the classifiers.
+func (referenceReaders *ReferenceReaders) Close() error {
+	if referenceReaders == nil {
+		return nil
+	}
+
+	var firstError error
+	if referenceReaders.Graft != nil {
+		if err := referenceReaders.Graft.Close(); err != nil {
+			firstError = err
+		}
+	}
+	if referenceReaders.Host != nil {
+		if err := referenceReaders.Host.Close(); err != nil && firstError == nil {
+			firstError = err
+		}
+	}
+	return firstError
+}
+
+// LoadReferenceReaders creates immutable reference readers that may be shared
+// by concurrently running sample classifiers.
+func LoadReferenceReaders(configuration *config.Config) (*ReferenceReaders, error) {
+	if configuration == nil {
+		return nil, fmt.Errorf("configuration is required")
+	}
+
+	referenceReaders := &ReferenceReaders{}
+	var err error
 	if configuration.ReferencePath != "" {
-		graftReferenceReader, err = bamnative.NewFastaReader(configuration.ReferencePath)
+		referenceReaders.Graft, err = bamnative.NewFastaReader(configuration.ReferencePath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load graft reference %q: %w", configuration.ReferencePath, err)
 		}
 	}
 	if configuration.HostRefPath != "" {
-		hostReferenceReader, err = bamnative.NewFastaReader(configuration.HostRefPath)
+		referenceReaders.Host, err = bamnative.NewFastaReader(configuration.HostRefPath)
 		if err != nil {
+			_ = referenceReaders.Close()
 			return nil, fmt.Errorf("failed to load host reference %q: %w", configuration.HostRefPath, err)
 		}
+	}
+	return referenceReaders, nil
+}
+
+// NewClassifier creates a classifier using readers created for this classifier.
+func NewClassifier(configuration *config.Config) (*Classifier, error) {
+	referenceReaders, err := LoadReferenceReaders(configuration)
+	if err != nil {
+		return nil, err
+	}
+	return NewClassifierWithReferenceReaders(configuration, referenceReaders)
+}
+
+// NewClassifierWithReferenceReaders creates a classifier using optional shared
+// immutable reference readers.
+func NewClassifierWithReferenceReaders(configuration *config.Config, referenceReaders *ReferenceReaders) (*Classifier, error) {
+	if configuration == nil {
+		return nil, fmt.Errorf("configuration is required")
+	}
+
+	var graftReferenceReader, hostReferenceReader *bamnative.FastaReader
+	if referenceReaders != nil {
+		graftReferenceReader = referenceReaders.Graft
+		hostReferenceReader = referenceReaders.Host
 	}
 
 	referenceScoringRequested := configuration.CalculateNM || configuration.IsBisulfite
