@@ -367,6 +367,7 @@ func TestFilterRejectsGraftHostSequencingModeMismatch(t *testing.T) {
 }
 
 func TestSortMemoryBudgetBoundsAggregateParallelSortMemory(t *testing.T) {
+	const defaultBudget = int64(256 << 20)
 	testCases := []struct {
 		requestedWorkers int
 		wantWorkers      int
@@ -380,17 +381,33 @@ func TestSortMemoryBudgetBoundsAggregateParallelSortMemory(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		workerCount := effectiveFilterWorkerCount(testCase.requestedWorkers)
+		workerCount := effectiveFilterWorkerCount(testCase.requestedWorkers, defaultBudget)
 		if workerCount != testCase.wantWorkers {
 			t.Fatalf("effective workers for %d = %d, want %d", testCase.requestedWorkers, workerCount, testCase.wantWorkers)
 		}
-		perWorkerMemory := sortMemoryLimitForWorkers(workerCount)
+		perWorkerMemory := sortMemoryLimitForWorkers(workerCount, defaultBudget)
 		if perWorkerMemory != testCase.wantPerWorker {
 			t.Fatalf("per-worker memory for %d workers = %d, want %d", workerCount, perWorkerMemory, testCase.wantPerWorker)
 		}
-		if int64(workerCount)*perWorkerMemory > filterTotalSortMemoryBudgetBytes {
+		if int64(workerCount)*perWorkerMemory > defaultBudget {
 			t.Fatalf("aggregate sort memory exceeds budget for %d workers", workerCount)
 		}
+	}
+}
+
+func TestSortMemoryCustomBudgetRaisesPerWorkerLimit(t *testing.T) {
+	const customBudget = int64(8 << 30) // 8 GiB
+	workerCount := effectiveFilterWorkerCount(4, customBudget)
+	if workerCount != 4 {
+		t.Fatalf("effective workers with custom budget = %d, want 4", workerCount)
+	}
+	perWorkerMemory := sortMemoryLimitForWorkers(workerCount, customBudget)
+	wantPerWorker := customBudget / 4
+	if perWorkerMemory != wantPerWorker {
+		t.Fatalf("per-worker memory with custom budget = %d, want %d", perWorkerMemory, wantPerWorker)
+	}
+	if int64(workerCount)*perWorkerMemory > customBudget {
+		t.Fatalf("aggregate sort memory exceeds custom budget")
 	}
 }
 

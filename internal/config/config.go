@@ -13,6 +13,11 @@ type Config struct {
 	ThreadCount int    // Number of parallel workers (default: 1)
 	OutputDir   string // Output directory path
 
+	// SortMemoryBytes is the per-run aggregate memory budget (in bytes) used
+	// for external queryname sorting of graft/host BAM inputs. Zero selects
+	// the historical 256 MiB default so existing callers keep prior behavior.
+	SortMemoryBytes int64
+
 	// Reference and NM calculation
 	ReferencePath string // Path to graft (human) reference genome FASTA file
 	HostRefPath   string // Path to host (mouse) reference genome FASTA file

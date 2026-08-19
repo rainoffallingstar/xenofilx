@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	filterTotalSortMemoryBudgetBytes  = int64(256 << 20)
+	defaultFilterTotalSortMemoryBudgetBytes  = int64(256 << 20)
 	filterMinimumSortMemoryLimitBytes = int64(8 << 20)
 )
 
@@ -213,8 +213,8 @@ func Filter(sample Sample, configuration *config.Config) *SampleResult {
 		sample,
 		configuration,
 		nil,
-		filterTotalSortMemoryBudgetBytes,
-		effectiveFilterWorkerCount(configuration.ThreadCount),
+		filterTotalSortMemoryBudgetBytes(configuration),
+		effectiveFilterWorkerCount(configuration.ThreadCount, filterTotalSortMemoryBudgetBytes(configuration)),
 	)
 }
 
@@ -377,20 +377,33 @@ func sortInputByReadName(inputPath, outputPath, temporaryDirectory string, memor
 	})
 }
 
-func effectiveFilterWorkerCount(requestedWorkerCount int) int {
+func filterTotalSortMemoryBudgetBytes(configuration *config.Config) int64 {
+	if configuration != nil && configuration.SortMemoryBytes > 0 {
+		return configuration.SortMemoryBytes
+	}
+	return defaultFilterTotalSortMemoryBudgetBytes
+}
+
+func effectiveFilterWorkerCount(requestedWorkerCount int, totalSortMemoryBytes int64) int {
 	if requestedWorkerCount < 1 {
 		return 1
 	}
-	maximumWorkerCount := int(filterTotalSortMemoryBudgetBytes / filterMinimumSortMemoryLimitBytes)
+	if totalSortMemoryBytes <= 0 {
+		totalSortMemoryBytes = defaultFilterTotalSortMemoryBudgetBytes
+	}
+	maximumWorkerCount := int(totalSortMemoryBytes / filterMinimumSortMemoryLimitBytes)
 	if requestedWorkerCount > maximumWorkerCount {
 		return maximumWorkerCount
 	}
 	return requestedWorkerCount
 }
 
-func sortMemoryLimitForWorkers(workerCount int) int64 {
-	effectiveWorkerCount := effectiveFilterWorkerCount(workerCount)
-	memoryLimitBytes := filterTotalSortMemoryBudgetBytes / int64(effectiveWorkerCount)
+func sortMemoryLimitForWorkers(workerCount int, totalSortMemoryBytes int64) int64 {
+	effectiveWorkerCount := effectiveFilterWorkerCount(workerCount, totalSortMemoryBytes)
+	if totalSortMemoryBytes <= 0 {
+		totalSortMemoryBytes = defaultFilterTotalSortMemoryBudgetBytes
+	}
+	memoryLimitBytes := totalSortMemoryBytes / int64(effectiveWorkerCount)
 	if memoryLimitBytes < filterMinimumSortMemoryLimitBytes {
 		return filterMinimumSortMemoryLimitBytes
 	}
@@ -783,12 +796,13 @@ func FilterParallel(samples []Sample, configuration *config.Config) []*SampleRes
 		return results
 	}
 
-	workerCount := effectiveFilterWorkerCount(configuration.ThreadCount)
+	totalSortMemoryBytes := filterTotalSortMemoryBudgetBytes(configuration)
+	workerCount := effectiveFilterWorkerCount(configuration.ThreadCount, totalSortMemoryBytes)
 	concurrentSampleCount := workerCount
 	if len(samples) < concurrentSampleCount {
 		concurrentSampleCount = len(samples)
 	}
-	sortMemoryLimitBytes := sortMemoryLimitForWorkers(concurrentSampleCount)
+	sortMemoryLimitBytes := sortMemoryLimitForWorkers(concurrentSampleCount, totalSortMemoryBytes)
 	classificationWorkerCount := workerCount / concurrentSampleCount
 	if classificationWorkerCount < 1 {
 		classificationWorkerCount = 1

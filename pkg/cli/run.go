@@ -23,6 +23,7 @@ var (
 	unmappedPenalty int
 	nmTag           string
 	threads         int
+	sortMemory      string
 
 	// Reference and NM calculation flags
 	graftRefPath  string
@@ -59,6 +60,8 @@ func init() {
 		"BAM tag name for edit distance (default: NM)")
 	runCmd.Flags().IntVarP(&threads, "threads", "j", 1,
 		"Number of parallel processing threads (default: 1)")
+	runCmd.Flags().StringVar(&sortMemory, "sort-memory", "",
+		"Aggregate memory budget for external queryname sorting of input BAMs, e.g. 8G (default: 256M)")
 	runCmd.Flags().StringSliceVarP(&outputNames, "output-names", "w", []string{},
 		"Alternative output names for BAM files")
 
@@ -107,6 +110,14 @@ func runFilter(cmd *cobra.Command, args []string) error {
 	cfg.HostRefPath = hostRefPath
 	cfg.CalculateNM = recalculateNM
 	cfg.IsBisulfite = isBisulfite
+
+	if sortMemory != "" {
+		sortMemoryBytes, err := parseMemorySize(sortMemory)
+		if err != nil {
+			return fmt.Errorf("invalid --sort-memory value %q: %w", sortMemory, err)
+		}
+		cfg.SortMemoryBytes = sortMemoryBytes
+	}
 
 	if err := cfg.Validate(); err != nil {
 		return fmt.Errorf("invalid configuration: %w", err)
@@ -200,4 +211,43 @@ func runFilter(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// parseMemorySize parses a human-readable memory size such as "256M", "8G",
+// or "1T" into bytes. A plain integer is treated as bytes. Units are binary
+// (1K = 1024 bytes) and the suffix is case-insensitive.
+func parseMemorySize(value string) (int64, error) {
+	normalized := strings.TrimSpace(value)
+	if normalized == "" {
+		return 0, fmt.Errorf("empty memory size")
+	}
+
+	unit := int64(1)
+	lastCharacter := normalized[len(normalized)-1]
+	switch {
+	case lastCharacter == 'K' || lastCharacter == 'k':
+		unit = 1 << 10
+		normalized = normalized[:len(normalized)-1]
+	case lastCharacter == 'M' || lastCharacter == 'm':
+		unit = 1 << 20
+		normalized = normalized[:len(normalized)-1]
+	case lastCharacter == 'G' || lastCharacter == 'g':
+		unit = 1 << 30
+		normalized = normalized[:len(normalized)-1]
+	case lastCharacter == 'T' || lastCharacter == 't':
+		unit = 1 << 40
+		normalized = normalized[:len(normalized)-1]
+	}
+
+	if normalized == "" {
+		return 0, fmt.Errorf("missing numeric value")
+	}
+	var magnitude int64
+	if _, err := fmt.Sscanf(normalized, "%d", &magnitude); err != nil {
+		return 0, fmt.Errorf("invalid numeric value %q", normalized)
+	}
+	if magnitude < 0 {
+		return 0, fmt.Errorf("negative memory size")
+	}
+	return magnitude * unit, nil
 }
