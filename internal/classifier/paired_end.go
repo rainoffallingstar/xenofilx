@@ -84,6 +84,19 @@ func (classifier *PairedEndClassifier) ClassifyResults(graftRecords, hostRecords
 	return classifyUniquePairs(graftRecords, hostRecords, classifier.classify)
 }
 
+// ClassifyGroup classifies unique primary pairs for a single fragment group without allocating maps.
+func (classifier *PairedEndClassifier) ClassifyGroup(graftRecords, hostRecords []*bamnative.Record) (Classification, error) {
+	graftPair, graftAmbiguous := BuildSinglePair(graftRecords)
+	if graftAmbiguous {
+		return ClassificationDiscarded, nil
+	}
+	hostPair, hostAmbiguous := BuildSinglePair(hostRecords)
+	if hostAmbiguous {
+		return ClassificationDiscarded, nil
+	}
+	return classifier.classify(graftPair, hostPair)
+}
+
 // PairedEndClassifierWithRef classifies paired-end fragments using reference genomes.
 type PairedEndClassifierWithRef struct {
 	calculator      *EditDistanceCalculator
@@ -168,6 +181,19 @@ func (classifier *PairedEndClassifierWithRef) ClassifyResults(graftRecords, host
 	return classifyUniquePairs(graftRecords, hostRecords, classifier.classify)
 }
 
+// ClassifyGroup classifies unique primary pairs using reference genomes for a single fragment group without allocating maps.
+func (classifier *PairedEndClassifierWithRef) ClassifyGroup(graftRecords, hostRecords []*bamnative.Record) (Classification, error) {
+	graftPair, graftAmbiguous := BuildSinglePair(graftRecords)
+	if graftAmbiguous {
+		return ClassificationDiscarded, nil
+	}
+	hostPair, hostAmbiguous := BuildSinglePair(hostRecords)
+	if hostAmbiguous {
+		return ClassificationDiscarded, nil
+	}
+	return classifier.classify(graftPair, hostPair)
+}
+
 func classifyUniquePairs(
 	graftRecords, hostRecords []*bamnative.Record,
 	classify func(*ReadPair, *ReadPair) (Classification, error),
@@ -201,6 +227,42 @@ func classifyUniquePairs(
 		results[name] = classification
 	}
 	return results, nil
+}
+
+// BuildSinglePair extracts a unique primary mapped R1/R2 pair from a record group sharing a fragment name without allocating maps.
+func BuildSinglePair(records []*bamnative.Record) (*ReadPair, bool) {
+	if len(records) == 0 {
+		return nil, false
+	}
+	var pair ReadPair
+	hasAlignments := false
+	for _, record := range records {
+		if !isPrimaryMappedRecord(record) {
+			continue
+		}
+		isFirstMate := record.IsFirstInPair()
+		isSecondMate := record.IsSecondInPair()
+		if !record.IsPaired() || isFirstMate == isSecondMate {
+			return nil, true
+		}
+		pair.Name = record.Name
+		hasAlignments = true
+		if isFirstMate {
+			if pair.Forward != nil {
+				return nil, true
+			}
+			pair.Forward = record
+			continue
+		}
+		if pair.Reverse != nil {
+			return nil, true
+		}
+		pair.Reverse = record
+	}
+	if !hasAlignments {
+		return nil, false
+	}
+	return &pair, false
 }
 
 // BuildPairs groups unique primary mapped R1/R2 records by fragment name.

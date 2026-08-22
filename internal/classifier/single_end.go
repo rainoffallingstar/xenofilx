@@ -69,6 +69,19 @@ func (classifier *SingleEndClassifier) ClassifyResults(graftRecords, hostRecords
 	return classifyUniqueSingleEndRecords(graftRecords, hostRecords, classifier.classify)
 }
 
+// ClassifyGroup classifies single-end reads for a single fragment group without allocating maps.
+func (classifier *SingleEndClassifier) ClassifyGroup(graftRecords, hostRecords []*bamnative.Record) (Classification, error) {
+	graftRecord, graftAmbiguous := BuildSingleRecord(graftRecords)
+	if graftAmbiguous {
+		return ClassificationDiscarded, nil
+	}
+	hostRecord, hostAmbiguous := BuildSingleRecord(hostRecords)
+	if hostAmbiguous {
+		return ClassificationDiscarded, nil
+	}
+	return classifier.classify(graftRecord, hostRecord)
+}
+
 // SingleEndClassifierWithRef classifies single-end reads using reference genomes.
 type SingleEndClassifierWithRef struct {
 	calculator    *EditDistanceCalculator
@@ -124,6 +137,19 @@ func (classifier *SingleEndClassifierWithRef) ClassifyResults(graftRecords, host
 	return classifyUniqueSingleEndRecords(graftRecords, hostRecords, classifier.classify)
 }
 
+// ClassifyGroup classifies single-end reads using reference genomes for a single fragment group without allocating maps.
+func (classifier *SingleEndClassifierWithRef) ClassifyGroup(graftRecords, hostRecords []*bamnative.Record) (Classification, error) {
+	graftRecord, graftAmbiguous := BuildSingleRecord(graftRecords)
+	if graftAmbiguous {
+		return ClassificationDiscarded, nil
+	}
+	hostRecord, hostAmbiguous := BuildSingleRecord(hostRecords)
+	if hostAmbiguous {
+		return ClassificationDiscarded, nil
+	}
+	return classifier.classify(graftRecord, hostRecord)
+}
+
 func classifyUniqueSingleEndRecords(
 	graftRecords, hostRecords []*bamnative.Record,
 	classify func(*bamnative.Record, *bamnative.Record) (Classification, error),
@@ -158,6 +184,24 @@ func classifyUniqueSingleEndRecords(
 		results[name] = classification
 	}
 	return results, nil
+}
+
+// BuildSingleRecord extracts a unique primary mapped record from a record group sharing a read name without allocating maps.
+func BuildSingleRecord(records []*bamnative.Record) (*bamnative.Record, bool) {
+	if len(records) == 0 {
+		return nil, false
+	}
+	var selected *bamnative.Record
+	for _, record := range records {
+		if !isPrimaryMappedRecord(record) {
+			continue
+		}
+		if selected != nil {
+			return nil, true
+		}
+		selected = record
+	}
+	return selected, false
 }
 
 func buildUniqueRecordLookup(records []*bamnative.Record) (map[string]*bamnative.Record, map[string]bool) {

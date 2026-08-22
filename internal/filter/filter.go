@@ -250,12 +250,26 @@ func filterWithReferenceReaders(
 
 	graftNameSortedPath := filepath.Join(temporaryDirectory, "graft.queryname.bam")
 	hostNameSortedPath := filepath.Join(temporaryDirectory, "host.queryname.bam")
-	if err := sortInputByReadName(sample.GraftPath, graftNameSortedPath, temporaryDirectory, sortMemoryLimitBytes); err != nil {
-		result.Error = fmt.Errorf("failed to sort graft BAM by read name: %w", err)
+
+	var sortWaitGroup sync.WaitGroup
+	var graftSortErr, hostSortErr error
+	sortWaitGroup.Add(2)
+	go func() {
+		defer sortWaitGroup.Done()
+		graftSortErr = sortInputByReadName(sample.GraftPath, graftNameSortedPath, temporaryDirectory, sortMemoryLimitBytes)
+	}()
+	go func() {
+		defer sortWaitGroup.Done()
+		hostSortErr = sortInputByReadName(sample.HostPath, hostNameSortedPath, temporaryDirectory, sortMemoryLimitBytes)
+	}()
+	sortWaitGroup.Wait()
+
+	if graftSortErr != nil {
+		result.Error = fmt.Errorf("failed to sort graft BAM by read name: %w", graftSortErr)
 		return result
 	}
-	if err := sortInputByReadName(sample.HostPath, hostNameSortedPath, temporaryDirectory, sortMemoryLimitBytes); err != nil {
-		result.Error = fmt.Errorf("failed to sort host BAM by read name: %w", err)
+	if hostSortErr != nil {
+		result.Error = fmt.Errorf("failed to sort host BAM by read name: %w", hostSortErr)
 		return result
 	}
 
@@ -715,27 +729,14 @@ func classifyRecordGroup(
 	graftReferenceNames map[int32]string,
 	hostReferenceNames map[int32]string,
 ) (classifier.Classification, error) {
-	var classifications map[string]classifier.Classification
-	var err error
-	if configuration.CalculateNM || configuration.IsBisulfite {
-		classifications, err = classificationEngine.ClassifyWithRef(
-			graftRecords,
-			hostRecords,
-			isPairedEnd,
-			graftReferenceNames,
-			hostReferenceNames,
-		)
-	} else {
-		classifications, err = classificationEngine.Classify(graftRecords, hostRecords, isPairedEnd)
-	}
-	if err != nil {
-		return classifier.ClassificationDiscarded, fmt.Errorf("failed to classify fragment %q: %w", fragmentName, err)
-	}
-	classification, exists := classifications[fragmentName]
-	if !exists {
-		return classifier.ClassificationDiscarded, fmt.Errorf("classifier returned no result for fragment %q", fragmentName)
-	}
-	return classification, nil
+	return classificationEngine.ClassifyGroup(
+		fragmentName,
+		graftRecords,
+		hostRecords,
+		isPairedEnd,
+		graftReferenceNames,
+		hostReferenceNames,
+	)
 }
 
 func updateFragmentStatistics(

@@ -162,6 +162,48 @@ func (classifier *Classifier) ClassifyWithRef(
 	return singleClassifier.ClassifyResults(graftRecords, hostRecords)
 }
 
+// ClassifyGroup classifies one read-name group without allocating maps.
+func (classifier *Classifier) ClassifyGroup(
+	fragmentName string,
+	graftRecords, hostRecords []*bamnative.Record,
+	isPairedEnd bool,
+	graftRefNames, hostRefNames map[int32]string,
+) (Classification, error) {
+	if classifier.config.CalculateNM || classifier.config.IsBisulfite {
+		if classifier.refReader == nil || classifier.hostRefReader == nil {
+			return ClassificationDiscarded, fmt.Errorf("both graft and host reference readers are required for reference-aware classification")
+		}
+		if isPairedEnd {
+			pairedClassifier := NewPairedEndClassifierWithRef(
+				classifier.calculator,
+				classifier.refReader,
+				classifier.hostRefReader,
+				classifier.config.MMThreshold,
+				classifier.config.UnmappedPenalty,
+				classifier.config.IsBisulfite,
+				graftRefNames,
+				hostRefNames,
+			)
+			return pairedClassifier.ClassifyGroup(graftRecords, hostRecords)
+		}
+		singleClassifier := NewSingleEndClassifierWithRef(
+			classifier.calculator,
+			classifier.refReader,
+			classifier.hostRefReader,
+			classifier.config.MMThreshold,
+			classifier.config.IsBisulfite,
+			graftRefNames,
+			hostRefNames,
+		)
+		return singleClassifier.ClassifyGroup(graftRecords, hostRecords)
+	}
+
+	if isPairedEnd {
+		return classifier.pairedEndClassifier.ClassifyGroup(graftRecords, hostRecords)
+	}
+	return classifier.singleEndClassifier.ClassifyGroup(graftRecords, hostRecords)
+}
+
 // ClassifyFragment classifies one read-name group without retaining results for other fragments.
 func (classifier *Classifier) ClassifyFragment(
 	fragmentName string,
@@ -169,27 +211,14 @@ func (classifier *Classifier) ClassifyFragment(
 	isPairedEnd bool,
 	graftRefNames, hostRefNames map[int32]string,
 ) (Classification, error) {
-	var classifications map[string]Classification
-	var err error
-	if classifier.config.CalculateNM || classifier.config.IsBisulfite {
-		classifications, err = classifier.ClassifyWithRef(
-			graftRecords,
-			hostRecords,
-			isPairedEnd,
-			graftRefNames,
-			hostRefNames,
-		)
-	} else {
-		classifications, err = classifier.Classify(graftRecords, hostRecords, isPairedEnd)
-	}
-	if err != nil {
-		return ClassificationDiscarded, err
-	}
-	classification, exists := classifications[fragmentName]
-	if !exists {
-		return ClassificationDiscarded, fmt.Errorf("classifier produced no result for fragment %q", fragmentName)
-	}
-	return classification, nil
+	return classifier.ClassifyGroup(
+		fragmentName,
+		graftRecords,
+		hostRecords,
+		isPairedEnd,
+		graftRefNames,
+		hostRefNames,
+	)
 }
 
 // GetCalculator returns the edit-distance calculator.
