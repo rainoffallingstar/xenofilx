@@ -1,143 +1,92 @@
 # xenofilx
 
-xenofilx is a Go implementation of the original XenofilteR algorithm for filtering host (mouse) reads from graft (human) sequencing data in tumor xenograft experiments.
+**A pure-Go graft/host read classifier for PDX BAM workflows.**
 
-This project is a **Go reimplementation** of the original [XenofilteR](https://github.com/NKI-GCF/XenofilteR) R/Bioconductor package, with the following enhancements:
+`xenofilx` reimplements the XenofilteR classification model without requiring R or samtools. It compares graft and host alignment evidence, supports reference-based NM recalculation and bisulfite-aware scoring, and writes filtered results plus summary statistics.
 
-- **Pure Go implementation** - No external dependencies like samtools or R
-- **Better performance** - Parallel processing with configurable worker count
-- **Native BAM I/O** - Custom pure Go BAM library (bamnative)
-- **Reference-based NM recalculation** - Recalculate edit distance using reference genome
-- **Bisulfite sequencing support** - Built-in support for BS-seq data
+## Where it fits
 
-## Features
+```text
+paired BAMs + graft/host references → xenofilx → graft/host classification → pairbam/bamdriver → downstream workflow
+```
 
-- Pure Go implementation (no external dependencies like samtools)
-- BAM file reading and writing with pure Go (bamnative package)
-- Edit distance calculation using NM tag
-- Support for reference genome-based NM recalculation
-- Bisulfite sequencing (BS-seq) mode support
-- Automatic FASTA index generation
-- Single-end and paired-end read classification
+The tool is designed for human-graft/mouse-host PDX workflows, but the CLI accepts explicit graft and host inputs. In host-absent cases, the classification contract remains score-based: a graft mate with a score below the configured threshold is retained as graft. See the source and benchmark evidence before generalizing behavior to a different biological setup.
 
-## Current Status
-
-- ✅ Core algorithm implemented
-- ✅ BAM I/O (pure Go)
-- ✅ CLI interface with cobra
-- ✅ NM tag calculation with reference genome
-- ✅ Bisulfite mode
-- ✅ FASTA index generation
-- ✅ Results statistics table
-
-## Building
+## Install
 
 ```bash
+git clone https://github.com/rainoffallingstar/xenofilx.git
 cd xenofilx
-go build -ldflags "-X github.com/rainoffallingstar/xenofilx/pkg/cli.Version=0.1.0" -o xenofilx ./cmd/xenofilx
+go build -o xenofilx ./cmd/xenofilx
+./xenofilx --help
 ```
 
-## Usage
+## Quick start
+
+Classify one graft/host pair:
 
 ```bash
-# Basic usage
-./xenofilx run \
+xenofilx run \
   --graft sample_human.bam \
   --host sample_mouse.bam \
-  --output ./filtered
+  --output filtered
+```
 
-# With reference genome for NM recalculation
-./xenofilx run \
+Recalculate NM against the supplied references:
+
+```bash
+xenofilx run \
   --graft sample_human.bam \
   --host sample_mouse.bam \
-  --output ./filtered \
   --graft-ref human.fa \
   --host-ref mouse.fa \
-  --recalculate-nm
+  --recalculate-nm \
+  --output filtered
+```
 
-# Bisulfite sequencing mode
-./xenofilx run \
+Enable bisulfite-aware scoring:
+
+```bash
+xenofilx run \
   --graft sample_human.bam \
   --host sample_mouse.bam \
-  --output ./filtered \
   --graft-ref human.fa \
   --host-ref mouse.fa \
-  --bisulfite
-
-# Multiple samples with parallel processing
-./xenofilx run \
-  --graft s1.bam s2.bam \
-  --host m1.bam m2.bam \
-  --output ./filtered \
-  --threads 4
-
-# Custom threshold
-./xenofilx run \
-  --graft sample_human.bam \
-  --host sample_mouse.bam \
-  --output ./filtered \
-  --mm-threshold 6
+  --bisulfite \
+  --output filtered
 ```
 
-## Command Line Options
+## Main options
 
+| Option | Meaning |
+| --- | --- |
+| `--graft, -g` | One or more graft BAM files. |
+| `--host, -t` | One or more host BAM files. |
+| `--output, -o` | Output directory. |
+| `--mm-threshold, -m` | Exclusive graft score cutoff; default is 4. |
+| `--unmapped-penalty` | Penalty for an unmapped read; default is 8. |
+| `--nm-tag` | BAM edit-distance tag; default is `NM`. |
+| `--threads, -j` | Number of parallel workers. |
+| `--graft-ref`, `--host-ref` | FASTA references for NM recalculation. |
+| `--recalculate-nm` | Force reference-based NM recalculation. |
+| `--bisulfite` | Apply bisulfite-aware scoring rules. |
+
+## Algorithm and output
+
+The score follows the XenofilteR-compatible contract of NM plus insertion and soft-clip contributions. Paired-end classification combines mate evidence and unmapped penalties, then applies the configured threshold. Output includes filtered BAM data and a results summary with graft-only, host-only, both, discarded, and threshold fields.
+
+Coordinate-sorted BAM inputs are expected. Missing BAM and FASTA indexes can be generated automatically. Secondary, supplementary, and unmapped records are not retained as eligible primary records; verify the paired-BAM contract before using `pairbam` downstream.
+
+## Development
+
+```bash
+gofmt -w .
+go test ./...
+go vet ./...
 ```
---graft, -g          Path(s) to graft (human) BAM files (required)
---host, -t           Path(s) to host (mouse) BAM files (required)
---output, -o         Output directory for filtered BAM files (required)
---mm-threshold, -m   Exclusive XenofilteR score cutoff; graft scores must be lower than this value (default: 4)
---unmapped-penalty   Penalty score for unmapped reads (default: 8)
---nm-tag             BAM tag name for edit distance (default: NM)
---threads, -j       Number of parallel processing threads (default: 1)
---graft-ref         Path to graft (human) reference genome FASTA file
---host-ref          Path to host (mouse) reference genome FASTA file
---recalculate-nm    Force recalculation of NM tag
---bisulfite         Enable bisulfite sequencing mode
-```
 
-## Output Format
+The accepted Gate 6 evidence covers corrected NM/oracle controls and bounded PDX classification comparisons. It does not establish unrestricted production-scale performance.
 
-```
-=== Sample Results ===
-Sample                  Total GraftOnly HostOnly     Both     Graft(%)  Host(%)   Discard(%)  TotalGraft(%)  Thresh
-------------------------------------------------------------------------------------------------------------------
-sample_Filtered       1285     1203        0       82       88.87%    0.16%    11.13%      88.87%         4
-```
+## License and repository
 
-### Output Columns
-
-| Column | Description |
-|--------|-------------|
-| Total | Total reads in graft BAM |
-| GraftOnly | Reads only mapping to graft (human) |
-| HostOnly | Reads only mapping to host (mouse) |
-| Both | Reads mapping to both |
-| Graft(%) | Percentage classified as graft |
-| Host(%) | Percentage classified as host |
-| Discard(%) | Percentage above threshold |
-| TotalGraft(%) | Total graft / Total reads |
-| Thresh | MM threshold used |
-
-## Algorithm
-
-The implementation follows the same algorithm as the R version:
-
-1. **Edit Distance Calculation**: `Score = NM tag + Insertions (I) + Soft Clips (S)`
-2. **Single-end Classification**: Compare edit distances between graft and host alignments
-3. **Paired-end Classification**: Average scores across read pairs, with penalties for unmapped mates
-4. **Filtering**: Retain reads classified as graft (human) based on threshold parameters
-
-## Implementation Details
-
-- **Language**: Go 1.21+
-- **CLI Framework**: cobra
-- **BAM Library**: Custom pure Go implementation (bamnative)
-- **Reference Genome**: FASTA with automatic index generation
-- **Parallel Processing**: goroutines with configurable worker count
-
-## Notes
-
-- BAM files must be coordinate-sorted
-- BAM index (.bai) files are automatically generated if missing
-- FASTA index (.fai) is automatically generated if missing
-- For BS-seq data, use `--bisulfite` flag to handle C→T conversions
+MIT · [rainoffallingstar/xenofilx](https://github.com/rainoffallingstar/xenofilx)
