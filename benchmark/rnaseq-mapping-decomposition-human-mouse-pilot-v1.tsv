@@ -1,0 +1,17 @@
+direction	analysis_job	graft_source	host_source	truth_source	mapping_category	fragments	selected	not_selected	selection_rate
+human_graft	41929279	human	mouse	human	absent_vs_absent	12387	0	12387	0.0
+human_graft	41929279	human	mouse	human	absent_vs_two_mates	66	0	66	0.0
+human_graft	41929279	human	mouse	human	two_mates_vs_absent	405602	404164	1438	0.9964546525904705
+human_graft	41929279	human	mouse	human	two_mates_vs_two_mates	81945	79664	2281	0.9721642565135151
+human_graft	41929279	human	mouse	mouse	absent_vs_absent	82272	0	82272	0.0
+human_graft	41929279	human	mouse	mouse	absent_vs_two_mates	358279	0	358279	0.0
+human_graft	41929279	human	mouse	mouse	two_mates_vs_absent	3029	2093	936	0.6909871244635193
+human_graft	41929279	human	mouse	mouse	two_mates_vs_two_mates	56420	1800	54620	0.03190358029067707
+mouse_graft	41929280	mouse	human	human	absent_vs_absent	12387	0	12387	0.0
+mouse_graft	41929280	mouse	human	human	absent_vs_two_mates	405602	0	405602	0.0
+mouse_graft	41929280	mouse	human	human	two_mates_vs_absent	66	26	40	0.3939393939393939
+mouse_graft	41929280	mouse	human	human	two_mates_vs_two_mates	81945	35	81910	0.00042711574836780766
+mouse_graft	41929280	mouse	human	mouse	absent_vs_absent	82272	0	82272	0.0
+mouse_graft	41929280	mouse	human	mouse	absent_vs_two_mates	3029	0	3029	0.0
+mouse_graft	41929280	mouse	human	mouse	two_mates_vs_absent	358279	338484	19795	0.9447497620569445
+mouse_graft	41929280	mouse	human	mouse	two_mates_vs_two_mates	56420	39029	17391	0.6917582417582417

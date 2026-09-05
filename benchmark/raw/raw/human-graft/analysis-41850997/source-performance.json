@@ -1,0 +1,52 @@
+{
+  "graft_source": "human",
+  "host_source": "mouse",
+  "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+  "tools": {
+    "legacy_xenofilter": {
+      "accuracy": 0.499663,
+      "balanced_accuracy": 0.499663,
+      "confusion": {
+        "true_human_predicted_graft": 26,
+        "true_human_predicted_non_graft": 499974,
+        "true_mouse_predicted_graft": 363,
+        "true_mouse_predicted_non_graft": 499637
+      },
+      "f1_graft": 0.00010391915090059934,
+      "false_negative_rate_graft_as_non_graft": 0.999948,
+      "false_positive_rate_host_as_graft": 0.000726,
+      "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41850997/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+      "filtered_fragments": 389,
+      "filtered_records": 778,
+      "negative_predictive_value_host": 0.4998314344279925,
+      "precision_graft_ppv": 0.06683804627249357,
+      "sensitivity_graft_recall": 5.2e-05,
+      "specificity_host_recall": 0.999274,
+      "truth_fragments": 1000000,
+      "unknown_selected_fragments": 0
+    },
+    "modern_xenofilx": {
+      "accuracy": 0.759666,
+      "balanced_accuracy": 0.759666,
+      "confusion": {
+        "true_human_predicted_graft": 260066,
+        "true_human_predicted_non_graft": 239934,
+        "true_mouse_predicted_graft": 400,
+        "true_mouse_predicted_non_graft": 499600
+      },
+      "f1_graft": 0.6839648320897976,
+      "false_negative_rate_graft_as_non_graft": 0.479868,
+      "false_positive_rate_host_as_graft": 0.0008,
+      "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41850997/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+      "filtered_fragments": 260466,
+      "filtered_records": 520932,
+      "negative_predictive_value_host": 0.675560555701293,
+      "precision_graft_ppv": 0.9984642909247272,
+      "sensitivity_graft_recall": 0.520132,
+      "specificity_host_recall": 0.9992,
+      "truth_fragments": 1000000,
+      "unknown_selected_fragments": 0
+    }
+  },
+  "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate3-n1000000-high-human/truth.tsv"
+}

@@ -1,0 +1,433 @@
+Warning: detected Bowtie 2 2.5.4, but byte-identity is only guaranteed against the pinned version 2.5.5.
+Note: these options are recognised but not yet active in this build (wired in a later phase): --nucleotide_coverage
+Bismark aligner (Rust) — resolved configuration
+aligner:        Bowtie 2 2.5.4 (/public3/home/scg9946/TTest/soft/MyMiniconda/envs/otter-core-bismark-rust-3.1.0-r2/bin/bowtie2)
+library:        directional
+layout:         paired-end [FASTQ]
+reads:          /public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate1-n1000000-qnameexact-v2-formal-t15/mixture_R1.fastq.gz+/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate1-n1000000-qnameexact-v2-formal-t15/mixture_R2.fastq.gz
+genome:         /public3/home/scg9946/otter-gate6/references/genomes/hg19/GRCh37.p13-gencode-v19/indexes/bismark/genome
+CT index:       /public3/home/scg9946/otter-gate6/references/genomes/hg19/GRCh37.p13-gencode-v19/indexes/bismark/genome/Bisulfite_Genome/CT_conversion/BS_CT
+GA index:       /public3/home/scg9946/otter-gate6/references/genomes/hg19/GRCh37.p13-gencode-v19/indexes/bismark/genome/Bisulfite_Genome/GA_conversion/BS_GA
+large index:    false
+FASTA(s):       1 file(s) (Fa)
+aligner_options: -q --score-min L,0,-0.2 --ignore-quals --no-mixed --no-discordant --dovetail --maxins 500
+output:         BAM, dir="/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host", basename=None
+chr chr1 (249250621 bp)
+chr chr2 (243199373 bp)
+chr chr3 (198022430 bp)
+chr chr4 (191154276 bp)
+chr chr5 (180915260 bp)
+chr chr6 (171115067 bp)
+chr chr7 (159138663 bp)
+chr chr8 (146364022 bp)
+chr chr9 (141213431 bp)
+chr chr10 (135534747 bp)
+chr chr11 (135006516 bp)
+chr chr12 (133851895 bp)
+chr chr13 (115169878 bp)
+chr chr14 (107349540 bp)
+chr chr15 (102531392 bp)
+chr chr16 (90354753 bp)
+chr chr17 (81195210 bp)
+chr chr18 (78077248 bp)
+chr chr19 (59128983 bp)
+chr chr20 (63025520 bp)
+chr chr21 (48129895 bp)
+chr chr22 (51304566 bp)
+chr chrX (155270560 bp)
+chr chrY (59373566 bp)
+chr chrM (16569 bp)
+chr GL877870.2 (66021 bp)
+chr GL877872.1 (297485 bp)
+chr GL383535.1 (429806 bp)
+chr JH159133.1 (266316 bp)
+chr KB663606.1 (305900 bp)
+chr KB021647.1 (1058686 bp)
+chr KE332497.1 (543325 bp)
+chr JH159131.1 (393769 bp)
+chr GL949745.1 (372609 bp)
+chr JH720447.1 (454385 bp)
+chr GL582968.1 (356330 bp)
+chr JH720446.1 (97345 bp)
+chr JH591181.2 (2281126 bp)
+chr JH720443.2 (408430 bp)
+chr JH159134.2 (3821770 bp)
+chr JH636052.4 (7283150 bp)
+chr JH636053.3 (1676126 bp)
+chr JH636054.1 (758378 bp)
+chr JH636056.1 (262912 bp)
+chr JH636058.1 (716227 bp)
+chr JH636057.1 (200195 bp)
+chr KE332505.1 (579598 bp)
+chr JH720451.1 (898979 bp)
+chr JH720452.1 (522319 bp)
+chr JH720453.1 (1461188 bp)
+chr JH720454.3 (752267 bp)
+chr JH159136.1 (200998 bp)
+chr JH806587.1 (4110759 bp)
+chr JH806588.1 (862483 bp)
+chr JH806589.1 (270630 bp)
+chr JH806590.2 (2418393 bp)
+chr JH806591.1 (882083 bp)
+chr JH806592.1 (835911 bp)
+chr JH806593.1 (389631 bp)
+chr JH806594.1 (390496 bp)
+chr JH806595.1 (444074 bp)
+chr JH806596.1 (413927 bp)
+chr JH806597.1 (1045622 bp)
+chr JH720448.1 (70483 bp)
+chr JH806598.1 (899320 bp)
+chr JH806599.1 (1214327 bp)
+chr JH806600.2 (6530008 bp)
+chr JH806601.1 (1389764 bp)
+chr JH806602.1 (713266 bp)
+chr JH806573.1 (24680 bp)
+chr JH806574.2 (22982 bp)
+chr JH806575.1 (47409 bp)
+chr JH806580.1 (93149 bp)
+chr JH806583.1 (167183 bp)
+chr JH806584.1 (70876 bp)
+chr JH806585.1 (73505 bp)
+chr JH806603.1 (182949 bp)
+chr JH159150.3 (3110903 bp)
+chr GL582969.1 (251823 bp)
+chr JH806577.1 (22394 bp)
+chr JH806578.1 (169437 bp)
+chr JH806579.1 (211307 bp)
+chr JH159137.1 (191409 bp)
+chr KE332502.1 (341712 bp)
+chr KB021645.1 (1523386 bp)
+chr KB663607.2 (334922 bp)
+chr KE332500.1 (228602 bp)
+chr KE332496.1 (503215 bp)
+chr GL383558.1 (457041 bp)
+chr GL582976.1 (412535 bp)
+chr GL383523.1 (171362 bp)
+chr KE332498.1 (149443 bp)
+chr GL949743.1 (608579 bp)
+chr KE332506.1 (307252 bp)
+chr GL383536.1 (203777 bp)
+chr JH591184.1 (462282 bp)
+chr JH636061.1 (186059 bp)
+chr JH806576.1 (273386 bp)
+chr GL383524.1 (78793 bp)
+chr GL582973.1 (321004 bp)
+chr JH159138.1 (108875 bp)
+chr KB021648.1 (469972 bp)
+chr JH159139.1 (120441 bp)
+chr JH159140.1 (546435 bp)
+chr JH591182.1 (196262 bp)
+chr JH159132.1 (100694 bp)
+chr JH720449.1 (212298 bp)
+chr JH591183.1 (177920 bp)
+chr JH720444.2 (273128 bp)
+chr JH159141.2 (240775 bp)
+chr KB663604.1 (478993 bp)
+chr JH720455.1 (65034 bp)
+chr KB021646.2 (211416 bp)
+chr JH159142.2 (326647 bp)
+chr JH159143.1 (191402 bp)
+chr JH806582.2 (342635 bp)
+chr JH159135.2 (102251 bp)
+chr KE332499.1 (274521 bp)
+chr GL877877.2 (284527 bp)
+chr JH806586.1 (43543 bp)
+chr GL582979.2 (179899 bp)
+chr KB663605.1 (155926 bp)
+chr GL582975.1 (34662 bp)
+chr GL949744.1 (276448 bp)
+chr GL383543.1 (392792 bp)
+chr GL877871.1 (389939 bp)
+chr GL582967.1 (248177 bp)
+chr JH159149.1 (245473 bp)
+chr GL582977.2 (580393 bp)
+chr GL582970.1 (354970 bp)
+chr GL383559.2 (338640 bp)
+chr JH159144.1 (388340 bp)
+chr JH591186.1 (376223 bp)
+chr GL383560.1 (534288 bp)
+chr GL339450.1 (330164 bp)
+chr GL582971.1 (1284284 bp)
+chr GL582974.1 (163298 bp)
+chr JH806581.1 (872115 bp)
+chr JH636060.1 (437946 bp)
+chr JH591185.1 (167437 bp)
+chr JH159145.1 (194862 bp)
+chr GL877873.1 (168465 bp)
+chr KB663608.1 (283551 bp)
+chr GL582972.1 (327774 bp)
+chr KB663603.1 (599580 bp)
+chr KE332495.1 (263861 bp)
+chr JH636059.1 (295379 bp)
+chr JH720445.1 (170033 bp)
+chr KE332501.1 (1020827 bp)
+chr GL383561.2 (644425 bp)
+chr GL949741.1 (151551 bp)
+chr GL383562.1 (45551 bp)
+chr GL383525.1 (65063 bp)
+chr GL383544.1 (128378 bp)
+chr GL383548.1 (165247 bp)
+chr GL383537.1 (62435 bp)
+chr GL383538.1 (49281 bp)
+chr GL383516.1 (49316 bp)
+chr GL383517.1 (49352 bp)
+chr GL383545.1 (179254 bp)
+chr GL383546.1 (309802 bp)
+chr GL383547.1 (154407 bp)
+chr GL877875.1 (167313 bp)
+chr GL383549.1 (120804 bp)
+chr GL383550.1 (169178 bp)
+chr GL383551.1 (184319 bp)
+chr GL877876.1 (408271 bp)
+chr GL383552.1 (138655 bp)
+chr GL383553.2 (152874 bp)
+chr GL383554.1 (296527 bp)
+chr GL383555.1 (388773 bp)
+chr GL383556.1 (192462 bp)
+chr GL383557.1 (89672 bp)
+chr GL000258.1 (1680828 bp)
+chr GL383563.2 (270261 bp)
+chr GL383564.1 (133151 bp)
+chr GL383565.1 (223995 bp)
+chr GL383566.1 (90219 bp)
+chr JH159146.1 (278131 bp)
+chr JH159147.1 (70345 bp)
+chr JH159148.1 (88070 bp)
+chr GL383567.1 (289831 bp)
+chr GL383568.1 (104552 bp)
+chr GL383569.1 (167950 bp)
+chr GL383570.1 (164789 bp)
+chr GL383571.1 (198278 bp)
+chr GL383572.1 (159547 bp)
+chr GL949746.1 (987716 bp)
+chr GL949747.1 (729519 bp)
+chr GL949748.1 (1064303 bp)
+chr GL949749.1 (1091840 bp)
+chr GL949750.1 (1066389 bp)
+chr GL949751.1 (1002682 bp)
+chr GL949752.1 (987100 bp)
+chr GL949753.1 (796478 bp)
+chr GL383573.1 (385657 bp)
+chr GL383574.1 (155864 bp)
+chr GL383575.2 (170222 bp)
+chr GL383576.1 (188024 bp)
+chr GL383518.1 (182439 bp)
+chr GL383519.1 (110268 bp)
+chr GL383520.1 (366579 bp)
+chr GL383577.1 (128385 bp)
+chr GL383578.1 (63917 bp)
+chr GL383579.1 (201198 bp)
+chr GL383580.1 (74652 bp)
+chr GL383581.1 (116690 bp)
+chr GL383582.2 (162811 bp)
+chr GL383583.1 (96924 bp)
+chr KB663609.1 (74013 bp)
+chr GL383521.1 (143390 bp)
+chr GL383522.1 (123821 bp)
+chr GL582966.2 (96131 bp)
+chr JH636055.1 (173151 bp)
+chr GL383526.1 (180671 bp)
+chr GL000257.1 (590426 bp)
+chr GL383527.1 (164536 bp)
+chr GL383528.1 (376187 bp)
+chr GL383529.1 (121345 bp)
+chr GL339449.2 (1612928 bp)
+chr GL383530.1 (101241 bp)
+chr GL383531.1 (173459 bp)
+chr GL383532.1 (82728 bp)
+chr GL949742.1 (226852 bp)
+chr GL383533.1 (124736 bp)
+chr KB021644.1 (187824 bp)
+chr GL000250.1 (4622290 bp)
+chr GL000251.1 (4795371 bp)
+chr GL000252.1 (4610396 bp)
+chr GL000253.1 (4683263 bp)
+chr GL000254.1 (4833398 bp)
+chr GL000255.1 (4611984 bp)
+chr GL000256.1 (4928567 bp)
+chr GL383534.2 (119183 bp)
+chr GL383539.1 (162988 bp)
+chr GL383540.1 (71551 bp)
+chr GL383541.1 (171286 bp)
+chr GL383542.1 (60032 bp)
+chr GL000191.1 (106433 bp)
+chr GL000192.1 (547496 bp)
+chr GL000193.1 (189789 bp)
+chr GL000194.1 (191469 bp)
+chr GL000195.1 (182896 bp)
+chr GL000196.1 (38914 bp)
+chr GL000197.1 (37175 bp)
+chr GL000198.1 (90085 bp)
+chr GL000199.1 (169874 bp)
+chr GL000200.1 (187035 bp)
+chr GL000201.1 (36148 bp)
+chr GL000202.1 (40103 bp)
+chr GL000203.1 (37498 bp)
+chr GL000204.1 (81310 bp)
+chr GL000205.1 (174588 bp)
+chr GL000206.1 (41001 bp)
+chr GL000207.1 (4262 bp)
+chr GL000208.1 (92689 bp)
+chr GL000209.1 (159169 bp)
+chr GL000210.1 (27682 bp)
+chr GL000211.1 (166566 bp)
+chr GL000212.1 (186858 bp)
+chr GL000213.1 (164239 bp)
+chr GL000214.1 (137718 bp)
+chr GL000215.1 (172545 bp)
+chr GL000216.1 (172294 bp)
+chr GL000217.1 (172149 bp)
+chr GL000218.1 (161147 bp)
+chr GL000219.1 (179198 bp)
+chr GL000220.1 (161802 bp)
+chr GL000221.1 (155397 bp)
+chr GL000222.1 (186861 bp)
+chr GL000223.1 (180455 bp)
+chr GL000224.1 (179693 bp)
+chr GL000225.1 (211173 bp)
+chr GL000226.1 (15008 bp)
+chr GL000227.1 (128374 bp)
+chr GL000228.1 (129120 bp)
+chr GL000229.1 (19913 bp)
+chr GL000230.1 (43691 bp)
+chr GL000231.1 (27386 bp)
+chr GL000232.1 (40652 bp)
+chr GL000233.1 (45941 bp)
+chr GL000234.1 (40531 bp)
+chr GL000235.1 (34474 bp)
+chr GL000236.1 (41934 bp)
+chr GL000237.1 (45867 bp)
+chr GL000238.1 (39939 bp)
+chr GL000239.1 (33824 bp)
+chr GL000240.1 (41933 bp)
+chr GL000241.1 (42152 bp)
+chr GL000242.1 (43523 bp)
+chr GL000243.1 (43341 bp)
+chr GL000244.1 (39929 bp)
+chr GL000245.1 (36651 bp)
+chr GL000246.1 (38154 bp)
+chr GL000247.1 (36422 bp)
+chr GL000248.1 (39786 bp)
+chr GL000249.1 (38502 bp)
+Note: --parallel 8 runs up to 16 concurrent Bowtie 2 instances, each loading a bisulfite index (peak resident bounded by, not equal to, ~67.9 GB of Bowtie 2 index). Memory scales with --parallel; reduce it if memory-limited.
+Created C->T converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.7 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.7_C_to_T.fastq (125000 sequences)
+Created C->T converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.4 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.4_C_to_T.fastq (125000 sequences)
+Created C->T converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.5 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.5_C_to_T.fastq (125000 sequences)
+Created C->T converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.3 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.3_C_to_T.fastq (125000 sequences)
+Created C->T converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.2 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.2_C_to_T.fastq (125000 sequences)
+Created C->T converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.1 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.1_C_to_T.fastq (125000 sequences)
+Created C->T converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.0 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.0_C_to_T.fastq (125000 sequences)
+Created C->T converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.6 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R1.fastq.gz.temp.6_C_to_T.fastq (125000 sequences)
+Created G->A converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.7 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.7_G_to_A.fastq (125000 sequences)
+Created G->A converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.5 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.5_G_to_A.fastq (125000 sequences)
+Created G->A converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.3 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.3_G_to_A.fastq (125000 sequences)
+Created G->A converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.1 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.1_G_to_A.fastq (125000 sequences)
+Created G->A converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.2 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.2_G_to_A.fastq (125000 sequences)
+Created G->A converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.0 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.0_G_to_A.fastq (125000 sequences)
+Created G->A converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.4 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.4_G_to_A.fastq (125000 sequences)
+Created G->A converted version of /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.6 -> /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/tmp/mixture_R2.fastq.gz.temp.6_G_to_A.fastq (125000 sequences)
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124842 (99.87%) aligned concordantly 0 times
+    57 (0.05%) aligned concordantly exactly 1 time
+    101 (0.08%) aligned concordantly >1 times
+0.13% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124858 (99.89%) aligned concordantly 0 times
+    47 (0.04%) aligned concordantly exactly 1 time
+    95 (0.08%) aligned concordantly >1 times
+0.11% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124857 (99.89%) aligned concordantly 0 times
+    43 (0.03%) aligned concordantly exactly 1 time
+    100 (0.08%) aligned concordantly >1 times
+0.11% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124851 (99.88%) aligned concordantly 0 times
+    56 (0.04%) aligned concordantly exactly 1 time
+    93 (0.07%) aligned concordantly >1 times
+0.12% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124831 (99.86%) aligned concordantly 0 times
+    65 (0.05%) aligned concordantly exactly 1 time
+    104 (0.08%) aligned concordantly >1 times
+0.14% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124836 (99.87%) aligned concordantly 0 times
+    48 (0.04%) aligned concordantly exactly 1 time
+    116 (0.09%) aligned concordantly >1 times
+0.13% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124856 (99.88%) aligned concordantly 0 times
+    48 (0.04%) aligned concordantly exactly 1 time
+    96 (0.08%) aligned concordantly >1 times
+0.12% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124838 (99.87%) aligned concordantly 0 times
+    60 (0.05%) aligned concordantly exactly 1 time
+    102 (0.08%) aligned concordantly >1 times
+0.13% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124843 (99.87%) aligned concordantly 0 times
+    50 (0.04%) aligned concordantly exactly 1 time
+    107 (0.09%) aligned concordantly >1 times
+0.13% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    121912 (97.53%) aligned concordantly 0 times
+    2560 (2.05%) aligned concordantly exactly 1 time
+    528 (0.42%) aligned concordantly >1 times
+2.47% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124833 (99.87%) aligned concordantly 0 times
+    53 (0.04%) aligned concordantly exactly 1 time
+    114 (0.09%) aligned concordantly >1 times
+0.13% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124833 (99.87%) aligned concordantly 0 times
+    50 (0.04%) aligned concordantly exactly 1 time
+    117 (0.09%) aligned concordantly >1 times
+0.13% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124848 (99.88%) aligned concordantly 0 times
+    51 (0.04%) aligned concordantly exactly 1 time
+    101 (0.08%) aligned concordantly >1 times
+0.12% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124842 (99.87%) aligned concordantly 0 times
+    57 (0.05%) aligned concordantly exactly 1 time
+    101 (0.08%) aligned concordantly >1 times
+0.13% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    121899 (97.52%) aligned concordantly 0 times
+    2582 (2.07%) aligned concordantly exactly 1 time
+    519 (0.42%) aligned concordantly >1 times
+2.48% overall alignment rate
+125000 reads; of these:
+  125000 (100.00%) were paired; of these:
+    124835 (99.87%) aligned concordantly 0 times
+    66 (0.05%) aligned concordantly exactly 1 time
+    99 (0.08%) aligned concordantly >1 times
+0.13% overall alignment rate
+>>> Writing bisulfite mapping results to /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/bismark-host/mixture_R1_bismark_bt2_pe.bam <<<
+Mapping summary for /public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate1-n1000000-qnameexact-v2-formal-t15/mixture_R1.fastq.gz / /public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate1-n1000000-qnameexact-v2-formal-t15/mixture_R2.fastq.gz:
+sequence pairs analysed:  1000000
+unique best alignments:   6016
+no alignment found:       992746
+ambiguous (unsuitable):   1238
+directional-rejected:     0
+could-not-extract genomic:0
+strand OT/CTOB/CTOT/OB:   2988/0/0/3028

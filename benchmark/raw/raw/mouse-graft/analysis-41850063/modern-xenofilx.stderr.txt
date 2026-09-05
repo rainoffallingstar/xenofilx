@@ -1,0 +1,23 @@
+xenofilx - Running with configuration:
+  MM_threshold: 6
+  Unmapped_penalty: 8
+  NM_tag: NM
+  Threads: 40
+  Graft_ref: /public3/home/scg9946/otter-gate6/references/genomes/mm10/GRCm38-gencode-M25/fasta/mm10.fa
+  Host_ref: /public3/home/scg9946/otter-gate6/references/genomes/hg19/GRCh37.p13-gencode-v19/fasta/hg19.fa
+  Recalculate_NM: true
+  Bisulfite_mode: true
+  Samples: 1
+
+Processing samples...
+Sorting BAM by read name: /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850063/mixture_human.bam
+Sorting BAM by read name: /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850063/mixture_mouse.bam
+Building index for staged output: /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850063/modern-xenofilx/.mixture_mouse_fixed_Filtered.bam.staged-4227594321.bam
+
+=== Sample Results ===
+Sample                  Total GraftOnly HostOnly     Both     Graft(%)      Host(%)   Discard(%) TotalGraft(%)   Thresh
+-----------------------------------------------------------------------------------------------
+mixture_mouse_fixed_Filtered.bam   223463   196477    26879      107       87.93%       12.04%        0.03%       87.93%        6
+
+=== Summary ===
+mixture_mouse_fixed_Filtered.bam - Output: /public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850063/modern-xenofilx/mixture_mouse_fixed_Filtered.bam

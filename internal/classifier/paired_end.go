@@ -45,11 +45,14 @@ func (classifier *PairedEndClassifier) classify(graftPair, hostPair *ReadPair) (
 	if err != nil {
 		return ClassificationDiscarded, err
 	}
-	if graftForwardScore >= classifier.threshold || graftReverseScore >= classifier.threshold {
+	if pairHasNoAlignments(hostPair) {
+		if graftForwardScore < classifier.threshold || graftReverseScore < classifier.threshold {
+			return ClassificationGraft, nil
+		}
 		return ClassificationDiscarded, nil
 	}
-	if pairHasNoAlignments(hostPair) {
-		return ClassificationGraft, nil
+	if graftForwardScore >= classifier.threshold || graftReverseScore >= classifier.threshold {
+		return ClassificationDiscarded, nil
 	}
 
 	hostForwardScore, err := classifier.scoreRecord(hostPair.Forward)
@@ -139,11 +142,14 @@ func (classifier *PairedEndClassifierWithRef) classify(graftPair, hostPair *Read
 	if err != nil {
 		return ClassificationDiscarded, err
 	}
-	if graftForwardScore >= classifier.threshold || graftReverseScore >= classifier.threshold {
+	if pairHasNoAlignments(hostPair) {
+		if graftForwardScore < classifier.threshold || graftReverseScore < classifier.threshold {
+			return ClassificationGraft, nil
+		}
 		return ClassificationDiscarded, nil
 	}
-	if pairHasNoAlignments(hostPair) {
-		return ClassificationGraft, nil
+	if graftForwardScore >= classifier.threshold || graftReverseScore >= classifier.threshold {
+		return ClassificationDiscarded, nil
 	}
 
 	hostForwardScore, err := classifier.scoreRecord(hostPair.Forward, false)

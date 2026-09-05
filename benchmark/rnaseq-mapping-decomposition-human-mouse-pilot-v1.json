@@ -1,0 +1,250 @@
+{
+  "schema_version": "gate6.rnaseq-mapping-decomposition/v1",
+  "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-rna-mixtures-20260903/human0.5-replicate1-n1000000-pilot/truth.tsv",
+  "directions": {
+    "human_graft": {
+      "analysis_job": 41929279,
+      "graft_source": "human",
+      "host_source": "mouse",
+      "selected_fragments": 487721,
+      "by_truth_source": {
+        "human": {
+          "fragments": 500000,
+          "categories": [
+            {
+              "direction": "human_graft",
+              "analysis_job": 41929279,
+              "graft_source": "human",
+              "host_source": "mouse",
+              "truth_source": "human",
+              "mapping_category": "absent_vs_absent",
+              "fragments": 12387,
+              "selected": 0,
+              "not_selected": 12387,
+              "selection_rate": 0.0
+            },
+            {
+              "direction": "human_graft",
+              "analysis_job": 41929279,
+              "graft_source": "human",
+              "host_source": "mouse",
+              "truth_source": "human",
+              "mapping_category": "absent_vs_two_mates",
+              "fragments": 66,
+              "selected": 0,
+              "not_selected": 66,
+              "selection_rate": 0.0
+            },
+            {
+              "direction": "human_graft",
+              "analysis_job": 41929279,
+              "graft_source": "human",
+              "host_source": "mouse",
+              "truth_source": "human",
+              "mapping_category": "two_mates_vs_absent",
+              "fragments": 405602,
+              "selected": 404164,
+              "not_selected": 1438,
+              "selection_rate": 0.9964546525904705
+            },
+            {
+              "direction": "human_graft",
+              "analysis_job": 41929279,
+              "graft_source": "human",
+              "host_source": "mouse",
+              "truth_source": "human",
+              "mapping_category": "two_mates_vs_two_mates",
+              "fragments": 81945,
+              "selected": 79664,
+              "not_selected": 2281,
+              "selection_rate": 0.9721642565135151
+            }
+          ],
+          "graft_primary_records": 975094,
+          "graft_unique_primary_records": 933512,
+          "graft_mean_mapq": 244.21370452489708,
+          "graft_median_mapq": 255.0
+        },
+        "mouse": {
+          "fragments": 500000,
+          "categories": [
+            {
+              "direction": "human_graft",
+              "analysis_job": 41929279,
+              "graft_source": "human",
+              "host_source": "mouse",
+              "truth_source": "mouse",
+              "mapping_category": "absent_vs_absent",
+              "fragments": 82272,
+              "selected": 0,
+              "not_selected": 82272,
+              "selection_rate": 0.0
+            },
+            {
+              "direction": "human_graft",
+              "analysis_job": 41929279,
+              "graft_source": "human",
+              "host_source": "mouse",
+              "truth_source": "mouse",
+              "mapping_category": "absent_vs_two_mates",
+              "fragments": 358279,
+              "selected": 0,
+              "not_selected": 358279,
+              "selection_rate": 0.0
+            },
+            {
+              "direction": "human_graft",
+              "analysis_job": 41929279,
+              "graft_source": "human",
+              "host_source": "mouse",
+              "truth_source": "mouse",
+              "mapping_category": "two_mates_vs_absent",
+              "fragments": 3029,
+              "selected": 2093,
+              "not_selected": 936,
+              "selection_rate": 0.6909871244635193
+            },
+            {
+              "direction": "human_graft",
+              "analysis_job": 41929279,
+              "graft_source": "human",
+              "host_source": "mouse",
+              "truth_source": "mouse",
+              "mapping_category": "two_mates_vs_two_mates",
+              "fragments": 56420,
+              "selected": 1800,
+              "not_selected": 54620,
+              "selection_rate": 0.03190358029067707
+            }
+          ],
+          "graft_primary_records": 118898,
+          "graft_unique_primary_records": 92626,
+          "graft_mean_mapq": 198.8218304765429,
+          "graft_median_mapq": 255.0
+        }
+      }
+    },
+    "mouse_graft": {
+      "analysis_job": 41929280,
+      "graft_source": "mouse",
+      "host_source": "human",
+      "selected_fragments": 377574,
+      "by_truth_source": {
+        "human": {
+          "fragments": 500000,
+          "categories": [
+            {
+              "direction": "mouse_graft",
+              "analysis_job": 41929280,
+              "graft_source": "mouse",
+              "host_source": "human",
+              "truth_source": "human",
+              "mapping_category": "absent_vs_absent",
+              "fragments": 12387,
+              "selected": 0,
+              "not_selected": 12387,
+              "selection_rate": 0.0
+            },
+            {
+              "direction": "mouse_graft",
+              "analysis_job": 41929280,
+              "graft_source": "mouse",
+              "host_source": "human",
+              "truth_source": "human",
+              "mapping_category": "absent_vs_two_mates",
+              "fragments": 405602,
+              "selected": 0,
+              "not_selected": 405602,
+              "selection_rate": 0.0
+            },
+            {
+              "direction": "mouse_graft",
+              "analysis_job": 41929280,
+              "graft_source": "mouse",
+              "host_source": "human",
+              "truth_source": "human",
+              "mapping_category": "two_mates_vs_absent",
+              "fragments": 66,
+              "selected": 26,
+              "not_selected": 40,
+              "selection_rate": 0.3939393939393939
+            },
+            {
+              "direction": "mouse_graft",
+              "analysis_job": 41929280,
+              "graft_source": "mouse",
+              "host_source": "human",
+              "truth_source": "human",
+              "mapping_category": "two_mates_vs_two_mates",
+              "fragments": 81945,
+              "selected": 35,
+              "not_selected": 81910,
+              "selection_rate": 0.00042711574836780766
+            }
+          ],
+          "graft_primary_records": 164022,
+          "graft_unique_primary_records": 144018,
+          "graft_mean_mapq": 224.15079684432575,
+          "graft_median_mapq": 255.0
+        },
+        "mouse": {
+          "fragments": 500000,
+          "categories": [
+            {
+              "direction": "mouse_graft",
+              "analysis_job": 41929280,
+              "graft_source": "mouse",
+              "host_source": "human",
+              "truth_source": "mouse",
+              "mapping_category": "absent_vs_absent",
+              "fragments": 82272,
+              "selected": 0,
+              "not_selected": 82272,
+              "selection_rate": 0.0
+            },
+            {
+              "direction": "mouse_graft",
+              "analysis_job": 41929280,
+              "graft_source": "mouse",
+              "host_source": "human",
+              "truth_source": "mouse",
+              "mapping_category": "absent_vs_two_mates",
+              "fragments": 3029,
+              "selected": 0,
+              "not_selected": 3029,
+              "selection_rate": 0.0
+            },
+            {
+              "direction": "mouse_graft",
+              "analysis_job": 41929280,
+              "graft_source": "mouse",
+              "host_source": "human",
+              "truth_source": "mouse",
+              "mapping_category": "two_mates_vs_absent",
+              "fragments": 358279,
+              "selected": 338484,
+              "not_selected": 19795,
+              "selection_rate": 0.9447497620569445
+            },
+            {
+              "direction": "mouse_graft",
+              "analysis_job": 41929280,
+              "graft_source": "mouse",
+              "host_source": "human",
+              "truth_source": "mouse",
+              "mapping_category": "two_mates_vs_two_mates",
+              "fragments": 56420,
+              "selected": 39029,
+              "not_selected": 17391,
+              "selection_rate": 0.6917582417582417
+            }
+          ],
+          "graft_primary_records": 829398,
+          "graft_unique_primary_records": 772226,
+          "graft_mean_mapq": 237.58064041630195,
+          "graft_median_mapq": 255.0
+        }
+      }
+    }
+  }
+}

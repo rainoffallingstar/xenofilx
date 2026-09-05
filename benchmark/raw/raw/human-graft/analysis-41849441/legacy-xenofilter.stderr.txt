@@ -1,0 +1,5 @@
+[1] "mixture_human.picard-nm.bam  - Filtered 26294 read pairs out of 27009  -  97.35 Percent"
+
+Warning: ‘timedatectl’ indicates the non-existent timezone name ‘n/a’
+Warning: Your system is mis-configured: ‘/etc/localtime’ is not a symlink
+Warning: ‘/etc/localtime’ is not identical to any known timezone file

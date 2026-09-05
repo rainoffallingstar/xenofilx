@@ -30,6 +30,73 @@ func TestBisulfiteScoringRecalculatesExistingNMTag(t *testing.T) {
 	}
 }
 
+func TestBisulfiteScoringUsesReadStrand(t *testing.T) {
+	testCases := []struct {
+		name      string
+		flags     uint16
+		reference string
+		sequence  string
+		operation byte
+		wantNM    int
+	}{
+		{
+			name:      "forward C-to-T conversion",
+			reference: "C",
+			sequence:  "T",
+			operation: bamnative.CigarMatch,
+			wantNM:    0,
+		},
+		{
+			name:      "forward G-to-A mismatch",
+			reference: "G",
+			sequence:  "A",
+			operation: bamnative.CigarMatch,
+			wantNM:    1,
+		},
+		{
+			name:      "reverse G-to-A conversion",
+			flags:     bamnative.FlagReverse,
+			reference: "G",
+			sequence:  "A",
+			operation: bamnative.CigarMismatch,
+			wantNM:    0,
+		},
+		{
+			name:      "reverse C-to-T mismatch",
+			flags:     bamnative.FlagReverse,
+			reference: "C",
+			sequence:  "T",
+			operation: bamnative.CigarMismatch,
+			wantNM:    1,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			referenceReader := newTestReferenceReader(t, testCase.reference)
+			calculator := NewEditDistanceCalculatorWithRef(
+				"NM",
+				referenceReader,
+				referenceReader,
+				true,
+				true,
+			)
+			record := newScoredRecord(testCase.name, 999)
+			record.Flags = testCase.flags
+			record.Seq = testCase.sequence
+			record.Cigar = []bamnative.CigarOp{{Op: testCase.operation, Len: 1}}
+
+			details, err := calculator.CalculateWithRefDetails(record, "chr1")
+			if err != nil {
+				t.Fatalf("CalculateWithRefDetails: %v", err)
+			}
+			if details.NM != testCase.wantNM {
+				t.Fatalf("NM = %d, want %d", details.NM, testCase.wantNM)
+			}
+		})
+	}
+}
+
 func TestReferenceAwareScoringMatchesXenofilteRFormula(t *testing.T) {
 	referenceReader := newTestReferenceReader(t, "AACCGGTT")
 	record := newScoredRecord("formula", 1)
@@ -69,6 +136,13 @@ func TestReferenceAwareScoringMatchesXenofilteRFormula(t *testing.T) {
 	}
 	if recalculatedScore != 3 {
 		t.Fatalf("recalculated score = %d, want NM(1) + insertion(1) + soft clip(1)", recalculatedScore)
+	}
+	details, err := recalculateNMCalculator.CalculateWithRefDetails(record, "chr1")
+	if err != nil {
+		t.Fatalf("CalculateWithRefDetails: %v", err)
+	}
+	if details.NM != 1 || details.Insertions != 1 || details.SoftClips != 1 || details.Score != 3 {
+		t.Fatalf("reference score details = %+v, want NM=1 insertion=1 softclip=1 score=3", details)
 	}
 }
 
@@ -116,6 +190,91 @@ func TestPairedEndClassificationComparesExactMeanScores(t *testing.T) {
 	}
 }
 
+func TestPairedEndHostAbsentUsesAnyMateBelowThreshold(t *testing.T) {
+	testCases := []struct {
+		name           string
+		forwardScore   int32
+		reverseScore   int32
+		expectedResult Classification
+	}{
+		{
+			name:           "forward mate below threshold",
+			forwardScore:   5,
+			reverseScore:   6,
+			expectedResult: ClassificationGraft,
+		},
+		{
+			name:           "reverse mate below threshold",
+			forwardScore:   6,
+			reverseScore:   5,
+			expectedResult: ClassificationGraft,
+		},
+		{
+			name:           "both mates at threshold",
+			forwardScore:   6,
+			reverseScore:   6,
+			expectedResult: ClassificationDiscarded,
+		},
+	}
+
+	classifyWithPlainScores := func(classifier *PairedEndClassifier, testCase struct {
+		name           string
+		forwardScore   int32
+		reverseScore   int32
+		expectedResult Classification
+	}) (Classification, error) {
+		return classifier.classify(
+			&ReadPair{
+				Name:    testCase.name,
+				Forward: newScoredRecord(testCase.name, testCase.forwardScore),
+				Reverse: newScoredRecord(testCase.name, testCase.reverseScore),
+			},
+			nil,
+		)
+	}
+
+	plainClassifier := NewPairedEndClassifier(NewEditDistanceCalculator("NM"), 6, 8)
+	for _, testCase := range testCases {
+		t.Run("plain/"+testCase.name, func(t *testing.T) {
+			classification, err := classifyWithPlainScores(plainClassifier, testCase)
+			if err != nil {
+				t.Fatalf("classify: %v", err)
+			}
+			if classification != testCase.expectedResult {
+				t.Fatalf("classification = %v, want %v", classification, testCase.expectedResult)
+			}
+		})
+	}
+
+	referenceClassifier := NewPairedEndClassifierWithRef(
+		NewEditDistanceCalculatorWithRef("NM", nil, nil, false, false),
+		nil,
+		nil,
+		6,
+		8,
+		false,
+		nil,
+		nil,
+	)
+	for _, testCase := range testCases {
+		t.Run("reference/"+testCase.name, func(t *testing.T) {
+			classification, err := referenceClassifier.classify(
+				&ReadPair{
+					Name:    testCase.name,
+					Forward: newScoredRecord(testCase.name, testCase.forwardScore),
+					Reverse: newScoredRecord(testCase.name, testCase.reverseScore),
+				},
+				nil,
+			)
+			if err != nil {
+				t.Fatalf("classify: %v", err)
+			}
+			if classification != testCase.expectedResult {
+				t.Fatalf("classification = %v, want %v", classification, testCase.expectedResult)
+			}
+		})
+	}
+}
 func TestMMThresholdIsExclusiveLikeOriginalXenofilteR(t *testing.T) {
 	singleClassifier := NewSingleEndClassifier(
 		NewEditDistanceCalculator("NM"),

@@ -1,0 +1,54 @@
+{
+  "schema_version": "gate6.rnaseq-human-mouse-mixture-benchmark/v1",
+  "date": "2026-09-03",
+  "assay": "RNA-seq",
+  "purpose": "Measure human and mouse graft-fragment selection across synthetic human/mouse RNA-seq mixture proportions.",
+  "sources": {
+    "human": {
+      "accession": "SRR1039508",
+      "reference": "hg38/GRCh38-gencode-v44"
+    },
+    "mouse": {
+      "accession": "SRR037954",
+      "reference": "mm10/GRCm38-gencode-M25"
+    }
+  },
+  "experiment": {
+    "alignment": "STAR independently against the human and mouse reference indexes",
+    "nm_semantics": "conventional reference NM",
+    "excluded_semantics": [
+      "Bismark",
+      "bisulfite conversion",
+      "XG",
+      "CT/GA converted-reference controls"
+    ],
+    "human_fractions": [0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99],
+    "replicates_per_fraction": 2,
+    "truth_fragments_per_replicate": 1000000,
+    "graft_sources": ["human", "mouse"],
+    "mm_threshold": 6,
+    "unmapped_penalty": 8
+  },
+  "comparators": [
+    "modern_xenofilx",
+    "legacy_xenofilter"
+  ],
+  "results": {
+    "per_cell_table": "rnaseq-human-mouse-mixture-results-20260903.tsv",
+    "per_cell_rows": 28,
+    "fragment_selection_equal_for_all_cells": true,
+    "unknown_selected_fragments_for_all_cells": 0,
+    "table_sha256": "db6782694c410e19138f249aa852511f81290f789238ca8950b8fbbc9d4843ec",
+    "mapping_decomposition": {
+      "schema_version": "gate6.rnaseq-mapping-decomposition/v1",
+      "pilot_fraction": 0.5,
+      "directions": ["human_graft", "mouse_graft"],
+      "primary_mapping_definition": "at least one primary, non-secondary, non-supplementary alignment",
+      "json": "rnaseq-mapping-decomposition-human-mouse-pilot-v1.json",
+      "tsv": "rnaseq-mapping-decomposition-human-mouse-pilot-v1.tsv"
+    }
+  },
+  "remote_evidence_root": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-rna-mixtures-20260903/",
+  "documentation": "rnaseq-human-mouse-mixture-20260903.md",
+  "interpretation_scope": "Algorithmic classifier evidence only; not full seven-input Gate 6 toolchain parity or production-scale acceptance."
+}

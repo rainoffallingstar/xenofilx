@@ -3,7 +3,7 @@ module github.com/rainoffallingstar/xenofilx
 go 1.23
 
 require (
-	github.com/rainoffallingstar/bamdriver v0.1.2-0.20260810112449-a0c9a704bf9b
+	github.com/rainoffallingstar/bamdriver v0.1.2-0.20260902024548-6ab31d04c17d
 	github.com/spf13/cobra v1.8.0
 )
 

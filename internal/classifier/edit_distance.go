@@ -31,6 +31,15 @@ func NewEditDistanceCalculatorWithRef(nmTag string, refReader, hostRefReader *ba
 	}
 }
 
+// ReferenceScore exposes every numerical component of Xenofilx's
+// reference-aware score without changing the classification contract.
+type ReferenceScore struct {
+	NM         int
+	Insertions int
+	SoftClips  int
+	Score      int
+}
+
 // Calculate computes the original XenofilteR score using the configured NM tag.
 func (calculator *EditDistanceCalculator) Calculate(record *bamnative.Record) (int, error) {
 	if record == nil {
@@ -47,58 +56,70 @@ func (calculator *EditDistanceCalculator) Calculate(record *bamnative.Record) (i
 
 // CalculateWithRef computes edit distance using the graft reference genome when needed.
 func (calculator *EditDistanceCalculator) CalculateWithRef(record *bamnative.Record, refName string) (int, error) {
-	return calculator.calculateWithReference(record, refName, calculator.refReader)
+	details, err := calculator.CalculateWithRefDetails(record, refName)
+	return details.Score, err
+}
+
+// CalculateWithRefDetails returns every numerical component used for graft scoring.
+func (calculator *EditDistanceCalculator) CalculateWithRefDetails(record *bamnative.Record, refName string) (ReferenceScore, error) {
+	return calculator.calculateWithReferenceDetails(record, refName, calculator.refReader)
 }
 
 // CalculateHostNM computes edit distance using the host reference genome when needed.
 func (calculator *EditDistanceCalculator) CalculateHostNM(record *bamnative.Record, refName string) (int, error) {
-	return calculator.calculateWithReference(record, refName, calculator.hostRefReader)
+	details, err := calculator.CalculateHostNMDetails(record, refName)
+	return details.Score, err
 }
 
-func (calculator *EditDistanceCalculator) calculateWithReference(record *bamnative.Record, refName string, referenceReader *bamnative.FastaReader) (int, error) {
+// CalculateHostNMDetails returns every numerical component used for host scoring.
+func (calculator *EditDistanceCalculator) CalculateHostNMDetails(record *bamnative.Record, refName string) (ReferenceScore, error) {
+	return calculator.calculateWithReferenceDetails(record, refName, calculator.hostRefReader)
+}
+
+func (calculator *EditDistanceCalculator) calculateWithReferenceDetails(record *bamnative.Record, refName string, referenceReader *bamnative.FastaReader) (ReferenceScore, error) {
 	if record == nil {
-		return 0, fmt.Errorf("cannot score a nil alignment")
+		return ReferenceScore{}, fmt.Errorf("cannot score a nil alignment")
 	}
 
 	if !calculator.recalculate && !calculator.isBisulfite && bamnative.HasNM(record, calculator.nmTag) {
 		nm, err := getNMTag(record, calculator.nmTag)
 		if err != nil {
-			return 0, err
+			return ReferenceScore{}, err
 		}
 		insertions, softClips := parseCigar(record.Cigar)
-		return nm + insertions + softClips, nil
+		return ReferenceScore{NM: nm, Insertions: insertions, SoftClips: softClips, Score: nm + insertions + softClips}, nil
 	}
 
 	if referenceReader == nil {
-		return 0, fmt.Errorf("cannot calculate NM for read %q: reference reader is unavailable", record.Name)
+		return ReferenceScore{}, fmt.Errorf("cannot calculate NM for read %q: reference reader is unavailable", record.Name)
 	}
 	if refName == "" {
-		return 0, fmt.Errorf("cannot calculate NM for read %q: reference name is empty", record.Name)
+		return ReferenceScore{}, fmt.Errorf("cannot calculate NM for read %q: reference name is empty", record.Name)
 	}
 
 	referenceStart := int64(record.Pos)
 	referenceSpan, err := calculateReferenceSpan(record.Cigar)
 	if err != nil {
-		return 0, fmt.Errorf("cannot calculate NM for read %q on %q: %w", record.Name, refName, err)
+		return ReferenceScore{}, fmt.Errorf("cannot calculate NM for read %q on %q: %w", record.Name, refName, err)
 	}
 	referenceEnd := referenceStart + int64(referenceSpan)
 	if referenceEnd < referenceStart {
-		return 0, fmt.Errorf("cannot calculate NM for read %q on %q: reference span overflows", record.Name, refName)
+		return ReferenceScore{}, fmt.Errorf("cannot calculate NM for read %q on %q: reference span overflows", record.Name, refName)
 	}
 	referenceSequence, exists := referenceReader.GetRegion(refName, referenceStart, referenceEnd)
 	if !exists {
-		return 0, fmt.Errorf("cannot calculate NM for read %q: reference interval %q:%d-%d was not found", record.Name, refName, referenceStart, referenceEnd)
+		return ReferenceScore{}, fmt.Errorf("cannot calculate NM for read %q: reference interval %q:%d-%d was not found", record.Name, refName, referenceStart, referenceEnd)
 	}
 	if err := validateReferenceCalculation(record, referenceSequence, referenceStart); err != nil {
-		return 0, fmt.Errorf("cannot calculate NM for read %q on %q: %w", record.Name, refName, err)
+		return ReferenceScore{}, fmt.Errorf("cannot calculate NM for read %q on %q: %w", record.Name, refName, err)
 	}
 
 	nm, err := bamnative.CalculateNMCheckedWindow(record, referenceSequence, referenceStart, calculator.isBisulfite)
 	if err != nil {
-		return 0, fmt.Errorf("failed to calculate NM for read %q on %q: %w", record.Name, refName, err)
+		return ReferenceScore{}, fmt.Errorf("failed to calculate NM for read %q on %q: %w", record.Name, refName, err)
 	}
 	insertions, softClips := parseCigar(record.Cigar)
-	return nm + insertions + softClips, nil
+	return ReferenceScore{NM: nm, Insertions: insertions, SoftClips: softClips, Score: nm + insertions + softClips}, nil
 }
 
 func validateReferenceCalculation(record *bamnative.Record, referenceSequence []byte, referenceStart int64) error {

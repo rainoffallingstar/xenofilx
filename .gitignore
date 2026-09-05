@@ -30,5 +30,7 @@ go.work
 .DS_Store
 Thumbs.db
 
-# Build artifacts
+# Build outputs
 /xenofilx
+/gate6-*
+

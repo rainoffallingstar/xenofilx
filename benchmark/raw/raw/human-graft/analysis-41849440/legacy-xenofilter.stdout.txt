@@ -1,0 +1,5 @@
+The following samples will be analyzed: 
+graft: /public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849440/legacy-xenofilter/mixture_human.picard-nm.bam ; 	 matching host: /public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849440/legacy-xenofilter/mixture_mouse.picard-nm.bam
+This analysis will be run on 8 cpus 
+Total calculation time of XenofilteR was:  0 
+

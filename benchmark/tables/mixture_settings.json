@@ -1,0 +1,59 @@
+{
+  "benchmark_id": "xenofilx-xg-aware-human-mouse-rrbs-mixture-20260902",
+  "date": "2026-09-02",
+  "design": {
+    "directions": [
+      "human graft / mouse host",
+      "mouse graft / human host"
+    ],
+    "excluded_fraction": 1.0,
+    "human_fractions": [
+      0.01,
+      0.05,
+      0.1,
+      0.25,
+      0.5
+    ],
+    "input_preprocessing": "raw mixed paired-end FASTQ; no additional trimming",
+    "mouse_fractions": [
+      0.99,
+      0.95,
+      0.9,
+      0.75,
+      0.5
+    ],
+    "qname_matching": "exact",
+    "replicates_per_fraction": 3,
+    "truth_fragments_per_replicate": 1000000
+  },
+  "evidence_roots": {
+    "human_graft": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902",
+    "mouse_graft": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902"
+  },
+  "failed_submissions": {
+    "41849432": "missing formal-t15 replicate 2 input path; replacement 41850996",
+    "41849433": "missing formal-t15 replicate 3 input path; replacement 41850997",
+    "41850051": "missing formal-t15 replicate 2 input path; replacement 41850998",
+    "41850052": "missing formal-t15 replicate 3 input path; replacement 41850999"
+  },
+  "references": {
+    "human": "hg19 / GRCh37.p13-gencode-v19",
+    "mouse": "mm10 / GRCm38-gencode-M25"
+  },
+  "sources": {
+    "human_fastq_r1": "/public3/home/scg9946/otter-gate6/acquisitions/rrbs-SRR31480456-20260813T041223Z-r2/decoded/R1.fastq.gz",
+    "human_fastq_r2": "/public3/home/scg9946/otter-gate6/acquisitions/rrbs-SRR31480456-20260813T041223Z-r2/decoded/R2.fastq.gz",
+    "mouse_fastq_r1": "/public3/home/scg9946/otter-gate6/acquisitions/mouse-rrbs-SRR10025242-20260814T1450Z/decoded/R1.fastq.gz",
+    "mouse_fastq_r2": "/public3/home/scg9946/otter-gate6/acquisitions/mouse-rrbs-SRR10025242-20260814T1450Z/decoded/R2.fastq.gz"
+  },
+  "tools": {
+    "bamdriver_fix_commit": "6ab31d0",
+    "bismark_version": "3.1.0",
+    "legacy_nm_semantics": "Picard conventional NM + XenofilteR",
+    "mm_threshold": 6,
+    "modern_nm_semantics": "Bismark XG-aware bisulfite NM",
+    "samtools_version": "1.7",
+    "unmapped_penalty": 8,
+    "xenofilx_binary_sha256": "bfcc85460494d837b7393a10f5df24d1f5e061ed2454e44e38b0af062c999034"
+  }
+}

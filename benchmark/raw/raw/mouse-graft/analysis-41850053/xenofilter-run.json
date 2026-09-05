@@ -1,0 +1,13 @@
+{
+  "schema_version": "gate6.xenofilter-legacy-run/v1",
+  "graft_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850053/legacy-xenofilter/mixture_mouse.picard-nm.bam",
+  "host_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850053/legacy-xenofilter/mixture_human.picard-nm.bam",
+  "destination_folder": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850053/legacy-xenofilter/destination",
+  "output_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850053/legacy-xenofilter/destination/Filtered_bams",
+  "thread_count": 8,
+  "mm_threshold": 6,
+  "unmapped_penalty": 8,
+  "nm_tag": "NM",
+  "xenofilter_version": "1.6",
+  "output_files": ["/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850053/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam", "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850053/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam.bai", "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850053/legacy-xenofilter/destination/Filtered_bams/XenofilteR.log"]
+}

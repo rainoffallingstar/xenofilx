@@ -1,0 +1,670 @@
+{
+  "archive_schema": "xenofilx.xg-aware-benchmark-evidence/v1",
+  "created_at_utc": "2026-09-02T03:43:44.434905+00:00",
+  "directions": {
+    "human-graft": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902",
+    "mouse-graft": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902"
+  },
+  "excluded_failed_jobs": {
+    "41849432": "missing input directory; replaced by 41850996 using high-human replicate 2 input",
+    "41849433": "missing input directory; replaced by 41850997 using high-human replicate 3 input",
+    "41850051": "missing input directory; replaced by 41850998 using high-human replicate 2 input",
+    "41850052": "missing input directory; replaced by 41850999 using high-human replicate 3 input"
+  },
+  "inventory": [
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849431",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849431,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate1-n1000000-qnameexact-v2/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849434",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849434,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849435",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849435,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849436",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849436,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849438",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849438,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849439",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849439,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849440",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849440,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849441",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849441,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849442",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849442,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849444",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849444,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849445",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849445,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849446",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849446,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849447",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41849447,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41850996",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850996,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate2-n1000000-high-human/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41850997",
+      "direction": "human-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850997,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate3-n1000000-high-human/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850050",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850050,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate1-n1000000-qnameexact-v2/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850053",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850053,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850054",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850054,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850055",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850055,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850056",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850056,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850057",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850057,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850058",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850058,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850059",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850059,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850062",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850062,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850063",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850063,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850064,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850065",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850065,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850066",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850066,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850998",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850998,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate2-n1000000-high-human/truth.tsv"
+    },
+    {
+      "analysis_directory": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850999",
+      "direction": "mouse-graft",
+      "files": [
+        "source-performance.json",
+        "manifest.properties",
+        "summary.tsv",
+        "xenofilter-run.json",
+        "modern-xenofilx.stdout.txt",
+        "modern-xenofilx.stderr.txt",
+        "legacy-xenofilter.stdout.txt",
+        "legacy-xenofilter.stderr.txt",
+        "bismark-graft.log",
+        "bismark-host.log",
+        "picard-graft.log",
+        "picard-host.log"
+      ],
+      "job_id": 41850999,
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate3-n1000000-high-human/truth.tsv"
+    }
+  ],
+  "note": "FASTQ and BAM files are not duplicated in this archive; their remote paths and SHA256 values are preserved in each manifest.properties file.",
+  "successful_jobs": {
+    "human-graft": [
+      41849431,
+      41849434,
+      41849435,
+      41849436,
+      41849438,
+      41849439,
+      41849440,
+      41849441,
+      41849442,
+      41849444,
+      41849445,
+      41849446,
+      41849447,
+      41850996,
+      41850997
+    ],
+    "mouse-graft": [
+      41850050,
+      41850053,
+      41850054,
+      41850055,
+      41850056,
+      41850057,
+      41850058,
+      41850059,
+      41850062,
+      41850063,
+      41850064,
+      41850065,
+      41850066,
+      41850998,
+      41850999
+    ]
+  },
+  "truth_files": [
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate1-n1000000-qnameexact-v2/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate2-n1000000-high-human/truth.tsv",
+    "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate3-n1000000-high-human/truth.tsv"
+  ]
+}

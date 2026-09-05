@@ -1,0 +1,1674 @@
+[
+  {
+    "direction": "human-graft",
+    "job_id": 41849431,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.499671,
+          "balanced_accuracy": 0.499671,
+          "confusion": {
+            "true_human_predicted_graft": 34,
+            "true_human_predicted_non_graft": 499966,
+            "true_mouse_predicted_graft": 363,
+            "true_mouse_predicted_non_graft": 499637
+          },
+          "f1_graft": 0.00013589210167127302,
+          "false_negative_rate_graft_as_non_graft": 0.999932,
+          "false_positive_rate_host_as_graft": 0.000726,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849431/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 397,
+          "filtered_records": 794,
+          "negative_predictive_value_host": 0.499835434667563,
+          "precision_graft_ppv": 0.08564231738035265,
+          "sensitivity_graft_recall": 6.8e-05,
+          "specificity_host_recall": 0.999274,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.760203,
+          "balanced_accuracy": 0.760203,
+          "confusion": {
+            "true_human_predicted_graft": 260604,
+            "true_human_predicted_non_graft": 239396,
+            "true_mouse_predicted_graft": 401,
+            "true_mouse_predicted_non_graft": 499599
+          },
+          "f1_graft": 0.6848943173829344,
+          "false_negative_rate_graft_as_non_graft": 0.478792,
+          "false_positive_rate_host_as_graft": 0.000802,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849431/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 261005,
+          "filtered_records": 522010,
+          "negative_predictive_value_host": 0.676051935398751,
+          "precision_graft_ppv": 0.9984636309649241,
+          "sensitivity_graft_recall": 0.521208,
+          "specificity_host_recall": 0.999198,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate1-n1000000-qnameexact-v2/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849434,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.749451,
+          "balanced_accuracy": 0.49966066666666664,
+          "confusion": {
+            "true_human_predicted_graft": 20,
+            "true_human_predicted_non_graft": 249980,
+            "true_mouse_predicted_graft": 569,
+            "true_mouse_predicted_non_graft": 749431
+          },
+          "f1_graft": 0.0001596239260302727,
+          "false_negative_rate_graft_as_non_graft": 0.99992,
+          "false_positive_rate_host_as_graft": 0.0007586666666666667,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849434/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 589,
+          "filtered_records": 1178,
+          "negative_predictive_value_host": 0.7498726750055783,
+          "precision_graft_ppv": 0.03395585738539898,
+          "sensitivity_graft_recall": 8e-05,
+          "specificity_host_recall": 0.9992413333333333,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.879406,
+          "balanced_accuracy": 0.7596586666666667,
+          "confusion": {
+            "true_human_predicted_graft": 130041,
+            "true_human_predicted_non_graft": 119959,
+            "true_mouse_predicted_graft": 635,
+            "true_mouse_predicted_non_graft": 749365
+          },
+          "f1_graft": 0.6832109195221132,
+          "false_negative_rate_graft_as_non_graft": 0.479836,
+          "false_positive_rate_host_as_graft": 0.0008466666666666667,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849434/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 130676,
+          "filtered_records": 261352,
+          "negative_predictive_value_host": 0.8620088712608878,
+          "precision_graft_ppv": 0.9951406532186476,
+          "sensitivity_graft_recall": 0.520164,
+          "specificity_host_recall": 0.9991533333333333,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849435,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.74948,
+          "balanced_accuracy": 0.49967999999999996,
+          "confusion": {
+            "true_human_predicted_graft": 20,
+            "true_human_predicted_non_graft": 249980,
+            "true_mouse_predicted_graft": 540,
+            "true_mouse_predicted_non_graft": 749460
+          },
+          "f1_graft": 0.0001596424010217114,
+          "false_negative_rate_graft_as_non_graft": 0.99992,
+          "false_positive_rate_host_as_graft": 0.00072,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849435/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 560,
+          "filtered_records": 1120,
+          "negative_predictive_value_host": 0.7498799327623469,
+          "precision_graft_ppv": 0.03571428571428571,
+          "sensitivity_graft_recall": 8e-05,
+          "specificity_host_recall": 0.99928,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.879569,
+          "balanced_accuracy": 0.7599393333333333,
+          "confusion": {
+            "true_human_predicted_graft": 130170,
+            "true_human_predicted_non_graft": 119830,
+            "true_mouse_predicted_graft": 601,
+            "true_mouse_predicted_non_graft": 749399
+          },
+          "f1_graft": 0.6837180352495332,
+          "false_negative_rate_graft_as_non_graft": 0.47932,
+          "false_positive_rate_host_as_graft": 0.0008013333333333334,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849435/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 130771,
+          "filtered_records": 261542,
+          "negative_predictive_value_host": 0.8621421972805785,
+          "precision_graft_ppv": 0.9954041798258023,
+          "sensitivity_graft_recall": 0.52068,
+          "specificity_host_recall": 0.9991986666666667,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849436,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.749501,
+          "balanced_accuracy": 0.49969399999999997,
+          "confusion": {
+            "true_human_predicted_graft": 20,
+            "true_human_predicted_non_graft": 249980,
+            "true_mouse_predicted_graft": 519,
+            "true_mouse_predicted_non_graft": 749481
+          },
+          "f1_graft": 0.00015965578213371972,
+          "false_negative_rate_graft_as_non_graft": 0.99992,
+          "false_positive_rate_host_as_graft": 0.000692,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849436/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 539,
+          "filtered_records": 1078,
+          "negative_predictive_value_host": 0.7498851881163947,
+          "precision_graft_ppv": 0.03710575139146568,
+          "sensitivity_graft_recall": 8e-05,
+          "specificity_host_recall": 0.999308,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.879238,
+          "balanced_accuracy": 0.759232,
+          "confusion": {
+            "true_human_predicted_graft": 129805,
+            "true_human_predicted_non_graft": 120195,
+            "true_mouse_predicted_graft": 567,
+            "true_mouse_predicted_non_graft": 749433
+          },
+          "f1_graft": 0.6825160632223192,
+          "false_negative_rate_graft_as_non_graft": 0.48078,
+          "false_positive_rate_host_as_graft": 0.000756,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849436/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 130372,
+          "filtered_records": 260744,
+          "negative_predictive_value_host": 0.8617857290703611,
+          "precision_graft_ppv": 0.9956509066363943,
+          "sensitivity_graft_recall": 0.51922,
+          "specificity_host_recall": 0.999244,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849438,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.899338,
+          "balanced_accuracy": 0.49965000000000004,
+          "confusion": {
+            "true_human_predicted_graft": 4,
+            "true_human_predicted_non_graft": 99996,
+            "true_mouse_predicted_graft": 666,
+            "true_mouse_predicted_non_graft": 899334
+          },
+          "f1_graft": 7.946756729909606e-05,
+          "false_negative_rate_graft_as_non_graft": 0.99996,
+          "false_positive_rate_host_as_graft": 0.00074,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849438/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 670,
+          "filtered_records": 1340,
+          "negative_predictive_value_host": 0.8999369577617004,
+          "precision_graft_ppv": 0.005970149253731343,
+          "sensitivity_graft_recall": 4e-05,
+          "specificity_host_recall": 0.99926,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.951153,
+          "balanced_accuracy": 0.7591116666666666,
+          "confusion": {
+            "true_human_predicted_graft": 51906,
+            "true_human_predicted_non_graft": 48094,
+            "true_mouse_predicted_graft": 753,
+            "true_mouse_predicted_non_graft": 899247
+          },
+          "f1_graft": 0.6800254161235171,
+          "false_negative_rate_graft_as_non_graft": 0.48094,
+          "false_positive_rate_host_as_graft": 0.0008366666666666667,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849438/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 52659,
+          "filtered_records": 105318,
+          "negative_predictive_value_host": 0.9492326416781286,
+          "precision_graft_ppv": 0.9857004500655159,
+          "sensitivity_graft_recall": 0.51906,
+          "specificity_host_recall": 0.9991633333333333,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849439,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.899368,
+          "balanced_accuracy": 0.4996888888888889,
+          "confusion": {
+            "true_human_predicted_graft": 9,
+            "true_human_predicted_non_graft": 99991,
+            "true_mouse_predicted_graft": 641,
+            "true_mouse_predicted_non_graft": 899359
+          },
+          "f1_graft": 0.00017883755588673624,
+          "false_negative_rate_graft_as_non_graft": 0.99991,
+          "false_positive_rate_host_as_graft": 0.0007122222222222223,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849439/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 650,
+          "filtered_records": 1300,
+          "negative_predictive_value_host": 0.8999439635763246,
+          "precision_graft_ppv": 0.013846153846153847,
+          "sensitivity_graft_recall": 9e-05,
+          "specificity_host_recall": 0.9992877777777778,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.951369,
+          "balanced_accuracy": 0.760045,
+          "confusion": {
+            "true_human_predicted_graft": 52089,
+            "true_human_predicted_non_graft": 47911,
+            "true_mouse_predicted_graft": 720,
+            "true_mouse_predicted_non_graft": 899280
+          },
+          "f1_graft": 0.6817530381063943,
+          "false_negative_rate_graft_as_non_graft": 0.47911,
+          "false_positive_rate_host_as_graft": 0.0008,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849439/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 52809,
+          "filtered_records": 105618,
+          "negative_predictive_value_host": 0.9494178048566763,
+          "precision_graft_ppv": 0.986365960347668,
+          "sensitivity_graft_recall": 0.52089,
+          "specificity_host_recall": 0.9992,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849440,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.899389,
+          "balanced_accuracy": 0.4996961111111111,
+          "confusion": {
+            "true_human_predicted_graft": 8,
+            "true_human_predicted_non_graft": 99992,
+            "true_mouse_predicted_graft": 619,
+            "true_mouse_predicted_non_graft": 899381
+          },
+          "f1_graft": 0.0001590030508710386,
+          "false_negative_rate_graft_as_non_graft": 0.99992,
+          "false_positive_rate_host_as_graft": 0.0006877777777777778,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849440/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 627,
+          "filtered_records": 1254,
+          "negative_predictive_value_host": 0.8999452656815824,
+          "precision_graft_ppv": 0.012759170653907496,
+          "sensitivity_graft_recall": 8e-05,
+          "specificity_host_recall": 0.9993122222222223,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.951266,
+          "balanced_accuracy": 0.7593566666666667,
+          "confusion": {
+            "true_human_predicted_graft": 51947,
+            "true_human_predicted_non_graft": 48053,
+            "true_mouse_predicted_graft": 681,
+            "true_mouse_predicted_non_graft": 899319
+          },
+          "f1_graft": 0.6807007888460832,
+          "false_negative_rate_graft_as_non_graft": 0.48053,
+          "false_positive_rate_host_as_graft": 0.0007566666666666667,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849440/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 52628,
+          "filtered_records": 105256,
+          "negative_predictive_value_host": 0.9492775805069181,
+          "precision_graft_ppv": 0.987060120088166,
+          "sensitivity_graft_recall": 0.51947,
+          "specificity_host_recall": 0.9992433333333334,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849441,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.949287,
+          "balanced_accuracy": 0.4996342105263158,
+          "confusion": {
+            "true_human_predicted_graft": 1,
+            "true_human_predicted_non_graft": 49999,
+            "true_mouse_predicted_graft": 714,
+            "true_mouse_predicted_non_graft": 949286
+          },
+          "f1_graft": 3.9436064280784776e-05,
+          "false_negative_rate_graft_as_non_graft": 0.99998,
+          "false_positive_rate_host_as_graft": 0.000751578947368421,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849441/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 715,
+          "filtered_records": 1430,
+          "negative_predictive_value_host": 0.9499652251359723,
+          "precision_graft_ppv": 0.0013986013986013986,
+          "sensitivity_graft_recall": 2e-05,
+          "specificity_host_recall": 0.9992484210526316,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.975138,
+          "balanced_accuracy": 0.7589968421052631,
+          "confusion": {
+            "true_human_predicted_graft": 25942,
+            "true_human_predicted_non_graft": 24058,
+            "true_mouse_predicted_graft": 804,
+            "true_mouse_predicted_non_graft": 949196
+          },
+          "f1_graft": 0.67604826310166,
+          "false_negative_rate_graft_as_non_graft": 0.48116,
+          "false_positive_rate_host_as_graft": 0.0008463157894736842,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849441/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 26746,
+          "filtered_records": 53492,
+          "negative_predictive_value_host": 0.9752808619332671,
+          "precision_graft_ppv": 0.9699394301951694,
+          "sensitivity_graft_recall": 0.51884,
+          "specificity_host_recall": 0.9991536842105263,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849442,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.949319,
+          "balanced_accuracy": 0.4996605263157895,
+          "confusion": {
+            "true_human_predicted_graft": 2,
+            "true_human_predicted_non_graft": 49998,
+            "true_mouse_predicted_graft": 683,
+            "true_mouse_predicted_non_graft": 949317
+          },
+          "f1_graft": 7.891881227187531e-05,
+          "false_negative_rate_graft_as_non_graft": 0.99996,
+          "false_positive_rate_host_as_graft": 0.0007189473684210526,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849442/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 685,
+          "filtered_records": 1370,
+          "negative_predictive_value_host": 0.9499677278936072,
+          "precision_graft_ppv": 0.00291970802919708,
+          "sensitivity_graft_recall": 4e-05,
+          "specificity_host_recall": 0.999281052631579,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.97528,
+          "balanced_accuracy": 0.7600947368421053,
+          "confusion": {
+            "true_human_predicted_graft": 26050,
+            "true_human_predicted_non_graft": 23950,
+            "true_mouse_predicted_graft": 770,
+            "true_mouse_predicted_non_graft": 949230
+          },
+          "f1_graft": 0.678208799791721,
+          "false_negative_rate_graft_as_non_graft": 0.479,
+          "false_positive_rate_host_as_graft": 0.0008105263157894737,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849442/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 26820,
+          "filtered_records": 53640,
+          "negative_predictive_value_host": 0.9753899586921227,
+          "precision_graft_ppv": 0.9712900820283371,
+          "sensitivity_graft_recall": 0.521,
+          "specificity_host_recall": 0.9991894736842105,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849444,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.949363,
+          "balanced_accuracy": 0.4997121052631579,
+          "confusion": {
+            "true_human_predicted_graft": 5,
+            "true_human_predicted_non_graft": 49995,
+            "true_mouse_predicted_graft": 642,
+            "true_mouse_predicted_non_graft": 949358
+          },
+          "f1_graft": 0.00019744506091180127,
+          "false_negative_rate_graft_as_non_graft": 0.9999,
+          "false_positive_rate_host_as_graft": 0.0006757894736842106,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849444/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 647,
+          "filtered_records": 1294,
+          "negative_predictive_value_host": 0.9499726322930936,
+          "precision_graft_ppv": 0.0077279752704791345,
+          "sensitivity_graft_recall": 0.0001,
+          "specificity_host_recall": 0.9993242105263158,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.975319,
+          "balanced_accuracy": 0.7598878947368422,
+          "confusion": {
+            "true_human_predicted_graft": 26026,
+            "true_human_predicted_non_graft": 23974,
+            "true_mouse_predicted_graft": 707,
+            "true_mouse_predicted_non_graft": 949293
+          },
+          "f1_graft": 0.6783522083067259,
+          "false_negative_rate_graft_as_non_graft": 0.47948,
+          "false_positive_rate_host_as_graft": 0.0007442105263157895,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849444/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 26733,
+          "filtered_records": 53466,
+          "negative_predictive_value_host": 0.9753674993604016,
+          "precision_graft_ppv": 0.973553286200576,
+          "sensitivity_graft_recall": 0.52052,
+          "specificity_host_recall": 0.9992557894736842,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849445,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.989268,
+          "balanced_accuracy": 0.499679797979798,
+          "confusion": {
+            "true_human_predicted_graft": 1,
+            "true_human_predicted_non_graft": 9999,
+            "true_mouse_predicted_graft": 733,
+            "true_mouse_predicted_non_graft": 989267
+          },
+          "f1_graft": 0.0001863238308179616,
+          "false_negative_rate_graft_as_non_graft": 0.9999,
+          "false_positive_rate_host_as_graft": 0.0007404040404040404,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849445/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 734,
+          "filtered_records": 1468,
+          "negative_predictive_value_host": 0.9899936553430218,
+          "precision_graft_ppv": 0.0013623978201634877,
+          "sensitivity_graft_recall": 0.0001,
+          "specificity_host_recall": 0.999259595959596,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.994252,
+          "balanced_accuracy": 0.7535818181818181,
+          "confusion": {
+            "true_human_predicted_graft": 5080,
+            "true_human_predicted_non_graft": 4920,
+            "true_mouse_predicted_graft": 828,
+            "true_mouse_predicted_non_graft": 989172
+          },
+          "f1_graft": 0.6386723661051042,
+          "false_negative_rate_graft_as_non_graft": 0.492,
+          "false_positive_rate_host_as_graft": 0.0008363636363636364,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849445/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 5908,
+          "filtered_records": 11816,
+          "negative_predictive_value_host": 0.9950507598894267,
+          "precision_graft_ppv": 0.8598510494245092,
+          "sensitivity_graft_recall": 0.508,
+          "specificity_host_recall": 0.9991636363636364,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849446,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.989287,
+          "balanced_accuracy": 0.49963989898989897,
+          "confusion": {
+            "true_human_predicted_non_graft": 10000,
+            "true_mouse_predicted_graft": 713,
+            "true_mouse_predicted_non_graft": 989287
+          },
+          "f1_graft": null,
+          "false_negative_rate_graft_as_non_graft": 1.0,
+          "false_positive_rate_host_as_graft": 0.0007202020202020202,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849446/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 713,
+          "filtered_records": 1426,
+          "negative_predictive_value_host": 0.9899928649126828,
+          "precision_graft_ppv": 0.0,
+          "sensitivity_graft_recall": 0.0,
+          "specificity_host_recall": 0.9992797979797979,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.994407,
+          "balanced_accuracy": 0.7600944444444444,
+          "confusion": {
+            "true_human_predicted_graft": 5210,
+            "true_human_predicted_non_graft": 4790,
+            "true_mouse_predicted_graft": 803,
+            "true_mouse_predicted_non_graft": 989197
+          },
+          "f1_graft": 0.6507212889527259,
+          "false_negative_rate_graft_as_non_graft": 0.479,
+          "false_positive_rate_host_as_graft": 0.0008111111111111111,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849446/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 6013,
+          "filtered_records": 12026,
+          "negative_predictive_value_host": 0.9951810234942711,
+          "precision_graft_ppv": 0.8664560119740562,
+          "sensitivity_graft_recall": 0.521,
+          "specificity_host_recall": 0.9991888888888889,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41849447,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.98933,
+          "balanced_accuracy": 0.49976060606060607,
+          "confusion": {
+            "true_human_predicted_graft": 2,
+            "true_human_predicted_non_graft": 9998,
+            "true_mouse_predicted_graft": 672,
+            "true_mouse_predicted_non_graft": 989328
+          },
+          "f1_graft": 0.0003747423646243208,
+          "false_negative_rate_graft_as_non_graft": 0.9998,
+          "false_positive_rate_host_as_graft": 0.0006787878787878788,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849447/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 674,
+          "filtered_records": 1348,
+          "negative_predictive_value_host": 0.9899952568030853,
+          "precision_graft_ppv": 0.002967359050445104,
+          "sensitivity_graft_recall": 0.0002,
+          "specificity_host_recall": 0.9993212121212122,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.994451,
+          "balanced_accuracy": 0.7592257575757575,
+          "confusion": {
+            "true_human_predicted_graft": 5192,
+            "true_human_predicted_non_graft": 4808,
+            "true_mouse_predicted_graft": 741,
+            "true_mouse_predicted_non_graft": 989259
+          },
+          "f1_graft": 0.651729115671876,
+          "false_negative_rate_graft_as_non_graft": 0.4808,
+          "false_positive_rate_host_as_graft": 0.0007484848484848485,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41849447/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 5933,
+          "filtered_records": 11866,
+          "negative_predictive_value_host": 0.9951633038819315,
+          "precision_graft_ppv": 0.8751053429967975,
+          "sensitivity_graft_recall": 0.5192,
+          "specificity_host_recall": 0.9992515151515151,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41850996,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.499678,
+          "balanced_accuracy": 0.499678,
+          "confusion": {
+            "true_human_predicted_graft": 39,
+            "true_human_predicted_non_graft": 499961,
+            "true_mouse_predicted_graft": 361,
+            "true_mouse_predicted_non_graft": 499639
+          },
+          "f1_graft": 0.00015587529976019186,
+          "false_negative_rate_graft_as_non_graft": 0.999922,
+          "false_positive_rate_host_as_graft": 0.000722,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41850996/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 400,
+          "filtered_records": 800,
+          "negative_predictive_value_host": 0.4998389355742297,
+          "precision_graft_ppv": 0.0975,
+          "sensitivity_graft_recall": 7.8e-05,
+          "specificity_host_recall": 0.999278,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.760289,
+          "balanced_accuracy": 0.760289,
+          "confusion": {
+            "true_human_predicted_graft": 260693,
+            "true_human_predicted_non_graft": 239307,
+            "true_mouse_predicted_graft": 404,
+            "true_mouse_predicted_non_graft": 499596
+          },
+          "f1_graft": 0.6850454015716788,
+          "false_negative_rate_graft_as_non_graft": 0.478614,
+          "false_positive_rate_host_as_graft": 0.000808,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41850996/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 261097,
+          "filtered_records": 522194,
+          "negative_predictive_value_host": 0.6761320498089736,
+          "precision_graft_ppv": 0.9984526823364497,
+          "sensitivity_graft_recall": 0.521386,
+          "specificity_host_recall": 0.999192,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate2-n1000000-high-human/truth.tsv"
+    }
+  },
+  {
+    "direction": "human-graft",
+    "job_id": 41850997,
+    "report": {
+      "graft_source": "human",
+      "host_source": "mouse",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.499663,
+          "balanced_accuracy": 0.499663,
+          "confusion": {
+            "true_human_predicted_graft": 26,
+            "true_human_predicted_non_graft": 499974,
+            "true_mouse_predicted_graft": 363,
+            "true_mouse_predicted_non_graft": 499637
+          },
+          "f1_graft": 0.00010391915090059934,
+          "false_negative_rate_graft_as_non_graft": 0.999948,
+          "false_positive_rate_host_as_graft": 0.000726,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41850997/legacy-xenofilter/destination/Filtered_bams/mixture_human.picard-nm_Filtered.bam",
+          "filtered_fragments": 389,
+          "filtered_records": 778,
+          "negative_predictive_value_host": 0.4998314344279925,
+          "precision_graft_ppv": 0.06683804627249357,
+          "sensitivity_graft_recall": 5.2e-05,
+          "specificity_host_recall": 0.999274,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.759666,
+          "balanced_accuracy": 0.759666,
+          "confusion": {
+            "true_human_predicted_graft": 260066,
+            "true_human_predicted_non_graft": 239934,
+            "true_mouse_predicted_graft": 400,
+            "true_mouse_predicted_non_graft": 499600
+          },
+          "f1_graft": 0.6839648320897976,
+          "false_negative_rate_graft_as_non_graft": 0.479868,
+          "false_positive_rate_host_as_graft": 0.0008,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-graft-mouse-host-xg-aware-20260902/analysis-41850997/modern-xenofilx/mixture_human_fixed_Filtered.bam",
+          "filtered_fragments": 260466,
+          "filtered_records": 520932,
+          "negative_predictive_value_host": 0.675560555701293,
+          "precision_graft_ppv": 0.9984642909247272,
+          "sensitivity_graft_recall": 0.520132,
+          "specificity_host_recall": 0.9992,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate3-n1000000-high-human/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850050,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.503226,
+          "balanced_accuracy": 0.503226,
+          "confusion": {
+            "true_human_predicted_graft": 14,
+            "true_human_predicted_non_graft": 499986,
+            "true_mouse_predicted_graft": 3240,
+            "true_mouse_predicted_non_graft": 496760
+          },
+          "f1_graft": 0.012876201679470008,
+          "false_negative_rate_graft_as_non_graft": 0.99352,
+          "false_positive_rate_host_as_graft": 2.8e-05,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850050/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 3254,
+          "filtered_records": 6508,
+          "negative_predictive_value_host": 0.5016182658370337,
+          "precision_graft_ppv": 0.9956976029502151,
+          "sensitivity_graft_recall": 0.00648,
+          "specificity_host_recall": 0.999972,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.603275,
+          "balanced_accuracy": 0.603275,
+          "confusion": {
+            "true_human_predicted_graft": 363,
+            "true_human_predicted_non_graft": 499637,
+            "true_mouse_predicted_graft": 103638,
+            "true_mouse_predicted_non_graft": 396362
+          },
+          "f1_graft": 0.34317161726553436,
+          "false_negative_rate_graft_as_non_graft": 0.792724,
+          "false_positive_rate_host_as_graft": 0.000726,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850050/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 104001,
+          "filtered_records": 208002,
+          "negative_predictive_value_host": 0.5576312027133958,
+          "precision_graft_ppv": 0.9965096489456832,
+          "sensitivity_graft_recall": 0.207276,
+          "specificity_host_recall": 0.999274,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate1-n1000000-qnameexact-v2/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850053,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.254841,
+          "balanced_accuracy": 0.503226,
+          "confusion": {
+            "true_human_predicted_graft": 1,
+            "true_human_predicted_non_graft": 249999,
+            "true_mouse_predicted_graft": 4842,
+            "true_mouse_predicted_non_graft": 745158
+          },
+          "f1_graft": 0.012829157851367769,
+          "false_negative_rate_graft_as_non_graft": 0.993544,
+          "false_positive_rate_host_as_graft": 4e-06,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850053/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 4843,
+          "filtered_records": 9686,
+          "negative_predictive_value_host": 0.2512156373315969,
+          "precision_graft_ppv": 0.999793516415445,
+          "sensitivity_graft_recall": 0.006456,
+          "specificity_host_recall": 0.999996,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.404439,
+          "balanced_accuracy": 0.6026713333333333,
+          "confusion": {
+            "true_human_predicted_graft": 216,
+            "true_human_predicted_non_graft": 249784,
+            "true_mouse_predicted_graft": 154655,
+            "true_mouse_predicted_non_graft": 595345
+          },
+          "f1_graft": 0.34182773014053935,
+          "false_negative_rate_graft_as_non_graft": 0.7937933333333334,
+          "false_positive_rate_host_as_graft": 0.000864,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850053/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 154871,
+          "filtered_records": 309742,
+          "negative_predictive_value_host": 0.2955572462902113,
+          "precision_graft_ppv": 0.9986052908549696,
+          "sensitivity_graft_recall": 0.20620666666666668,
+          "specificity_host_recall": 0.999136,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850054,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.254794,
+          "balanced_accuracy": 0.503192,
+          "confusion": {
+            "true_human_predicted_graft": 3,
+            "true_human_predicted_non_graft": 249997,
+            "true_mouse_predicted_graft": 4797,
+            "true_mouse_predicted_non_graft": 745203
+          },
+          "f1_graft": 0.012710651828298886,
+          "false_negative_rate_graft_as_non_graft": 0.993604,
+          "false_positive_rate_host_as_graft": 1.2e-05,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850054/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 4800,
+          "filtered_records": 9600,
+          "negative_predictive_value_host": 0.2512027733118971,
+          "precision_graft_ppv": 0.999375,
+          "sensitivity_graft_recall": 0.006396,
+          "specificity_host_recall": 0.999988,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.404523,
+          "balanced_accuracy": 0.6028006666666667,
+          "confusion": {
+            "true_human_predicted_graft": 161,
+            "true_human_predicted_non_graft": 249839,
+            "true_mouse_predicted_graft": 154684,
+            "true_mouse_predicted_non_graft": 595316
+          },
+          "f1_graft": 0.3419016516640972,
+          "false_negative_rate_graft_as_non_graft": 0.7937546666666667,
+          "false_positive_rate_host_as_graft": 0.000644,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850054/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 154845,
+          "filtered_records": 309690,
+          "negative_predictive_value_host": 0.29561323070915985,
+          "precision_graft_ppv": 0.9989602505731539,
+          "sensitivity_graft_recall": 0.20624533333333334,
+          "specificity_host_recall": 0.999356,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850055,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.254741,
+          "balanced_accuracy": 0.5031566666666667,
+          "confusion": {
+            "true_human_predicted_graft": 3,
+            "true_human_predicted_non_graft": 249997,
+            "true_mouse_predicted_graft": 4744,
+            "true_mouse_predicted_non_graft": 745256
+          },
+          "f1_graft": 0.012571099984498115,
+          "false_negative_rate_graft_as_non_graft": 0.9936746666666667,
+          "false_positive_rate_host_as_graft": 1.2e-05,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850055/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 4747,
+          "filtered_records": 9494,
+          "negative_predictive_value_host": 0.2511893960631116,
+          "precision_graft_ppv": 0.9993680219085739,
+          "sensitivity_graft_recall": 0.006325333333333333,
+          "specificity_host_recall": 0.999988,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.404669,
+          "balanced_accuracy": 0.6028846666666666,
+          "confusion": {
+            "true_human_predicted_graft": 171,
+            "true_human_predicted_non_graft": 249829,
+            "true_mouse_predicted_graft": 154840,
+            "true_mouse_predicted_non_graft": 595160
+          },
+          "f1_graft": 0.3421836861651405,
+          "false_negative_rate_graft_as_non_graft": 0.7935466666666666,
+          "false_positive_rate_host_as_graft": 0.000684,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850055/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 155011,
+          "filtered_records": 310022,
+          "negative_predictive_value_host": 0.2956594701232797,
+          "precision_graft_ppv": 0.9988968524814368,
+          "sensitivity_graft_recall": 0.20645333333333332,
+          "specificity_host_recall": 0.999316,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.25-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850056,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.105811,
+          "balanced_accuracy": 0.5032283333333334,
+          "confusion": {
+            "true_human_predicted_non_graft": 100000,
+            "true_mouse_predicted_graft": 5811,
+            "true_mouse_predicted_non_graft": 894189
+          },
+          "f1_graft": 0.012830491128944117,
+          "false_negative_rate_graft_as_non_graft": 0.9935433333333333,
+          "false_positive_rate_host_as_graft": 0.0,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850056/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 5811,
+          "filtered_records": 11622,
+          "negative_predictive_value_host": 0.10058449650921505,
+          "precision_graft_ppv": 1.0,
+          "sensitivity_graft_recall": 0.006456666666666667,
+          "specificity_host_recall": 1.0,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.285448,
+          "balanced_accuracy": 0.6026844444444445,
+          "confusion": {
+            "true_human_predicted_graft": 77,
+            "true_human_predicted_non_graft": 99923,
+            "true_mouse_predicted_graft": 185525,
+            "true_mouse_predicted_non_graft": 714475
+          },
+          "f1_graft": 0.341791927428284,
+          "false_negative_rate_graft_as_non_graft": 0.7938611111111111,
+          "false_positive_rate_host_as_graft": 0.00077,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850056/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 185602,
+          "filtered_records": 371204,
+          "negative_predictive_value_host": 0.1226955370715547,
+          "precision_graft_ppv": 0.999585133780886,
+          "sensitivity_graft_recall": 0.2061388888888889,
+          "specificity_host_recall": 0.99923,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850057,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.10574,
+          "balanced_accuracy": 0.5031844444444444,
+          "confusion": {
+            "true_human_predicted_graft": 1,
+            "true_human_predicted_non_graft": 99999,
+            "true_mouse_predicted_graft": 5741,
+            "true_mouse_predicted_non_graft": 894259
+          },
+          "f1_graft": 0.01267689916112977,
+          "false_negative_rate_graft_as_non_graft": 0.9936211111111111,
+          "false_positive_rate_host_as_graft": 1e-05,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850057/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 5742,
+          "filtered_records": 11484,
+          "negative_predictive_value_host": 0.10057651032227048,
+          "precision_graft_ppv": 0.9998258446534308,
+          "sensitivity_graft_recall": 0.006378888888888889,
+          "specificity_host_recall": 0.99999,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.285778,
+          "balanced_accuracy": 0.6029566666666667,
+          "confusion": {
+            "true_human_predicted_graft": 57,
+            "true_human_predicted_non_graft": 99943,
+            "true_mouse_predicted_graft": 185835,
+            "true_mouse_predicted_non_graft": 714165
+          },
+          "f1_graft": 0.3422716071211502,
+          "false_negative_rate_graft_as_non_graft": 0.7935166666666666,
+          "false_positive_rate_host_as_graft": 0.00057,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850057/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 185892,
+          "filtered_records": 371784,
+          "negative_predictive_value_host": 0.12276381020699956,
+          "precision_graft_ppv": 0.9996933703440708,
+          "sensitivity_graft_recall": 0.20648333333333332,
+          "specificity_host_recall": 0.99943,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850058,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.105721,
+          "balanced_accuracy": 0.5031694444444444,
+          "confusion": {
+            "true_human_predicted_graft": 2,
+            "true_human_predicted_non_graft": 99998,
+            "true_mouse_predicted_graft": 5723,
+            "true_mouse_predicted_non_graft": 894277
+          },
+          "f1_graft": 0.012637389936238926,
+          "false_negative_rate_graft_as_non_graft": 0.9936411111111111,
+          "false_positive_rate_host_as_graft": 2e-05,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850058/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 5725,
+          "filtered_records": 11450,
+          "negative_predictive_value_host": 0.10057378491865933,
+          "precision_graft_ppv": 0.999650655021834,
+          "sensitivity_graft_recall": 0.006358888888888889,
+          "specificity_host_recall": 0.99998,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.285874,
+          "balanced_accuracy": 0.6029477777777777,
+          "confusion": {
+            "true_human_predicted_graft": 71,
+            "true_human_predicted_non_graft": 99929,
+            "true_mouse_predicted_graft": 185945,
+            "true_mouse_predicted_non_graft": 714055
+          },
+          "f1_graft": 0.34243510224527074,
+          "false_negative_rate_graft_as_non_graft": 0.7933944444444444,
+          "false_positive_rate_host_as_graft": 0.00071,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850058/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 186016,
+          "filtered_records": 372032,
+          "negative_predictive_value_host": 0.1227653123402917,
+          "precision_graft_ppv": 0.9996183124032342,
+          "sensitivity_graft_recall": 0.20660555555555554,
+          "specificity_host_recall": 0.99929,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.1-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850059,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.056118,
+          "balanced_accuracy": 0.50322,
+          "confusion": {
+            "true_human_predicted_non_graft": 50000,
+            "true_mouse_predicted_graft": 6118,
+            "true_mouse_predicted_non_graft": 943882
+          },
+          "f1_graft": 0.012797583561861612,
+          "false_negative_rate_graft_as_non_graft": 0.99356,
+          "false_positive_rate_host_as_graft": 0.0,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850059/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 6118,
+          "filtered_records": 12236,
+          "negative_predictive_value_host": 0.05030778301649492,
+          "precision_graft_ppv": 1.0,
+          "sensitivity_graft_recall": 0.00644,
+          "specificity_host_recall": 1.0,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.245826,
+          "balanced_accuracy": 0.6026115789473685,
+          "confusion": {
+            "true_human_predicted_graft": 48,
+            "true_human_predicted_non_graft": 49952,
+            "true_mouse_predicted_graft": 195874,
+            "true_mouse_predicted_non_graft": 754126
+          },
+          "f1_graft": 0.34186270967832016,
+          "false_negative_rate_graft_as_non_graft": 0.7938168421052632,
+          "false_positive_rate_host_as_graft": 0.00096,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850059/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 195922,
+          "filtered_records": 391844,
+          "negative_predictive_value_host": 0.06212332634396166,
+          "precision_graft_ppv": 0.9997550045426241,
+          "sensitivity_graft_recall": 0.20618315789473685,
+          "specificity_host_recall": 0.99904,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850062,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.056058,
+          "balanced_accuracy": 0.5031884210526316,
+          "confusion": {
+            "true_human_predicted_non_graft": 50000,
+            "true_mouse_predicted_graft": 6058,
+            "true_mouse_predicted_non_graft": 943942
+          },
+          "f1_graft": 0.012672871311154762,
+          "false_negative_rate_graft_as_non_graft": 0.9936231578947369,
+          "false_positive_rate_host_as_graft": 0.0,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850062/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 6058,
+          "filtered_records": 12116,
+          "negative_predictive_value_host": 0.050304746152189966,
+          "precision_graft_ppv": 1.0,
+          "sensitivity_graft_recall": 0.006376842105263158,
+          "specificity_host_recall": 1.0,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.246062,
+          "balanced_accuracy": 0.6029347368421053,
+          "confusion": {
+            "true_human_predicted_graft": 27,
+            "true_human_predicted_non_graft": 49973,
+            "true_mouse_predicted_graft": 196089,
+            "true_mouse_predicted_non_graft": 753911
+          },
+          "f1_graft": 0.3421800236625263,
+          "false_negative_rate_graft_as_non_graft": 0.7935905263157895,
+          "false_positive_rate_host_as_graft": 0.00054,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850062/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 196116,
+          "filtered_records": 392232,
+          "negative_predictive_value_host": 0.06216444163585791,
+          "precision_graft_ppv": 0.9998623263782659,
+          "sensitivity_graft_recall": 0.20640947368421053,
+          "specificity_host_recall": 0.99946,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850063,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.05604,
+          "balanced_accuracy": 0.5031789473684211,
+          "confusion": {
+            "true_human_predicted_non_graft": 50000,
+            "true_mouse_predicted_graft": 6040,
+            "true_mouse_predicted_non_graft": 943960
+          },
+          "f1_graft": 0.01263545458349023,
+          "false_negative_rate_graft_as_non_graft": 0.9936421052631579,
+          "false_positive_rate_host_as_graft": 0.0,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850063/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 6040,
+          "filtered_records": 12080,
+          "negative_predictive_value_host": 0.050303835164392935,
+          "precision_graft_ppv": 1.0,
+          "sensitivity_graft_recall": 0.006357894736842105,
+          "specificity_host_recall": 1.0,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.246418,
+          "balanced_accuracy": 0.6030084210526316,
+          "confusion": {
+            "true_human_predicted_graft": 39,
+            "true_human_predicted_non_graft": 49961,
+            "true_mouse_predicted_graft": 196457,
+            "true_mouse_predicted_non_graft": 753543
+          },
+          "f1_graft": 0.34270856592609134,
+          "false_negative_rate_graft_as_non_graft": 0.7932031578947368,
+          "false_positive_rate_host_as_graft": 0.00078,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850063/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 196496,
+          "filtered_records": 392992,
+          "negative_predictive_value_host": 0.06217890639001175,
+          "precision_graft_ppv": 0.9998015226773064,
+          "sensitivity_graft_recall": 0.20679684210526317,
+          "specificity_host_recall": 0.99922,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.05-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850064,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.016386,
+          "balanced_accuracy": 0.5032252525252525,
+          "confusion": {
+            "true_human_predicted_non_graft": 10000,
+            "true_mouse_predicted_graft": 6386,
+            "true_mouse_predicted_non_graft": 983614
+          },
+          "f1_graft": 0.012818325428097143,
+          "false_negative_rate_graft_as_non_graft": 0.993549494949495,
+          "false_positive_rate_host_as_graft": 0.0,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 6386,
+          "filtered_records": 12772,
+          "negative_predictive_value_host": 0.010064270430972189,
+          "precision_graft_ppv": 1.0,
+          "sensitivity_graft_recall": 0.00645050505050505,
+          "specificity_host_recall": 1.0,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.214047,
+          "balanced_accuracy": 0.6025590909090909,
+          "confusion": {
+            "true_human_predicted_graft": 10,
+            "true_human_predicted_non_graft": 9990,
+            "true_mouse_predicted_graft": 204057,
+            "true_mouse_predicted_non_graft": 785943
+          },
+          "f1_graft": 0.34178484121912756,
+          "false_negative_rate_graft_as_non_graft": 0.7938818181818181,
+          "false_positive_rate_host_as_graft": 0.001,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850064/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 204067,
+          "filtered_records": 408134,
+          "negative_predictive_value_host": 0.012551307710573629,
+          "precision_graft_ppv": 0.999950996486448,
+          "sensitivity_graft_recall": 0.2061181818181818,
+          "specificity_host_recall": 0.999,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate1-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850065,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.016344,
+          "balanced_accuracy": 0.5032040404040404,
+          "confusion": {
+            "true_human_predicted_non_graft": 10000,
+            "true_mouse_predicted_graft": 6344,
+            "true_mouse_predicted_non_graft": 983656
+          },
+          "f1_graft": 0.012734557542374922,
+          "false_negative_rate_graft_as_non_graft": 0.9935919191919191,
+          "false_positive_rate_host_as_graft": 0.0,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850065/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 6344,
+          "filtered_records": 12688,
+          "negative_predictive_value_host": 0.010063845032888645,
+          "precision_graft_ppv": 1.0,
+          "sensitivity_graft_recall": 0.006408080808080808,
+          "specificity_host_recall": 1.0,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.21433,
+          "balanced_accuracy": 0.6029,
+          "confusion": {
+            "true_human_predicted_graft": 6,
+            "true_human_predicted_non_graft": 9994,
+            "true_mouse_predicted_graft": 204336,
+            "true_mouse_predicted_non_graft": 785664
+          },
+          "f1_graft": 0.34217334733267357,
+          "false_negative_rate_graft_as_non_graft": 0.7936,
+          "false_positive_rate_host_as_graft": 0.0006,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850065/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 204342,
+          "filtered_records": 408684,
+          "negative_predictive_value_host": 0.01256067305299513,
+          "precision_graft_ppv": 0.9999706374607276,
+          "sensitivity_graft_recall": 0.2064,
+          "specificity_host_recall": 0.9994,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate2-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850066,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.016244,
+          "balanced_accuracy": 0.5031535353535354,
+          "confusion": {
+            "true_human_predicted_non_graft": 10000,
+            "true_mouse_predicted_graft": 6244,
+            "true_mouse_predicted_non_graft": 983756
+          },
+          "f1_graft": 0.012535081767117293,
+          "false_negative_rate_graft_as_non_graft": 0.9936929292929293,
+          "false_positive_rate_host_as_graft": 0.0,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850066/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 6244,
+          "filtered_records": 12488,
+          "negative_predictive_value_host": 0.010062832325037534,
+          "precision_graft_ppv": 1.0,
+          "sensitivity_graft_recall": 0.006307070707070707,
+          "specificity_host_recall": 1.0,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.214663,
+          "balanced_accuracy": 0.6029196969696969,
+          "confusion": {
+            "true_human_predicted_graft": 9,
+            "true_human_predicted_non_graft": 9991,
+            "true_mouse_predicted_graft": 204672,
+            "true_mouse_predicted_non_graft": 785328
+          },
+          "f1_graft": 0.3426387462427209,
+          "false_negative_rate_graft_as_non_graft": 0.7932606060606061,
+          "false_positive_rate_host_as_graft": 0.0009,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850066/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 204681,
+          "filtered_records": 409362,
+          "negative_predictive_value_host": 0.012562254893948214,
+          "precision_graft_ppv": 0.9999560291380245,
+          "sensitivity_graft_recall": 0.20673939393939395,
+          "specificity_host_recall": 0.9991,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.01-replicate3-n1000000-qnameexact-v2-formal-t15/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850998,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.503183,
+          "balanced_accuracy": 0.5031829999999999,
+          "confusion": {
+            "true_human_predicted_graft": 12,
+            "true_human_predicted_non_graft": 499988,
+            "true_mouse_predicted_graft": 3195,
+            "true_mouse_predicted_non_graft": 496805
+          },
+          "f1_graft": 0.012698551490738404,
+          "false_negative_rate_graft_as_non_graft": 0.99361,
+          "false_positive_rate_host_as_graft": 2.4e-05,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850998/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 3207,
+          "filtered_records": 6414,
+          "negative_predictive_value_host": 0.5015966203614993,
+          "precision_graft_ppv": 0.9962581852198317,
+          "sensitivity_graft_recall": 0.00639,
+          "specificity_host_recall": 0.999976,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.602719,
+          "balanced_accuracy": 0.602719,
+          "confusion": {
+            "true_human_predicted_graft": 405,
+            "true_human_predicted_non_graft": 499595,
+            "true_mouse_predicted_graft": 103124,
+            "true_mouse_predicted_non_graft": 396876
+          },
+          "f1_graft": 0.34173668539539936,
+          "false_negative_rate_graft_as_non_graft": 0.793752,
+          "false_positive_rate_host_as_graft": 0.00081,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850998/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 103529,
+          "filtered_records": 207058,
+          "negative_predictive_value_host": 0.557290754525244,
+          "precision_graft_ppv": 0.9960880526229365,
+          "sensitivity_graft_recall": 0.206248,
+          "specificity_host_recall": 0.99919,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate2-n1000000-high-human/truth.tsv"
+    }
+  },
+  {
+    "direction": "mouse-graft",
+    "job_id": 41850999,
+    "report": {
+      "graft_source": "mouse",
+      "host_source": "human",
+      "schema_version": "gate6.mixture-graft-membership-evaluation/v2",
+      "tools": {
+        "legacy_xenofilter": {
+          "accuracy": 0.503231,
+          "balanced_accuracy": 0.503231,
+          "confusion": {
+            "true_human_predicted_graft": 7,
+            "true_human_predicted_non_graft": 499993,
+            "true_mouse_predicted_graft": 3238,
+            "true_mouse_predicted_non_graft": 496762
+          },
+          "f1_graft": 0.01286848354181363,
+          "false_negative_rate_graft_as_non_graft": 0.993524,
+          "false_positive_rate_host_as_graft": 1.4e-05,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850999/legacy-xenofilter/destination/Filtered_bams/mixture_mouse.picard-nm_Filtered.bam",
+          "filtered_fragments": 3245,
+          "filtered_records": 6490,
+          "negative_predictive_value_host": 0.5016207593641366,
+          "precision_graft_ppv": 0.9978428351309707,
+          "sensitivity_graft_recall": 0.006476,
+          "specificity_host_recall": 0.999986,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        },
+        "modern_xenofilx": {
+          "accuracy": 0.602987,
+          "balanced_accuracy": 0.602987,
+          "confusion": {
+            "true_human_predicted_graft": 362,
+            "true_human_predicted_non_graft": 499638,
+            "true_mouse_predicted_graft": 103349,
+            "true_mouse_predicted_non_graft": 396651
+          },
+          "f1_graft": 0.3423790522286325,
+          "false_negative_rate_graft_as_non_graft": 0.793302,
+          "false_positive_rate_host_as_graft": 0.000724,
+          "filtered_bam": "/public3/home/scg9946/otter-gate6/evidence/gate6-mouse-graft-human-host-xg-aware-20260902/analysis-41850999/modern-xenofilx/mixture_mouse_fixed_Filtered.bam",
+          "filtered_fragments": 103711,
+          "filtered_records": 207422,
+          "negative_predictive_value_host": 0.5574518933067347,
+          "precision_graft_ppv": 0.9965095312936911,
+          "sensitivity_graft_recall": 0.206698,
+          "specificity_host_recall": 0.999276,
+          "truth_fragments": 1000000,
+          "unknown_selected_fragments": 0
+        }
+      },
+      "truth_path": "/public3/home/scg9946/otter-gate6/evidence/gate6-human-mouse-mixtures-20260830/human0.5-replicate3-n1000000-high-human/truth.tsv"
+    }
+  }
+]
