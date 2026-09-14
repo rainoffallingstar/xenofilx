@@ -21,7 +21,7 @@ permissions:
 env:
   FIXTURE_BASE_URL: https://huggingface.co/datasets/fallingstar10/otter-data/resolve/0b0c627cb0fdb2394577bb9c6cdc969646ed668f
   GATE_C_RECORD_LIMIT: '200000'
-  ENVA_COMMIT: f1205bfa661480e450a54f3dcb916d8c24a0856d
+  ENVA_COMMIT: bdea477885a90dec16874351a9f572feb8298a55
   BAMDRIVER_COMMIT: 56d3f05f569bed00ce7d2d37bf636af7112a3b63
 
 jobs:
