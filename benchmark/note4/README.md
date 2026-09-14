@@ -35,7 +35,11 @@ The two evaluated pipelines are:
 
 * **modern** `xenofilx` — strand-aware bisulfite NM recalculation (`bamdriver`);
 * **legacy prototype** — Picard `SetNmMdAndUqTags` with `IS_BISULFITE_SEQUENCE=true` followed by
-  R `XenofilteR`, installed from a pinned source commit.
+  R `XenofilteR`, installed from a pinned source commit. `XenofilteR` loads `GenomeInfoDb`, which
+  needs the `GenomeInfoDbData` annotation package at load time; the conda spec
+  `bioconductor-genomeinfodbdata` resolves without installing an R package of that name, so
+  `scripts/gate6/install-xenofilter.sh` installs it from the pinned Bioconductor release, asserts
+  its version, and only then runs `R CMD INSTALL`.
 
 The unpatched conventional control (Picard without `IS_BISULFITE_SEQUENCE`) is also produced per
 cell; it is the arm that collapses to negligible recall and is not part of the reported table.
@@ -84,6 +88,11 @@ non-zero when a metric leaves the acceptable range.
 ## Reproducing
 
 ```bash
+# create the analysis environment (samtools, picard, r-base 4.3, the Bioconductor imports),
+# then install the pinned XenofilteR release into it
+enva create --yaml <analysis environment yaml> --name gradient-analysis
+bash scripts/gate6/install-xenofilter.sh <XenofilteR source directory> gradient-analysis
+
 # representative slice (the same cells a push / pull_request run covers)
 python3 scripts/gate6/run-note4-gradient-cell.py \
   --contract benchmark/note4/mixture-cells.json \
