@@ -149,8 +149,9 @@ jobs:
       - name: Install XenofilteR from the pinned source
         run: |
           set -euo pipefail
-          .ci/enva/target/release/enva run --name gradient-analysis \
-            --command "R CMD INSTALL '$GITHUB_WORKSPACE/.ci/XenofilteR'" \
+          bash scripts/gate6/install-xenofilter.sh \
+            "$GITHUB_WORKSPACE/.ci/XenofilteR" \
+            gradient-analysis \
             2>&1 | tee ci-artifacts/logs/xenofilter-install.log
 
       - name: Acquire and verify reference FASTAs
