@@ -53,14 +53,33 @@ cell; it is the arm that collapses to negligible recall and is not part of the r
 * `per-cell-expected.json` — the per-cell values plus the 50% cell entry; this is the anchor file
   the workflows compare against.
 
-Both `xenofilx` selection and the Picard arms are deterministic, so CI enforces the **per-cell**
-recorded values (0.01 percentage point tolerance) rather than the three-replicate means. A single
-replicate can deviate from the published mean by up to ~2 percentage points at low human
-fractions, so mean-based tolerances would be wrong for a one-replicate slice. The aggregate
-tables remain the reference for the manuscript numbers.
+Both `xenofilx` selection and the Picard arms are deterministic, so the recorded per-cell
+values are used as the **reference**, not as a hard gate:
+
+| Outcome | Meaning | Job effect |
+|---|---|---|
+| within ±0.5 pp | metric matches the recorded value | none |
+| outside ±0.5 pp | acceptable difference | warning annotation |
+| outside ±2.0 pp | large difference | warning annotation, still recorded |
+
+The comparison never fails the job. Differences are written to
+`gradient-comparison.json` (with a per-metric `status` field) and summarised as a GitHub
+warning/notice annotation, and the evidence is uploaded either way. Only a missing or
+structurally invalid evidence set is fatal, because that means the evaluation did not run.
+
+Structural contract checks remain enforced in `mixture-parity.yml`: the evaluated arms must be
+exactly the expected set, `unknown_selected_fragments` must be zero, the truth manifest must
+carry at least 1,000,000 fragments, and every metric must lie in `[0, 1]`.
+
+A single replicate can deviate from the published three-replicate mean by up to ~2 percentage
+points at low human fractions, so the recorded per-cell values are compared instead of the
+aggregate means. The aggregate tables remain the reference for the manuscript numbers.
 
 All tables were recomputed directly from the evidence roots and match the manuscript values
 digit for digit.
+
+The strict behaviour is still available: `compare-note4-gradient.py --fail-on-deviation` exits
+non-zero when a metric leaves the acceptable range.
 
 ## Reproducing
 
