@@ -79,6 +79,18 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Free runner disk space
+        run: |
+          set -euo pipefail
+          # A 3 GB fixture BAM plus a 3 GB reference, and for the bsseq cells a CT and a GA
+          # reference on top, leave no headroom on the default runner image. Remove only the
+          # preinstalled toolchains this job does not use; the Go and Rust toolchains it does
+          # use were installed by the preceding setup steps and must be kept.
+          df -h / | tail -n 1
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          df -h / | tail -n 1
+
       - name: Prepare evidence directory
         run: mkdir -p ci-artifacts/fixture ci-artifacts/reference ci-artifacts/evidence
 
@@ -208,23 +220,20 @@ jobs:
         if: matrix.mode == 'bsseq'
         run: |
           set -euo pipefail
+          samtools_path="$(.ci/enva/target/release/enva run --name gate-c-samtools \
+            --command 'command -v samtools' | tail -n 1)"
+          test -n "$samtools_path"
           for context in CT GA; do
             low="$(printf '%s' "$context" | tr 'A-Z' 'a-z')"
-            # Write through samtools' own -o instead of a shell redirection: `enva run` also
-            # writes to stdout, which would otherwise prepend non-BAM bytes to the file.
-            .ci/enva/target/release/enva run --name gate-c-samtools \
-              --command "samtools view -h -o ci-artifacts/fixture/input.$low.sam ci-artifacts/fixture/input.bam"
-            test -s "ci-artifacts/fixture/input.$low.sam"
-            awk -F'\t' -v tag="XG:Z:$context" \
-              'BEGIN{OFS="\t"} /^@/{print; next} {for(i=12;i<=NF;i++) if($i==tag){print; next}}' \
-              "ci-artifacts/fixture/input.$low.sam" > "ci-artifacts/fixture/input.$low.filtered.sam"
-            .ci/enva/target/release/enva run --name gate-c-samtools \
-              --command "samtools view -b -o ci-artifacts/fixture/input.xg-$low.bam ci-artifacts/fixture/input.$low.filtered.sam"
+            # The helper streams samtools | awk | samtools, so no SAM intermediate is written:
+            # a text intermediate for this fixture is several times the BAM size.
+            bash scripts/gate6/split-bam-by-xg-tag.sh \
+              "$GITHUB_WORKSPACE/ci-artifacts/fixture/input.bam" \
+              "$context" \
+              "$GITHUB_WORKSPACE/ci-artifacts/fixture/input.xg-$low.bam" \
+              "$samtools_path" \
+              | tee "ci-artifacts/evidence/xg-$low-record-count.txt"
             ls -l "ci-artifacts/fixture/input.xg-$low.bam"
-            .ci/enva/target/release/enva run --name gate-c-samtools \
-              --command "samtools quickcheck -v ci-artifacts/fixture/input.xg-$low.bam"
-            .ci/enva/target/release/enva run --name gate-c-samtools \
-              --command "samtools view -c ci-artifacts/fixture/input.xg-$low.bam | tee ci-artifacts/evidence/xg-$low-record-count.txt"
           done
 
       - name: Control arms - oracle and audit on converted references
@@ -268,6 +277,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: xenofilx-gate-c-${{ matrix.cell }}
-          path: ci-artifacts/
+          # Only derived records and logs: the fixture BAM and the reference FASTA are
+          # reproducible from the pinned revision and would add several GB per artifact.
+          path: |
+            ci-artifacts/evidence/
+            ci-artifacts/*.log
+            ci-artifacts/*.yaml
           if-no-files-found: warn
           retention-days: 90
