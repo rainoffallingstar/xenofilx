@@ -7,6 +7,7 @@ import argparse
 import csv
 import gzip
 import json
+import sys
 from itertools import zip_longest
 from pathlib import Path
 from typing import TextIO
@@ -142,6 +143,15 @@ def main() -> int:
     report = compare_rows(arguments.oracle, arguments.xenofilx, arguments.xenofilx_mode)
     arguments.report.parent.mkdir(parents=True, exist_ok=True)
     arguments.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    if not report["equal"]:
+        # Surface the mismatch in the job log; the report file alone is not visible during triage.
+        print("oracle comparison mismatch", file=sys.stderr)
+        print(f"  mode: {report['xenofilx_mode']}", file=sys.stderr)
+        print(f"  records compared: {report['records_compared']}", file=sys.stderr)
+        print(f"  difference counts: {report['difference_counts']}", file=sys.stderr)
+        first = report["first_difference"]
+        if first is not None:
+            print(f"  first difference: {json.dumps(first, indent=2)}", file=sys.stderr)
     return 0 if report["equal"] else 1
 
 
