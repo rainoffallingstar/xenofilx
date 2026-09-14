@@ -32,5 +32,11 @@ Thumbs.db
 
 # Build outputs
 /xenofilx
+/xenofilter
+/xenofilter-go
 /gate6-*
+
+# Python caches from the gate6 helper scripts
+__pycache__/
+*.pyc
 
