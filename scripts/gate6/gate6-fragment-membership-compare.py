@@ -99,10 +99,18 @@ def write_sorted_unique_names(
             qname, separator, _ = alignment_line.partition("\t")
             if not separator or not qname:
                 raise ValueError(f"malformed SAM record while reading {bam_path}")
-            sort_process.stdin.write(qname)
-            sort_process.stdin.write("\n")
+            try:
+                sort_process.stdin.write(qname)
+                sort_process.stdin.write("\n")
+            except BrokenPipeError:
+                # The sorter exited early; stop feeding it and surface its own error below
+                # instead of masking it with a pipe write failure.
+                break
     finally:
-        sort_process.stdin.close()
+        try:
+            sort_process.stdin.close()
+        except BrokenPipeError:
+            pass
         view_process.stdout.close()
 
     view_stderr = view_process.stderr.read() if view_process.stderr else ""
@@ -112,7 +120,9 @@ def write_sorted_unique_names(
     if view_status != 0:
         raise RuntimeError(f"samtools view failed for {bam_path}: {view_stderr.strip()}")
     if sort_status != 0:
-        raise RuntimeError(f"sort failed for {bam_path}: {sort_stderr.strip()}")
+        raise RuntimeError(
+            f"sort failed for {bam_path} (exit {sort_status}): {sort_stderr.strip()}"
+        )
 
 
 def iterate_names(path: Path) -> Iterator[str]:

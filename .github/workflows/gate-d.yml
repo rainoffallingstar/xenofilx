@@ -5,9 +5,8 @@ name: Xenofilx Gate D
 # The workflow recomputes fragment membership and mapping stratification from published
 # BAM intermediates, then cross-checks the score-decision accounting.
 #
-# NOTE: `FIXTURE_BASE_URL` still contains 0b0c627cb0fdb2394577bb9c6cdc969646ed668f. Replace it with the
-# immutable Hugging Face dataset revision after the Gate D intermediates are published to
-# `fallingstar10/otter-data`.
+# The fixture revision below is a fixed, immutable `fallingstar10/otter-data` revision that
+# contains the Gate C inputs and the Gate D intermediates this job cross-checks.
 
 on:
   push:
@@ -21,7 +20,7 @@ permissions:
 
 env:
   FIXTURE_BASE_URL: https://huggingface.co/datasets/fallingstar10/otter-data/resolve/0b0c627cb0fdb2394577bb9c6cdc969646ed668f
-  ENVA_COMMIT: 7dc3d3681715a136e070b667535c39d30d8e1177
+  ENVA_COMMIT: f1205bfa661480e450a54f3dcb916d8c24a0856d
 
 jobs:
   fragment-accounting:
@@ -45,6 +44,18 @@ jobs:
 
       - name: Prepare evidence directory
         run: mkdir -p ci-artifacts/{fixture,evidence,tmp,logs}
+
+      - name: Free runner disk space
+        run: |
+          set -euo pipefail
+          # Four fixture BAMs plus externally sorted QNAME temp files need roughly 12 GB,
+          # which the default runner image cannot spare. Remove the preinstalled toolchains
+          # that this job does not use (Go, Node, .NET, Android SDK, Haskell, CodeQL).
+          df -h / | tail -n 1
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+          sudo rm -rf /opt/hostedtoolcache/go /opt/hostedtoolcache/node || true
+          df -h / | tail -n 1
 
       - name: Build enva and create the Samtools environment
         env:
