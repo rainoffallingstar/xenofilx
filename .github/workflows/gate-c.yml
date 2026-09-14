@@ -4,9 +4,8 @@ name: Xenofilx Gate C
 # independent oracle (`bamdriver/cmd/nmoracle`) record for record, on the original
 # reference (primary arm) and on strand-converted CT/GA references (control arms).
 #
-# NOTE: `FIXTURE_BASE_URL` still contains 0b0c627cb0fdb2394577bb9c6cdc969646ed668f. Replace it with the
-# immutable Hugging Face dataset revision after the Gate C fixture BAMs are published to
-# `fallingstar10/otter-data`. The workflow is otherwise complete.
+# The fixture revision below is a fixed, immutable `fallingstar10/otter-data` revision that
+# contains the Gate C fixture BAMs used by every cell.
 
 on:
   push:
@@ -181,10 +180,17 @@ jobs:
       - name: Primary arm - assert oracle equality
         run: |
           set -euo pipefail
+          # The audit runs with --bisulfite only for the bsseq cells, so the expected NM
+          # contract must follow the cell mode instead of being fixed.
+          if [ "${{ matrix.mode }}" = "bsseq" ]; then
+            xenofilx_mode=bisulfite
+          else
+            xenofilx_mode=conventional
+          fi
           python3 scripts/gate6/gate6-nm-score-compare.py \
             --oracle ci-artifacts/evidence/oracle-records.tsv \
             --xenofilx ci-artifacts/evidence/xenofilx-records.tsv \
-            --xenofilx-mode bisulfite \
+            --xenofilx-mode "$xenofilx_mode" \
             --report ci-artifacts/evidence/xenofilx-oracle-comparison.json
 
       - name: Control arms - convert the reference for CT and GA
@@ -204,18 +210,21 @@ jobs:
           set -euo pipefail
           for context in CT GA; do
             low="$(printf '%s' "$context" | tr 'A-Z' 'a-z')"
+            # Write through samtools' own -o instead of a shell redirection: `enva run` also
+            # writes to stdout, which would otherwise prepend non-BAM bytes to the file.
             .ci/enva/target/release/enva run --name gate-c-samtools \
-              --command "samtools view -h ci-artifacts/fixture/input.bam" \
-              > "ci-artifacts/fixture/input.$low.sam"
+              --command "samtools view -h -o ci-artifacts/fixture/input.$low.sam ci-artifacts/fixture/input.bam"
+            test -s "ci-artifacts/fixture/input.$low.sam"
             awk -F'\t' -v tag="XG:Z:$context" \
               'BEGIN{OFS="\t"} /^@/{print; next} {for(i=12;i<=NF;i++) if($i==tag){print; next}}' \
               "ci-artifacts/fixture/input.$low.sam" > "ci-artifacts/fixture/input.$low.filtered.sam"
             .ci/enva/target/release/enva run --name gate-c-samtools \
-              --command "samtools view -bh ci-artifacts/fixture/input.$low.filtered.sam" \
-              > "ci-artifacts/fixture/input.xg-$low.bam"
+              --command "samtools view -b -o ci-artifacts/fixture/input.xg-$low.bam ci-artifacts/fixture/input.$low.filtered.sam"
+            ls -l "ci-artifacts/fixture/input.xg-$low.bam"
             .ci/enva/target/release/enva run --name gate-c-samtools \
-              --command "samtools view -c ci-artifacts/fixture/input.xg-$low.bam" \
-              | tee "ci-artifacts/evidence/xg-$low-record-count.txt"
+              --command "samtools quickcheck -v ci-artifacts/fixture/input.xg-$low.bam"
+            .ci/enva/target/release/enva run --name gate-c-samtools \
+              --command "samtools view -c ci-artifacts/fixture/input.xg-$low.bam | tee ci-artifacts/evidence/xg-$low-record-count.txt"
           done
 
       - name: Control arms - oracle and audit on converted references
