@@ -38,6 +38,11 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--enva", required=True, help="Path to the compiled enva binary")
     parser.add_argument("--environment", required=True, help="enva environment name for the analysis toolchain")
     parser.add_argument("--work-directory", required=True, help="Directory holding per-cell evidence")
+    parser.add_argument(
+        "--fixture-cache",
+        default="ci-artifacts/fixture-cache",
+        help="Shared content-addressed cache so repeated runs of one cell download it once",
+    )
     parser.add_argument("--gate6-scripts", default=str(SCRIPT_DIRECTORY), help="Directory holding the gate6 helpers")
     parser.add_argument("--threads", type=int, default=4, help="Thread count for xenofilx and XenofilteR")
     parser.add_argument("--sort-memory", default="4G", help="samtools sort memory for xenofilx")
@@ -118,10 +123,13 @@ def main() -> None:
             f"{arguments.cell}-t{parameters['mm_threshold']}-p{parameters['unmapped_penalty']}"
         )
     work_directory = pathlib.Path(arguments.work_directory) / cell_directory_name
-    fixture_directory = work_directory / "fixture"
     log_directory = work_directory / "logs"
-    fixture_directory.mkdir(parents=True, exist_ok=True)
     log_directory.mkdir(parents=True, exist_ok=True)
+
+    # Fixtures are content addressed in a shared cache so a sweep that re-runs the same cell
+    # (for example the 12 parameter combinations of one replicate) downloads it only once.
+    fixture_cache = pathlib.Path(arguments.fixture_cache)
+    fixture_cache.mkdir(parents=True, exist_ok=True)
 
     dataset_prefix = f"{arguments.fixture_base_url}/xenofilx/mixture/bs-pdx/{arguments.cell}"
     fixtures = {
@@ -132,7 +140,7 @@ def main() -> None:
     local_paths = {}
     for role, (url, metadata) in fixtures.items():
         suffix = ".tsv" if role == "truth" else ".bam"
-        local_path = fixture_directory / f"{role}{suffix}"
+        local_path = fixture_cache / f"{arguments.cell}.{role}{suffix}"
         download_verified(url, local_path, metadata["sha256"], metadata["size_bytes"])
         local_paths[role] = local_path
 

@@ -107,7 +107,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Prepare evidence directory
-        run: mkdir -p ci-artifacts/{fixture,reference,evidence,logs}
+        run: mkdir -p ci-artifacts/{reference,evidence,logs,fixture-cache}
 
       - name: Build xenofilx and enva
         run: |
