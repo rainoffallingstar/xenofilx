@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	defaultFilterTotalSortMemoryBudgetBytes  = int64(256 << 20)
-	filterMinimumSortMemoryLimitBytes = int64(8 << 20)
+	defaultFilterTotalSortMemoryBudgetBytes = int64(256 << 20)
+	filterMinimumSortMemoryLimitBytes       = int64(8 << 20)
 )
 
 // Sample represents a single sample to process.
