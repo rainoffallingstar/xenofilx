@@ -194,9 +194,11 @@ func runSingleBenchmark(
 }
 
 func main() {
-	defaultInputPath := "/home/fallingstar10/shire/xdxtools/testdata/pdx-srr36187610/SRR36187610_mm10.bam"
+	// Set XENOFILX_SORTBENCH_INPUT to default the -input flag to a local BAM;
+	// otherwise the caller must pass -input explicitly.
+	defaultInputPath := os.Getenv("XENOFILX_SORTBENCH_INPUT")
 
-	inputPathFlag := flag.String("input", defaultInputPath, "Path to input BAM file to sort and benchmark")
+	inputPathFlag := flag.String("input", defaultInputPath, "Path to input BAM file to sort and benchmark (or set XENOFILX_SORTBENCH_INPUT)")
 	outputPathFlag := flag.String("output", "", "Path for sorted output BAM (defaults to temp file)")
 	byNameFlag := flag.Bool("by-name", false, "Sort by queryname instead of coordinate")
 	memoryLimitMBFlag := flag.Int64("memory-limit-mb", 64, "External sort memory buffer limit in MB")

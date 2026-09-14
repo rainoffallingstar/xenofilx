@@ -9,7 +9,12 @@ import (
 	"time"
 )
 
-const pdxBenchmarkBAMPath = "/home/fallingstar10/shire/xdxtools/testdata/pdx-srr36187610/SRR36187610_mm10.bam"
+// pdxBenchmarkBAMPath returns the optional PDX BAM used by the measured sort
+// test and benchmark. Set XENOFILX_TEST_PDX_BAM to an mm10 PDX BAM path to
+// enable them; an empty value makes both skip so the suite stays portable.
+func pdxBenchmarkBAMPath() string {
+	return os.Getenv("XENOFILX_TEST_PDX_BAM")
+}
 
 // SortBenchmarkMetrics captures performance measurements for a BAM sort execution.
 type SortBenchmarkMetrics struct {
@@ -134,14 +139,18 @@ func executeSortBenchmark(
 	}, nil
 }
 
-// TestSortPDXSRR36187610 runs a measured sorting test of the 88MB PDX BAM file and logs performance metrics.
+// TestSortPDXSRR36187610 runs a measured sorting test of an optional large PDX BAM and logs performance metrics.
 func TestSortPDXSRR36187610(t *testing.T) {
-	if _, err := os.Stat(pdxBenchmarkBAMPath); os.IsNotExist(err) {
-		t.Skipf("PDX test BAM not found at %s", pdxBenchmarkBAMPath)
+	benchmarkBAMPath := pdxBenchmarkBAMPath()
+	if benchmarkBAMPath == "" {
+		t.Skip("XENOFILX_TEST_PDX_BAM not set, skipping measured sort test")
+	}
+	if _, err := os.Stat(benchmarkBAMPath); err != nil {
+		t.Skipf("PDX test BAM not found at %s", benchmarkBAMPath)
 	}
 
-	t.Logf("Running bamnative.Sort on %s", pdxBenchmarkBAMPath)
-	metrics, err := executeSortBenchmark(pdxBenchmarkBAMPath, false, 64<<20, t.TempDir())
+	t.Logf("Running bamnative.Sort on %s", benchmarkBAMPath)
+	metrics, err := executeSortBenchmark(benchmarkBAMPath, false, 64<<20, t.TempDir())
 	if err != nil {
 		t.Fatalf("Sort benchmark failed: %v", err)
 	}
@@ -158,13 +167,17 @@ func TestSortPDXSRR36187610(t *testing.T) {
 	t.Logf("GC Cycles:         %d collections (pause total: %v)", metrics.NumGC, metrics.GCPauseTotal)
 }
 
-// BenchmarkSortPDXSRR36187610 benchmarks coordinate sorting on the 88MB PDX BAM file.
+// BenchmarkSortPDXSRR36187610 benchmarks coordinate sorting on an optional large PDX BAM file.
 func BenchmarkSortPDXSRR36187610(b *testing.B) {
-	if _, err := os.Stat(pdxBenchmarkBAMPath); os.IsNotExist(err) {
-		b.Skipf("PDX test BAM not found at %s", pdxBenchmarkBAMPath)
+	benchmarkBAMPath := pdxBenchmarkBAMPath()
+	if benchmarkBAMPath == "" {
+		b.Skip("XENOFILX_TEST_PDX_BAM not set, skipping sort benchmark")
+	}
+	if _, err := os.Stat(benchmarkBAMPath); err != nil {
+		b.Skipf("PDX test BAM not found at %s", benchmarkBAMPath)
 	}
 
-	fileInfo, err := os.Stat(pdxBenchmarkBAMPath)
+	fileInfo, err := os.Stat(benchmarkBAMPath)
 	if err != nil {
 		b.Fatalf("Failed to stat BAM: %v", err)
 	}
@@ -184,7 +197,7 @@ func BenchmarkSortPDXSRR36187610(b *testing.B) {
 			MemoryLimitBytes:   64 << 20,
 			TemporaryDirectory: temporaryDirectory,
 		}
-		if err := Sort(pdxBenchmarkBAMPath, sortOptions); err != nil {
+		if err := Sort(benchmarkBAMPath, sortOptions); err != nil {
 			b.Fatalf("Sort failed at iteration %d: %v", iteration, err)
 		}
 		_ = os.Remove(outputPath)

@@ -46,8 +46,14 @@ func TestGetSequenceRealHg19(t *testing.T) {
 }
 
 // TestGetSequenceRealMm10 verifies the chr prefix fallback for mm10.fa.
+//
+// Set XENOFILX_TEST_MM10_FASTA to a full mm10 FASTA path to enable this check;
+// it is skipped when the variable is unset so the test remains portable.
 func TestGetSequenceRealMm10(t *testing.T) {
-	const mm10Path = "/public3/home/scg9946/TTest/breg/CpG_me/genomes/mm10/mm10.fa"
+	mm10Path := os.Getenv("XENOFILX_TEST_MM10_FASTA")
+	if mm10Path == "" {
+		t.Skip("XENOFILX_TEST_MM10_FASTA not set, skipping real-genome test")
+	}
 	if _, err := os.Stat(mm10Path); err != nil {
 		t.Skipf("mm10.fa not accessible (%v), skipping real-genome test", err)
 	}
@@ -78,10 +84,16 @@ func TestGetSequenceRealMm10(t *testing.T) {
 }
 
 // TestCalculateNMWithRealReads verifies that CalculateNM produces valid values
-// when called with the real hg19 reference and test BAM records.
+// when called with a full hg19 reference and test BAM records.
+//
+// Set XENOFILX_TEST_HG19_FASTA to a full hg19 FASTA path to enable this check;
+// it is skipped when the variable is unset so the test remains portable.
 func TestCalculateNMWithRealReads(t *testing.T) {
 	const bamPath = "../../testdata/Test_hg19_NRAS.bam"
-	const hg19Path = "/public3/home/scg9946/methx/testdata/genomes/hg19.fa"
+	hg19Path := os.Getenv("XENOFILX_TEST_HG19_FASTA")
+	if hg19Path == "" {
+		t.Skip("XENOFILX_TEST_HG19_FASTA not set, skipping real-read NM test")
+	}
 
 	for _, p := range []string{bamPath, hg19Path} {
 		if _, err := os.Stat(p); err != nil {
