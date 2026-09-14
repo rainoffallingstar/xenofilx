@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import shutil
 import subprocess
 from collections import Counter
 from pathlib import Path
@@ -162,10 +163,21 @@ def evaluate_tool(
     }
 
 
+def resolve_executable(candidate: Path) -> Path:
+    """Accept an explicit executable path or a bare command name resolved on PATH."""
+    if candidate.is_file():
+        return candidate
+    resolved = shutil.which(str(candidate))
+    if resolved is None:
+        raise ValueError(f"executable is not available: {candidate}")
+    return Path(resolved)
+
+
 def main() -> int:
     arguments = parse_arguments()
-    if not arguments.samtools.is_file():
-        raise ValueError(f"samtools is not a file: {arguments.samtools}")
+    # Callers such as the Note 4 sweep run inside an enva environment and pass the bare
+    # command name, so a name that resolves on PATH is as valid as an explicit path.
+    samtools_path = resolve_executable(arguments.samtools)
     if not arguments.truth.is_file():
         raise ValueError(f"truth manifest is not a file: {arguments.truth}")
     truth_by_fragment = load_truth(arguments.truth)
@@ -180,7 +192,7 @@ def main() -> int:
     for tool_name, bam_path in tool_outputs.items():
         if not bam_path.is_file():
             raise ValueError(f"filtered BAM is not a file: {bam_path}")
-        selected_qnames, filtered_record_count = stream_selected_qnames(arguments.samtools, bam_path)
+        selected_qnames, filtered_record_count = stream_selected_qnames(samtools_path, bam_path)
         report["tools"][tool_name] = {
             "filtered_bam": str(bam_path.resolve()),
             **evaluate_tool(

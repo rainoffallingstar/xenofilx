@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import shutil
 import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -296,21 +297,32 @@ def compare_records(
     }
 
 
+def resolve_executable(candidate: Path) -> Path:
+    """Accept an explicit executable path or a bare command name resolved on PATH."""
+    if candidate.is_file():
+        return candidate
+    resolved = shutil.which(str(candidate))
+    if resolved is None:
+        raise ValueError(f"executable is not available: {candidate}")
+    return Path(resolved)
+
+
 def main() -> int:
     arguments = parse_arguments()
     if arguments.records_read <= 0:
         raise ValueError("--records-read must be positive")
+    samtools_path = resolve_executable(arguments.samtools)
     picard_paths = dict(arguments.picard_bam)
     if len(picard_paths) != len(arguments.picard_bam):
         raise ValueError("Picard labels must be unique")
     original_records = read_original_mapped_records(
-        arguments.samtools,
+        samtools_path,
         arguments.original_bam,
         arguments.records_read,
     )
     universe = {record["identity_key"]: record for record in original_records}
     picard_records_by_label = {
-        label: read_picard_nm_for_universe(arguments.samtools, path, universe)
+        label: read_picard_nm_for_universe(samtools_path, path, universe)
         for label, path in picard_paths.items()
     }
     oracle_rows = read_audit_rows(arguments.oracle)
