@@ -1,0 +1,321 @@
+name: Xenofilx Mixture Parity
+
+# Gate evidence: graft-classification performance on real human/mouse mixtures evaluated
+# against the construction truth manifest. RNA-PDX and BS-PDX are independent cells.
+#
+# Three result families are produced and evaluated per cell:
+#   1. modern_xenofilx                  - xenofilx selection
+#   2. picard conventional / bisulfite   - Picard SetNmMdAndUqTags NM semantics (BS cell
+#                                          produces both; the RNA cell produces conventional)
+#   3. legacy_xenofilter_*               - XenofilteR selection driven by each Picard NM
+#                                          variant, installed from a pinned source commit
+#                                          because XenofilteR is no longer packaged.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FIXTURE_BASE_URL: https://huggingface.co/datasets/fallingstar10/otter-data/resolve/0b0c627cb0fdb2394577bb9c6cdc969646ed668f
+  ENVA_COMMIT: d93b7fc7c82593dcaffa56f28b50aad02cca1108
+  XENOFILTER_COMMIT: de0bbe4c706766702b0fe15a676893639f96d50d
+  HG38_URL: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/GRCh38.primary_assembly.genome.fa.gz
+  HG38_GZ_MD5: 9c3fc2ca260a767530dddb0f26721a6b
+  HG38_FA_SHA256: e49b92b3e4f321bf254c042f25b726d9931c4d74c7523e8b6bb530e63b0cfd4b
+  HG38_FA_SIZE: '3151417447'
+  HG19_URL: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/GRCh37.p13.genome.fa.gz
+  HG19_GZ_MD5: 490904ef2561472d0801c704ffc85761
+  HG19_FA_SHA256: b22e74cdd8b90a1228474ce31739aa76d71be55735f93de1471e3886790b9256
+  HG19_FA_SIZE: '3234842113'
+  MM10_URL: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/GRCm38.primary_assembly.genome.fa.gz
+  MM10_GZ_MD5: 3bc591be24b77f710b6ba5d41022fc5a
+  MM10_FA_SHA256: 767f48e8ae5bda117ad519fb694cbf7e24f161bf094c274bbbcd16e52aedf802
+  MM10_FA_SIZE: '2776387546'
+
+jobs:
+  mixture-parity:
+    name: Mixture ${{ matrix.assay }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - assay: rna-pdx
+            graft_dataset_path: xenofilx/mixture/rna-pdx/human0.5-replicate1/graft.bam
+            graft_sha256: c4595708e48b767eaacb676a5f720e0da58a16f4d74a663962c8823a5bbaa0c5
+            graft_size: '89523416'
+            host_dataset_path: xenofilx/mixture/rna-pdx/human0.5-replicate1/host.bam
+            host_sha256: b7f81931f5ca47a98765a7e3f032c438217488b949d7c147cc68ab6dc4584e38
+            host_size: '99967346'
+            truth_dataset_path: xenofilx/mixture/rna-pdx/human0.5-replicate1/truth.tsv
+            truth_sha256: 418673a664ed13207b3f7e3ef068283bc8c9a36764630dcb22649dcffdcbe503
+            truth_size: '58032760'
+            graft_reference: hg38
+            host_reference: mm10
+            mm_threshold: '4'
+            bisulfite: 'false'
+            graft_source: human
+          - assay: bs-pdx
+            graft_dataset_path: xenofilx/mixture/bs-pdx/human0p5-replicate1/graft.hg19.bam
+            graft_sha256: 1cbf6d2f59635661a937d116b0cd42e279627166f6c643287f4b0d89693bd6be
+            graft_size: '63927702'
+            host_dataset_path: xenofilx/mixture/bs-pdx/human0p5-replicate1/host.mm10.bam
+            host_sha256: f1c71f84bc515cd242664e69738333bdd368c65d3eed32cf97237d43db448292
+            host_size: '20426256'
+            truth_dataset_path: xenofilx/mixture/bs-pdx/human0p5-replicate1/truth.tsv
+            truth_sha256: 4f5d8f7abeff9247f170c48a89ce3fe9f7e3685d0b84e1d6ea05363a071fbff2
+            truth_size: '60684836'
+            graft_reference: hg19
+            host_reference: mm10
+            mm_threshold: '6'
+            bisulfite: 'true'
+            graft_source: human
+    steps:
+      - name: Checkout xenofilx
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned enva
+        uses: actions/checkout@v4
+        with:
+          repository: rainoffallingstar/enva
+          ref: ${{ env.ENVA_COMMIT }}
+          path: .ci/enva
+
+      - name: Checkout pinned XenofilteR source
+        uses: actions/checkout@v4
+        with:
+          repository: PeeperLab/XenofilteR
+          ref: ${{ env.XENOFILTER_COMMIT }}
+          path: .ci/XenofilteR
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Prepare evidence directory
+        run: mkdir -p ci-artifacts/{fixture,reference,evidence,tmp,logs}
+
+      - name: Build xenofilx and enva
+        run: |
+          set -euo pipefail
+          go build -buildvcs=false -o ci-artifacts/xenofilx ./cmd/xenofilx
+          (cd .ci/enva && cargo build --release --locked --bin enva) 2>&1 | tee ci-artifacts/logs/enva-build.log
+
+      - name: Create the mixture analysis environment through enva
+        env:
+          RATTLER_CACHE_DIR: ${{ runner.temp }}/rattler-cache
+        run: |
+          set -euo pipefail
+          mkdir -p "$RATTLER_CACHE_DIR"
+          cat > ci-artifacts/mixture-analysis.yaml <<'YAML'
+          channels:
+            - conda-forge
+            - bioconda
+          dependencies:
+            - samtools=1.15.1
+            - picard=3.4.0
+            - r-base=4.3
+            - bioconductor-biocparallel
+            - bioconductor-genomicalignments
+            - bioconductor-genomicranges
+            - bioconductor-iranges
+            - bioconductor-s4vectors
+            - bioconductor-rsamtools
+            - r-futile.logger
+            - r-jsonlite
+          YAML
+          .ci/enva/target/release/enva create \
+            --yaml ci-artifacts/mixture-analysis.yaml \
+            --name mixture-analysis \
+            --force \
+            --output summary \
+            2>&1 | tee ci-artifacts/logs/enva-create.log
+
+      - name: Install XenofilteR from the pinned source
+        run: |
+          set -euo pipefail
+          .ci/enva/target/release/enva run --name mixture-analysis \
+            --command "R CMD INSTALL '$GITHUB_WORKSPACE/.ci/XenofilteR'" \
+            2>&1 | tee ci-artifacts/logs/xenofilter-install.log
+
+      - name: Verify the analysis toolchain
+        run: |
+          set -euo pipefail
+          .ci/enva/target/release/enva run --name mixture-analysis \
+            --command "samtools --version | head -n 1; picard MarkDuplicates --version 2>&1 | head -n 1; Rscript -e 'cat(as.character(packageVersion(\"XenofilteR\")), \"\\n\")'" \
+            2>&1 | tee ci-artifacts/logs/toolchain-versions.log
+          grep -q '^samtools 1.15.1' ci-artifacts/logs/toolchain-versions.log
+
+      - name: Download and verify mixture fixtures
+        run: |
+          set -euo pipefail
+          download_and_check () {
+            local dataset_path="$1" local_path="$2" expected_sha="$3" expected_size="$4"
+            curl --fail --location --silent --show-error --retry 5 \
+              "$FIXTURE_BASE_URL/$dataset_path" --output "$local_path"
+            printf '%s  %s\n' "$expected_sha" "$local_path" | sha256sum --check -
+            test "$(stat -c %s "$local_path")" = "$expected_size"
+          }
+          download_and_check "${{ matrix.graft_dataset_path }}" ci-artifacts/fixture/graft.bam "${{ matrix.graft_sha256 }}" "${{ matrix.graft_size }}"
+          download_and_check "${{ matrix.host_dataset_path }}" ci-artifacts/fixture/host.bam "${{ matrix.host_sha256 }}" "${{ matrix.host_size }}"
+          download_and_check "${{ matrix.truth_dataset_path }}" ci-artifacts/fixture/truth.tsv "${{ matrix.truth_sha256 }}" "${{ matrix.truth_size }}"
+
+      - name: Acquire and verify reference FASTAs
+        run: |
+          set -euo pipefail
+          fetch_reference () {
+            local label="$1" url="$2" gz_md5="$3" fa_sha="$4" fa_size="$5"
+            local gz="ci-artifacts/reference/${label}.fa.gz"
+            local fa="ci-artifacts/reference/${label}.fa"
+            curl --fail --location --silent --show-error --retry 5 --continue-at - "$url" --output "$gz"
+            printf '%s  %s\n' "$gz_md5" "$gz" | md5sum --check -
+            gunzip -c "$gz" > "$fa"
+            printf '%s  %s\n' "$fa_sha" "$fa" | sha256sum --check -
+            test "$(stat -c %s "$fa")" = "$fa_size"
+            rm -f "$gz"
+          }
+          fetch_by_label () {
+            case "$1" in
+              hg38) fetch_reference hg38 "$HG38_URL" "$HG38_GZ_MD5" "$HG38_FA_SHA256" "$HG38_FA_SIZE" ;;
+              hg19) fetch_reference hg19 "$HG19_URL" "$HG19_GZ_MD5" "$HG19_FA_SHA256" "$HG19_FA_SIZE" ;;
+              mm10) fetch_reference mm10 "$MM10_URL" "$MM10_GZ_MD5" "$MM10_FA_SHA256" "$MM10_FA_SIZE" ;;
+              *) echo "unknown reference label: $1" >&2; exit 1 ;;
+            esac
+          }
+          fetch_by_label "${{ matrix.graft_reference }}"
+          fetch_by_label "${{ matrix.host_reference }}"
+
+      - name: Result 1 - Xenofilx graft selection
+        run: |
+          set -euo pipefail
+          extra_args=()
+          if [ "${{ matrix.bisulfite }}" = "true" ]; then
+            extra_args+=(--bisulfite)
+          fi
+          ./ci-artifacts/xenofilx run \
+            --graft ci-artifacts/fixture/graft.bam \
+            --host ci-artifacts/fixture/host.bam \
+            --output ci-artifacts/evidence/modern-xenofilx \
+            --output-names "mixture_graft_Filtered.bam" \
+            --graft-ref ci-artifacts/reference/${{ matrix.graft_reference }}.fa \
+            --host-ref ci-artifacts/reference/mm10.fa \
+            --mm-threshold ${{ matrix.mm_threshold }} \
+            --unmapped-penalty 8 \
+            --threads 4 \
+            --sort-memory 4G \
+            --recalculate-nm \
+            "${extra_args[@]}" \
+            > ci-artifacts/logs/xenofilx.stdout.txt \
+            2> ci-artifacts/logs/xenofilx.stderr.txt
+
+      - name: Result 2 - Picard conventional NM
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts/picard
+          .ci/enva/target/release/enva run --name mixture-analysis \
+            --command "picard SetNmMdAndUqTags I=ci-artifacts/fixture/graft.bam O=ci-artifacts/picard/graft.conventional.bam R=ci-artifacts/reference/${{ matrix.graft_reference }}.fa" \
+            2>&1 | tee ci-artifacts/logs/picard-conventional-graft.log
+          .ci/enva/target/release/enva run --name mixture-analysis \
+            --command "picard SetNmMdAndUqTags I=ci-artifacts/fixture/host.bam O=ci-artifacts/picard/host.conventional.bam R=ci-artifacts/reference/mm10.fa" \
+            2>&1 | tee ci-artifacts/logs/picard-conventional-host.log
+
+      - name: Result 2b - Picard bisulfite NM
+        if: matrix.bisulfite == 'true'
+        run: |
+          set -euo pipefail
+          .ci/enva/target/release/enva run --name mixture-analysis \
+            --command "picard SetNmMdAndUqTags I=ci-artifacts/fixture/graft.bam O=ci-artifacts/picard/graft.bisulfite.bam R=ci-artifacts/reference/${{ matrix.graft_reference }}.fa IS_BISULFITE_SEQUENCE=true" \
+            2>&1 | tee ci-artifacts/logs/picard-bisulfite-graft.log
+          .ci/enva/target/release/enva run --name mixture-analysis \
+            --command "picard SetNmMdAndUqTags I=ci-artifacts/fixture/host.bam O=ci-artifacts/picard/host.bisulfite.bam R=ci-artifacts/reference/mm10.fa IS_BISULFITE_SEQUENCE=true" \
+            2>&1 | tee ci-artifacts/logs/picard-bisulfite-host.log
+
+      - name: Result 3 - XenofilteR with conventional Picard NM
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts/evidence/legacy-conventional
+          .ci/enva/target/release/enva run --name mixture-analysis \
+            --command "Rscript scripts/gate6/gate6-xenofilter-legacy.R ci-artifacts/picard/graft.conventional.bam ci-artifacts/picard/host.conventional.bam ci-artifacts/evidence/legacy-conventional 4 ${{ matrix.mm_threshold }} 8 NM ci-artifacts/evidence/legacy-conventional-run.json" \
+            2>&1 | tee ci-artifacts/logs/xenofilter-conventional.log
+
+      - name: Result 3b - XenofilteR with bisulfite Picard NM
+        if: matrix.bisulfite == 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts/evidence/legacy-bisulfite
+          .ci/enva/target/release/enva run --name mixture-analysis \
+            --command "Rscript scripts/gate6/gate6-xenofilter-legacy.R ci-artifacts/picard/graft.bisulfite.bam ci-artifacts/picard/host.bisulfite.bam ci-artifacts/evidence/legacy-bisulfite 4 ${{ matrix.mm_threshold }} 8 NM ci-artifacts/evidence/legacy-bisulfite-run.json" \
+            2>&1 | tee ci-artifacts/logs/xenofilter-bisulfite.log
+
+      - name: Evaluate all result families against the truth manifest
+        run: |
+          set -euo pipefail
+          conventional_dir="$(find ci-artifacts/evidence/legacy-conventional -type d -name Filtered_bams -print -quit)"
+          test -n "$conventional_dir"
+          conventional_bam="$(find "$conventional_dir" -name '*_Filtered.bam' -print -quit)"
+          test -n "$conventional_bam"
+          tool_arguments="--tool-output modern_xenofilx=ci-artifacts/evidence/modern-xenofilx/mixture_graft_Filtered.bam --tool-output legacy_xenofilter_conventional=$conventional_bam"
+          if [ "${{ matrix.bisulfite }}" = "true" ]; then
+            bisulfite_dir="$(find ci-artifacts/evidence/legacy-bisulfite -type d -name Filtered_bams -print -quit)"
+            bisulfite_bam="$(find "$bisulfite_dir" -name '*_Filtered.bam' -print -quit)"
+            tool_arguments="$tool_arguments --tool-output legacy_xenofilter_bisulfite=$bisulfite_bam"
+          fi
+          .ci/enva/target/release/enva run --name mixture-analysis \
+            --command "python3 scripts/gate6/gate6-mixture-evaluate.py --truth ci-artifacts/fixture/truth.tsv --samtools samtools $tool_arguments --require-known-selection --graft-source ${{ matrix.graft_source }} --report ci-artifacts/evidence/source-performance.json" \
+            2>&1 | tee ci-artifacts/logs/mixture-evaluate.log
+
+      - name: Assert the three-way mixture contract
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path('ci-artifacts/evidence/source-performance.json').read_text())
+          tools = report['tools']
+          expected = {'modern_xenofilx', 'legacy_xenofilter_conventional'}
+          if 'legacy_xenofilter_bisulfite' in tools:
+              expected.add('legacy_xenofilter_bisulfite')
+          assert set(tools) == expected, sorted(tools)
+
+          metrics = ('accuracy', 'sensitivity_graft_recall', 'specificity_host_recall', 'precision_graft_ppv', 'f1_graft')
+          for name, tool in tools.items():
+              assert tool['unknown_selected_fragments'] == 0, (name, tool.get('unknown_selected_fragments'))
+              assert tool['truth_fragments'] == 1000000, (name, tool['truth_fragments'])
+              for metric in metrics:
+                  assert 0.0 <= float(tool[metric]) <= 1.0, (name, metric, tool.get(metric))
+              print(name, {metric: round(float(tool[metric]), 6) for metric in metrics})
+          PY
+
+      - name: Remove the analysis environment through enva
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -x .ci/enva/target/release/enva ]; then
+            if .ci/enva/target/release/enva validate --name mixture-analysis \
+              > ci-artifacts/logs/enva-pre-remove-validate.log 2>&1; then
+              .ci/enva/target/release/enva remove mixture-analysis \
+                2>&1 | tee ci-artifacts/logs/enva-remove.log
+            fi
+          fi
+
+      - name: Upload mixture parity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xenofilx-mixture-${{ matrix.assay }}
+          path: ci-artifacts/evidence/
+          if-no-files-found: warn
+          retention-days: 90

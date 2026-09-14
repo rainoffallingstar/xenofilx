@@ -1,0 +1,787 @@
+{
+  "schema_version": "otter.xenofilx-note4-gradient/v1",
+  "description": "Input contract for reproducing Supplementary Tables S6 and S7 from published otter-data fixtures.",
+  "table_s6_evidence_root": "gate6-bsseq-gradient-human-graft-picard-bisulfite-20260910",
+  "table_s7_evidence_root": "gate6-bsseq-parameter-grid-human60-picard-bisulfite-20260910",
+  "sources": {
+    "human_rrbs": "SRR31480456",
+    "mouse_rrbs": "SRR10025242"
+  },
+  "references": {
+    "graft": {
+      "label": "hg19",
+      "assembly": "GRCh37.p13-gencode-v19",
+      "url": "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/GRCh37.p13.genome.fa.gz",
+      "gzip_md5": "490904ef2561472d0801c704ffc85761",
+      "fasta_sha256": "b22e74cdd8b90a1228474ce31739aa76d71be55735f93de1471e3886790b9256",
+      "fasta_size_bytes": 3234842113
+    },
+    "host": {
+      "label": "mm10",
+      "assembly": "GRCm38-gencode-M25",
+      "url": "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/GRCm38.primary_assembly.genome.fa.gz",
+      "gzip_md5": "3bc591be24b77f710b6ba5d41022fc5a",
+      "fasta_sha256": "767f48e8ae5bda117ad519fb694cbf7e24f161bf094c274bbbcd16e52aedf802",
+      "fasta_size_bytes": 2776387546
+    }
+  },
+  "parameters": {
+    "mm_threshold": 6,
+    "unmapped_penalty": 8,
+    "bisulfite": true,
+    "modern_nm_semantics": "strand_aware_bisulfite",
+    "legacy_nm_semantics": "picard_bisulfite_reference_nm",
+    "comparison_unit": "unique_fragment_membership"
+  },
+  "parameter_grid": {
+    "mm_thresholds": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "unmapped_penalties": [
+      8,
+      10,
+      12
+    ],
+    "cells": [
+      "human0p6-replicate1",
+      "human0p6-replicate2",
+      "human0p6-replicate3"
+    ]
+  },
+  "cells": [
+    {
+      "label": "human0-replicate1",
+      "human_fraction": 0.0,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "9a544860a39ca3f3300674278d4eeb80f59b103bb5195889bbbcb8828bf1f0c4",
+        "size_bytes": 165311
+      },
+      "host_mm10_bam": {
+        "sha256": "84f08bb3ec45ab3dc75056653d0563d9479068631423573deb2b1b8c2b920a35",
+        "size_bytes": 39997009
+      },
+      "truth_tsv": {
+        "sha256": "b353a94a429cf54f376bb23730faf79b2e2be0eb7868f3a679ea3ff9cc575850",
+        "size_bytes": 60137742
+      }
+    },
+    {
+      "label": "human0p001-replicate1",
+      "human_fraction": 0.001,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "af66bab6fe920a6a4c2a93ae4b1c4af5f34411b68239d195a274c7912bf2bfe4",
+        "size_bytes": 331962
+      },
+      "host_mm10_bam": {
+        "sha256": "66dcdd8d3b7913d0675ff83cb63ed18b0b6b54a40d7a3c48f5b45bba7dfa7787",
+        "size_bytes": 40106392
+      },
+      "truth_tsv": {
+        "sha256": "337b9abc16aff035e800d42aa1e5b1f713f29186f74ba5f70638d4e789e158e6",
+        "size_bytes": 60139708
+      }
+    },
+    {
+      "label": "human0p001-replicate2",
+      "human_fraction": 0.001,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "3650c033c24b9e54cbf05a51da84791622d816f2190b25d22df7df5b96a99cc2",
+        "size_bytes": 324744
+      },
+      "host_mm10_bam": {
+        "sha256": "690d60b804d380153079922377017bdd9d603e0d51b3660438b57f43fafd5527",
+        "size_bytes": 39922009
+      },
+      "truth_tsv": {
+        "sha256": "b7f7fa65498ec3f189d5f80314091068123a5ef9865b447e65c48a94721f3062",
+        "size_bytes": 60139196
+      }
+    },
+    {
+      "label": "human0p001-replicate3",
+      "human_fraction": 0.001,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "8ec16d2cc2b16fe0c0cb129fa3e3d19a470a15bd75096f6c366b4c3f0c06dbd8",
+        "size_bytes": 326507
+      },
+      "host_mm10_bam": {
+        "sha256": "147fabdf47f2e99e0afe43952943f998dd2d454d505804985d8df1f9905ee543",
+        "size_bytes": 39926743
+      },
+      "truth_tsv": {
+        "sha256": "c1daeff5b6255e6a84ea38f7541963ff30a26f2840ac0575f14d147b36017f1d",
+        "size_bytes": 60138822
+      }
+    },
+    {
+      "label": "human0p005-replicate1",
+      "human_fraction": 0.005,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "d0a8c024532d3a0c8684cf3a72695124ea1138f967aec789ac1f69bf3f4acbbf",
+        "size_bytes": 932354
+      },
+      "host_mm10_bam": {
+        "sha256": "6a08bd7ad678fdef75e180e02f81b1e239711614dc2b66c433e5364992ea1bce",
+        "size_bytes": 39942538
+      },
+      "truth_tsv": {
+        "sha256": "a28306c2d938750bc56eb781e96af9410bd9e17e7d42f2dc73f7024d0c5b2472",
+        "size_bytes": 60144056
+      }
+    },
+    {
+      "label": "human0p005-replicate2",
+      "human_fraction": 0.005,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "bbe9684b6ec1cc2c99051afb8fe2adf757f79538bf889ced31c24f3ec9f369a7",
+        "size_bytes": 947391
+      },
+      "host_mm10_bam": {
+        "sha256": "373b66e8d758740e5b20089150a7ff67f5828211bd0218ef9577e16a60bb0325",
+        "size_bytes": 39766836
+      },
+      "truth_tsv": {
+        "sha256": "2cb194b9f845942f4290295e04184f07c07333ff6ac5d660f07d5134fa6e7279",
+        "size_bytes": 60143454
+      }
+    },
+    {
+      "label": "human0p005-replicate3",
+      "human_fraction": 0.005,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "323983dd24837539a2a6fe5aadafec548b6c0b9398805e281ca6f17c29a98d8a",
+        "size_bytes": 936924
+      },
+      "host_mm10_bam": {
+        "sha256": "b3d8640e87f08e23f7dbacd6d4746121c51969f98154609ed430c90bf20140d0",
+        "size_bytes": 39774123
+      },
+      "truth_tsv": {
+        "sha256": "32bfc1b18dce1829cfce4db5051815fb5ced1430ae5a4a901cd836ecee01b4b1",
+        "size_bytes": 60143262
+      }
+    },
+    {
+      "label": "human0p01-replicate1",
+      "human_fraction": 0.01,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "4d3a31170a0d9e3919ef4d69d13d588b209d0c95771641326a51324bfc4fbb94",
+        "size_bytes": 1641617
+      },
+      "host_mm10_bam": {
+        "sha256": "b08b095a59d750cf9935bc3ab6bed9633197c19809720b5a06766d1e369a41dd",
+        "size_bytes": 39585828
+      },
+      "truth_tsv": {
+        "sha256": "19618eb3ad70ef990ce5137c9f2fd61e35548d9c29a41c2686aa3e902e5298fb",
+        "size_bytes": 60149352
+      }
+    },
+    {
+      "label": "human0p01-replicate2",
+      "human_fraction": 0.01,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "601b76c0e22e1e4bdec7b308ad9f0d6a6aa9d96f5cfdc84aae83effd1f930ec8",
+        "size_bytes": 1673710
+      },
+      "host_mm10_bam": {
+        "sha256": "6b5fb0f7b46c7e1d86f1abf624317a8c25d6c404e9fa16fdd2a6fb4695e1c19a",
+        "size_bytes": 39625394
+      },
+      "truth_tsv": {
+        "sha256": "828c8768c5a4538717ab7079357a88021866b996d36a054fd19e2817df1e2d16",
+        "size_bytes": 60147838
+      }
+    },
+    {
+      "label": "human0p01-replicate3",
+      "human_fraction": 0.01,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "8072dcadfd4cb5aeb2e5ebef3d1c59e97ecd3efa6441beeab2f54ab056a303ae",
+        "size_bytes": 1656985
+      },
+      "host_mm10_bam": {
+        "sha256": "a254dde0b15743360c749c9d99481798666cbd59f1c6528fd7e47063cd93783f",
+        "size_bytes": 39698523
+      },
+      "truth_tsv": {
+        "sha256": "063327173b8ba5d3967e6babe53e9de9ecb3112d70fc05e2f0cd012986c896f8",
+        "size_bytes": 60148788
+      }
+    },
+    {
+      "label": "human0p02-replicate1",
+      "human_fraction": 0.02,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "24a5e6076997455d11d0010ba79484c4c0a7033d1c15499ad5a7c5a6d63bf14c",
+        "size_bytes": 3149126
+      },
+      "host_mm10_bam": {
+        "sha256": "b1272983392cbe26ce9d3c79d2fea49a1455c8eeb02f5b8be1b1a84cfefa7a3a",
+        "size_bytes": 39355935
+      },
+      "truth_tsv": {
+        "sha256": "9399f09929f2af914ac5e56aba3bec580762a9e171f7555e856a9845f2cb3cbd",
+        "size_bytes": 60160510
+      }
+    },
+    {
+      "label": "human0p02-replicate2",
+      "human_fraction": 0.02,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "e9781de8668ccb1ee79b3cf9005a8afd6f7b65ccd559f95fa9c8ddc12e55e8dd",
+        "size_bytes": 3157983
+      },
+      "host_mm10_bam": {
+        "sha256": "80c4a5a9600f7d58b145b59b879803e87eef59cb3ae6ae98976415e0bb59e0f4",
+        "size_bytes": 39187692
+      },
+      "truth_tsv": {
+        "sha256": "03a7cb0dc797ffd8f55a733e67a3591b69d63de1e307a0f6043886ff30cbb6bb",
+        "size_bytes": 60160066
+      }
+    },
+    {
+      "label": "human0p02-replicate3",
+      "human_fraction": 0.02,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "9472e0f8ac916ac51e62aa442ff280c578a8d2a9d83f8a5298142a104ede9331",
+        "size_bytes": 3129511
+      },
+      "host_mm10_bam": {
+        "sha256": "c7783a53ce6f73bd013e2b6b5a6b574610216bf3e41d42cc1c20345b92b1dd7d",
+        "size_bytes": 39188805
+      },
+      "truth_tsv": {
+        "sha256": "80d1388e8878f32886ef1894f33843052b37da2943d53346f10e0027fb83fa63",
+        "size_bytes": 60159618
+      }
+    },
+    {
+      "label": "human0p05-replicate1",
+      "human_fraction": 0.05,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "a1559b91b3efecadc5d188a652323168846abee671576ae924be61a1e83e738a",
+        "size_bytes": 7439631
+      },
+      "host_mm10_bam": {
+        "sha256": "45cc4cf6d381f1e78de84370110894e6405ad98f5e8ec11c2d3751edb4bcd296",
+        "size_bytes": 38030515
+      },
+      "truth_tsv": {
+        "sha256": "2b4f882a94b5b1c9895a39bd00233705dec278e0ce9a2584469f1badc4c061ce",
+        "size_bytes": 60193378
+      }
+    },
+    {
+      "label": "human0p05-replicate2",
+      "human_fraction": 0.05,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "6ca2d0034dec6f41290b410491648fb7e00e5fa8a7a4799cf7830202e495a900",
+        "size_bytes": 7471014
+      },
+      "host_mm10_bam": {
+        "sha256": "888e4c1c67919a4b52204761371aa7e0500065e50a7adac22f194d9df994794d",
+        "size_bytes": 38054938
+      },
+      "truth_tsv": {
+        "sha256": "8c616f332c9dcea35255bf97c488a552d04b78cc09caa09f62e9fedaeae720c2",
+        "size_bytes": 60191456
+      }
+    },
+    {
+      "label": "human0p05-replicate3",
+      "human_fraction": 0.05,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "2a1a51c8dc9e47ac14d5a8fe6fba37fa16a081ecef099c77afc6b52a4831183b",
+        "size_bytes": 7433037
+      },
+      "host_mm10_bam": {
+        "sha256": "8d3be887f3f712a6c12e7f2b7304a032a9c5c8a3139c01e650d0681c3fe0d058",
+        "size_bytes": 38144768
+      },
+      "truth_tsv": {
+        "sha256": "f4af37ad3ab1ac2a3abbba482028e0fdaa41afbd1c0bfbc871dc4bf65ed7a4e5",
+        "size_bytes": 60192600
+      }
+    },
+    {
+      "label": "human0p1-replicate1",
+      "human_fraction": 0.1,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "054c85273551ad42bf74a3c2ca7b87a3ef9166d54f97c32c6ff1ba0710e99201",
+        "size_bytes": 14416583
+      },
+      "host_mm10_bam": {
+        "sha256": "520fa83737587fbdcde9f96ff578a74057ad3270882e047e29a81ac6bfd86ad4",
+        "size_bytes": 36059365
+      },
+      "truth_tsv": {
+        "sha256": "2e73b1a409172857fd3bee6fd922800c2d03050bd66699a52b0621d5035eb620",
+        "size_bytes": 60248280
+      }
+    },
+    {
+      "label": "human0p1-replicate2",
+      "human_fraction": 0.1,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "55f96f8f525ae2a3940e7dcc6de177b22bb2701b07157ae6c8c05f1847593d39",
+        "size_bytes": 14476482
+      },
+      "host_mm10_bam": {
+        "sha256": "03f736a59116bdbbfecb5450d8406186704d288580407f32dd29b184264551fe",
+        "size_bytes": 36107966
+      },
+      "truth_tsv": {
+        "sha256": "772a66e1afd968cded71837ebeba6be10dd402826f9b2aab34595a0d1c903813",
+        "size_bytes": 60246100
+      }
+    },
+    {
+      "label": "human0p1-replicate3",
+      "human_fraction": 0.1,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "2bafa0472284f679e7b907d6ee3ec9392ae4874062fca2f5b8ea7d3719eedb18",
+        "size_bytes": 14393026
+      },
+      "host_mm10_bam": {
+        "sha256": "007477dc65bebbae07ea17b433ae6b1167151c76191368d35059ebd9fc95ffed",
+        "size_bytes": 36142177
+      },
+      "truth_tsv": {
+        "sha256": "672c9fa5873c1ea810679caad6829e4b05af5804c3fe56d1281002dbb4a63157",
+        "size_bytes": 60247150
+      }
+    },
+    {
+      "label": "human0p25-replicate1",
+      "human_fraction": 0.25,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "3bc5d229859443f47403bb070bd6ae799aa21abb6c7c958da5fb034cf2b59788",
+        "size_bytes": 34156000
+      },
+      "host_mm10_bam": {
+        "sha256": "7fc51afd3ec00bfa19ffeb3ed8f2e88aa0018ee0d22d69406ce9db317dcf658c",
+        "size_bytes": 30176899
+      },
+      "truth_tsv": {
+        "sha256": "f484bc5cb19cf7185fb3bef3a64749f2ebf346e9ed53b0cfdef042ab513c3295",
+        "size_bytes": 60412302
+      }
+    },
+    {
+      "label": "human0p25-replicate2",
+      "human_fraction": 0.25,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "c001a590eff8222567f53a38a5d38aed4ca0326cde3d0b57057fb4a45ec0098a",
+        "size_bytes": 34226488
+      },
+      "host_mm10_bam": {
+        "sha256": "8231835ba8aa200e21c2f54cb059748bb142567a5052a916512b24416f1a88a3",
+        "size_bytes": 30169957
+      },
+      "truth_tsv": {
+        "sha256": "0fe56f0aa25941d4161be6730a23cbe35872cd454def971d172786ed38621d88",
+        "size_bytes": 60409984
+      }
+    },
+    {
+      "label": "human0p25-replicate3",
+      "human_fraction": 0.25,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "2bda240c8502d55978153af13f1b79c56c400c75b9044238c5d1ea175880cfb0",
+        "size_bytes": 34099388
+      },
+      "host_mm10_bam": {
+        "sha256": "83deb311b0969f95501cf29a12be87227f132dc2e2ea413db56121791aac633b",
+        "size_bytes": 30210634
+      },
+      "truth_tsv": {
+        "sha256": "9cb6a962d0e763e45479a6c39c256917679293ba0bb53bde9b99087c08baac50",
+        "size_bytes": 60410004
+      }
+    },
+    {
+      "label": "human0p5-replicate1",
+      "human_fraction": 0.5,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "1cbf6d2f59635661a937d116b0cd42e279627166f6c643287f4b0d89693bd6be",
+        "size_bytes": 63927702
+      },
+      "host_mm10_bam": {
+        "sha256": "f1c71f84bc515cd242664e69738333bdd368c65d3eed32cf97237d43db448292",
+        "size_bytes": 20426256
+      },
+      "truth_tsv": {
+        "sha256": "4f5d8f7abeff9247f170c48a89ce3fe9f7e3685d0b84e1d6ea05363a071fbff2",
+        "size_bytes": 60684836
+      }
+    },
+    {
+      "label": "human0p5-replicate2",
+      "human_fraction": 0.5,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "d4fdcf72a91d46bdd96bfe9ded289b73293c13a99bb0eeaac07fe3002db0b92d",
+        "size_bytes": 63954020
+      },
+      "host_mm10_bam": {
+        "sha256": "46e922cd810ca0190a0a70db79d86e2a4cb5b22aed09731260501d888922ab70",
+        "size_bytes": 20306793
+      },
+      "truth_tsv": {
+        "sha256": "d670fe7d77b7eec9d1e5e8ef9e6fd22d2ad98541dd01233ad39d0cf9e969a519",
+        "size_bytes": 60685276
+      }
+    },
+    {
+      "label": "human0p5-replicate3",
+      "human_fraction": 0.5,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "edde240f378159fba81e7e4fb08cff406abd71fd00f6a73f17418d9f22c5d19f",
+        "size_bytes": 63800832
+      },
+      "host_mm10_bam": {
+        "sha256": "3b3a3daf028fc203b211e1ce135a348bd4fad2d54fade11b4a6f6dbbb89fca31",
+        "size_bytes": 20328143
+      },
+      "truth_tsv": {
+        "sha256": "fe9026a5e65a5a0313cec5d5dc1bbaafdb209667e6edd4e72b5b312d96b02838",
+        "size_bytes": 60684028
+      }
+    },
+    {
+      "label": "human0p6-replicate1",
+      "human_fraction": 0.6,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "fbce4d6772fd4c084598f608269bb86a74a6cc07345fe68e5b1380ca11f9d15b",
+        "size_bytes": 74781959
+      },
+      "host_mm10_bam": {
+        "sha256": "5c6df9228707effea58c6d133befebddc7f3f201a92d8c611b6d69749af2199c",
+        "size_bytes": 16336876
+      },
+      "truth_tsv": {
+        "sha256": "d6f3a089b4b371e99e0ce653ba437c1e28b751d93b3b15e2640825e3c60d89d4",
+        "size_bytes": 60794400
+      }
+    },
+    {
+      "label": "human0p6-replicate2",
+      "human_fraction": 0.6,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "09654f223e214966f7b9843f34890e9fb4660ffb7743358de7a33adf3a488247",
+        "size_bytes": 74780977
+      },
+      "host_mm10_bam": {
+        "sha256": "a1e28cf6be0c8359e29ba1041106229d0fbd1e9fca8e3de69bd89be75879a1ee",
+        "size_bytes": 16326654
+      },
+      "truth_tsv": {
+        "sha256": "bf44a7f2c140287a7e26eb877197c5689a0add759ba58e059e5ce822db6650c0",
+        "size_bytes": 60794582
+      }
+    },
+    {
+      "label": "human0p6-replicate3",
+      "human_fraction": 0.6,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "d5ad58dfd26d5093eb8d698e5d18a233bd8e5c8e6669601bb5c4ad8b1bd0e60b",
+        "size_bytes": 74710737
+      },
+      "host_mm10_bam": {
+        "sha256": "8d1fd32ab159321e7cd97f2c44a329fa3af24fff3b7be87c126eabb44d19ce9a",
+        "size_bytes": 16356697
+      },
+      "truth_tsv": {
+        "sha256": "4910fb0ab976b5b5a2e37c5f318d6e7bf0d410a56bf9f895dbfdd3beff21a18a",
+        "size_bytes": 60793094
+      }
+    },
+    {
+      "label": "human0p7-replicate1",
+      "human_fraction": 0.7,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "aa3b9e2935b63bda4fd1f971f1f11b542c18198ec29dfcf6e9f6a7874a71134f",
+        "size_bytes": 85319424
+      },
+      "host_mm10_bam": {
+        "sha256": "96925202b61e9c964976511cd5c34e3c6b8a3f7280ac5ef256ea268c0b13c982",
+        "size_bytes": 12332440
+      },
+      "truth_tsv": {
+        "sha256": "8adab2058a3978c233ef655a83e96b96d50f00d268199fb61a1176913d5c219c",
+        "size_bytes": 60903690
+      }
+    },
+    {
+      "label": "human0p7-replicate2",
+      "human_fraction": 0.7,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "b5f6d8a0b10bba78736496e51fe892d03b2cc32b4b16db2232e1715ea0d625dc",
+        "size_bytes": 85273484
+      },
+      "host_mm10_bam": {
+        "sha256": "13f6aa86b5628551e643087ac4048e53476292e5808b00abf2843e7496232c8c",
+        "size_bytes": 12329190
+      },
+      "truth_tsv": {
+        "sha256": "ef5106e4d8ebf37660d8a1824612519a19b080e6251c231faf39a715c08498cf",
+        "size_bytes": 60903812
+      }
+    },
+    {
+      "label": "human0p7-replicate3",
+      "human_fraction": 0.7,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "5eb0c3e79250d9ee17657bfb84d38b3d3834a57ce24665113788e504eeae8f5a",
+        "size_bytes": 85250300
+      },
+      "host_mm10_bam": {
+        "sha256": "e3833f1365dfffcbf358b3bf3dbc100f924298c80e05bbb030488675a7d174ff",
+        "size_bytes": 12314543
+      },
+      "truth_tsv": {
+        "sha256": "5617b7580fb5bcfa1348f46541a0c017e74e1fcd0f2a6da6b501e518fd2b710a",
+        "size_bytes": 60901958
+      }
+    },
+    {
+      "label": "human0p8-replicate1",
+      "human_fraction": 0.8,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "3b82a4cf34079d4f2be2fed4275ed03b3b53b5b7ab6f3b5a5b8ef50d57605290",
+        "size_bytes": 95374393
+      },
+      "host_mm10_bam": {
+        "sha256": "f11bba317b8e0802f936d8365f68b13d372df8cdae01c055c4cc9e0d0c07cfbc",
+        "size_bytes": 8327545
+      },
+      "truth_tsv": {
+        "sha256": "517dd372b60de5052be0e89de2009a3fb95775fded4d2ad55857adf9c99a9245",
+        "size_bytes": 61012740
+      }
+    },
+    {
+      "label": "human0p8-replicate2",
+      "human_fraction": 0.8,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "177f5dbc98589b4f873c112b281cecd573f96e76b3ad4a104fbe402cb77257f5",
+        "size_bytes": 95382111
+      },
+      "host_mm10_bam": {
+        "sha256": "540e3a2431a2798e114e0945c55658d2861f6ca15a4a8b16f9518ae93986d6b5",
+        "size_bytes": 8341730
+      },
+      "truth_tsv": {
+        "sha256": "b751fcae07470dcc627f2d8642af8f0a943632197a4f737e95369a001a9ff252",
+        "size_bytes": 61012700
+      }
+    },
+    {
+      "label": "human0p8-replicate3",
+      "human_fraction": 0.8,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "35fffdb6555b8c7db19d0c59771432d1976ac925ffa25c685067319c5759e786",
+        "size_bytes": 95334854
+      },
+      "host_mm10_bam": {
+        "sha256": "75ae3e27869a7ea383651aa2261901049f0ac68e772ea17cc5f85562d33ca059",
+        "size_bytes": 8329535
+      },
+      "truth_tsv": {
+        "sha256": "9cfc81d86d011e50cb0e502861d53a6e275a601350a98af90b3945c84bef1ac4",
+        "size_bytes": 61010668
+      }
+    },
+    {
+      "label": "human0p9-replicate1",
+      "human_fraction": 0.9,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "066b2e3b44206049841245d0ab1fc92d4f481c0353fb70673e3caacf8bf88a8d",
+        "size_bytes": 105158533
+      },
+      "host_mm10_bam": {
+        "sha256": "75addde8a3be9569d3d72f9d311f07a6874bee819dedbd28edb154c690c4de65",
+        "size_bytes": 4309875
+      },
+      "truth_tsv": {
+        "sha256": "6bed2cd03f3f41c4bceaaebc3690917d6a5f56a8d38252945e9a23118ee1c2ba",
+        "size_bytes": 61122068
+      }
+    },
+    {
+      "label": "human0p9-replicate2",
+      "human_fraction": 0.9,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "2862edd89d6d7656ea3e32d5d9a24341d51dab2faee759429af119b998a23ade",
+        "size_bytes": 105055237
+      },
+      "host_mm10_bam": {
+        "sha256": "b487ccef0e2448d0a97c664db83ef6675edf407d6fcaeb340030cc9c21e0dbe0",
+        "size_bytes": 4291945
+      },
+      "truth_tsv": {
+        "sha256": "42a31eb89079576629be00a4b7ea71796c6342dbff926bb3f129895b96232d9c",
+        "size_bytes": 61121620
+      }
+    },
+    {
+      "label": "human0p9-replicate3",
+      "human_fraction": 0.9,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "ce015c1fa3a343a22ba60cc92aa0c7cead1636c5cc38e58a8080ef3a05e89cab",
+        "size_bytes": 105052113
+      },
+      "host_mm10_bam": {
+        "sha256": "e7242964350fe578ada00b2dbd86939ea1d7b1080dfb46eab3aa7dfeb670f993",
+        "size_bytes": 4294487
+      },
+      "truth_tsv": {
+        "sha256": "2fffdce6aacdf6f811359c3d042e974ec44ea8efe6f091d27f910d02764beb53",
+        "size_bytes": 61120318
+      }
+    },
+    {
+      "label": "human0p95-replicate1",
+      "human_fraction": 0.95,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "39ae0bae642488b1255c27b293306437334015165a104d23368fa4059361c21a",
+        "size_bytes": 109902827
+      },
+      "host_mm10_bam": {
+        "sha256": "30b6242da3ac8c724dcf1f59c2e6cd73e62ebfb932fceb0a96247d9172178c09",
+        "size_bytes": 2293631
+      },
+      "truth_tsv": {
+        "sha256": "669e558ac75c097353b581e0d8f35a28d7f8a7461870bef96cce771e15774ff4",
+        "size_bytes": 61176450
+      }
+    },
+    {
+      "label": "human0p95-replicate2",
+      "human_fraction": 0.95,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "b85226242709c813170dccc6f632b90a8e6e7acb10885e6981ca1a9a9d73a20b",
+        "size_bytes": 109801257
+      },
+      "host_mm10_bam": {
+        "sha256": "6cf593880fa5191907fb82c1bc6b782d4f3ff3a6d4fb3729700e1b94cf6ea2cf",
+        "size_bytes": 2277869
+      },
+      "truth_tsv": {
+        "sha256": "0438fe72b65d56fe7434156c5dbff761991fc369386953911e9af19fe0b23974",
+        "size_bytes": 61175702
+      }
+    },
+    {
+      "label": "human0p95-replicate3",
+      "human_fraction": 0.95,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "0db8e668c2ceebbb923db825de4bdf258612f899f6f883bab59e32b2e95595f4",
+        "size_bytes": 109783571
+      },
+      "host_mm10_bam": {
+        "sha256": "bbf0139e66e691c315ef6a4047ebb0a574855576c66bcd4ae53497a3aa647437",
+        "size_bytes": 2286564
+      },
+      "truth_tsv": {
+        "sha256": "511bea8d4a73700fa1bc2590b891be09dc02c8d6e21902341466e658c5a2265b",
+        "size_bytes": 61174324
+      }
+    },
+    {
+      "label": "human0p99-replicate1",
+      "human_fraction": 0.99,
+      "replicate": 1,
+      "graft_hg19_bam": {
+        "sha256": "7586c48e0d91b191171bf67e14ec9bb0d62690529532dfe3d276d2e5700e9770",
+        "size_bytes": 113637815
+      },
+      "host_mm10_bam": {
+        "sha256": "3bc438a633f8c5268d42c741771050027d18e1e6bd3506b28fa92187755ae46f",
+        "size_bytes": 647178
+      },
+      "truth_tsv": {
+        "sha256": "a922b1fd0e7579dc7ec9b780d966fbd34c84e13a4e79cf60490c5d80127e5a4e",
+        "size_bytes": 61220152
+      }
+    },
+    {
+      "label": "human0p99-replicate2",
+      "human_fraction": 0.99,
+      "replicate": 2,
+      "graft_hg19_bam": {
+        "sha256": "e4707ffbe0bc9cf74758d608e0a0ff486337636d7c136a4283e11c0b097584b6",
+        "size_bytes": 113505674
+      },
+      "host_mm10_bam": {
+        "sha256": "49981ad7f09922ca8abb95d10bdba733af5a66b99325f140b84dda0ec2eedafe",
+        "size_bytes": 657873
+      },
+      "truth_tsv": {
+        "sha256": "2bd438534737a31aabe45818af4be667bd7149944dd618a055217fe95f5bfc93",
+        "size_bytes": 61219178
+      }
+    },
+    {
+      "label": "human0p99-replicate3",
+      "human_fraction": 0.99,
+      "replicate": 3,
+      "graft_hg19_bam": {
+        "sha256": "953d0c7a858b42616764d82d5e3aba541727c0d9e8a5c8d9e9cd921e47e0c247",
+        "size_bytes": 113553760
+      },
+      "host_mm10_bam": {
+        "sha256": "2c2fcf7df0cd5ba33848dd0115fe56822ad42c24b54404cf7562f64af7dfb349",
+        "size_bytes": 641983
+      },
+      "truth_tsv": {
+        "sha256": "e5a62f4a9f88d45e7fa146410c1c2e3bc7bfb98f2e29ed90d0893f07d360cd2e",
+        "size_bytes": 61218160
+      }
+    }
+  ]
+}

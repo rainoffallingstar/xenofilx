@@ -1,0 +1,186 @@
+name: Xenofilx Gate D
+
+# Gate D accounts for every modern-only fragment disagreement between the Xenofilx
+# ("modern") and Picard+XenofilteR ("legacy") graft selections, on real BS-PDX data.
+# The workflow recomputes fragment membership and mapping stratification from published
+# BAM intermediates, then cross-checks the score-decision accounting.
+#
+# NOTE: `FIXTURE_BASE_URL` still contains 0b0c627cb0fdb2394577bb9c6cdc969646ed668f. Replace it with the
+# immutable Hugging Face dataset revision after the Gate D intermediates are published to
+# `fallingstar10/otter-data`.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FIXTURE_BASE_URL: https://huggingface.co/datasets/fallingstar10/otter-data/resolve/0b0c627cb0fdb2394577bb9c6cdc969646ed668f
+  ENVA_COMMIT: d93b7fc7c82593dcaffa56f28b50aad02cca1108
+
+jobs:
+  fragment-accounting:
+    name: BS-PDX fragment disagreement accounting
+    runs-on: ubuntu-latest
+    # Four fixture BAMs total about 10 GB, so this job is intentionally bandwidth-heavy.
+    timeout-minutes: 300
+    steps:
+      - name: Checkout xenofilx
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned enva for Samtools
+        uses: actions/checkout@v4
+        with:
+          repository: rainoffallingstar/enva
+          ref: ${{ env.ENVA_COMMIT }}
+          path: .ci/enva
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Prepare evidence directory
+        run: mkdir -p ci-artifacts/{fixture,evidence,tmp,logs}
+
+      - name: Build enva and create the Samtools environment
+        env:
+          RATTLER_CACHE_DIR: ${{ runner.temp }}/rattler-cache
+        run: |
+          set -euo pipefail
+          mkdir -p "$RATTLER_CACHE_DIR"
+          (cd .ci/enva && cargo build --release --locked --bin enva) 2>&1 | tee ci-artifacts/logs/enva-build.log
+          cat > ci-artifacts/gate-d-samtools.yaml <<'YAML'
+          channels:
+            - conda-forge
+            - bioconda
+          dependencies:
+            - samtools=1.15.1
+          YAML
+          .ci/enva/target/release/enva create \
+            --yaml ci-artifacts/gate-d-samtools.yaml \
+            --name gate-d-samtools \
+            --force \
+            --output summary \
+            2>&1 | tee ci-artifacts/logs/enva-create.log
+
+      - name: Download and verify the Gate D fixtures
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --retry 5 \
+            "$FIXTURE_BASE_URL/provenance/checksums.sha256" \
+            --output ci-artifacts/checksums.sha256
+          fetch_fixture () {
+            local dataset_path="$1" local_name="$2"
+            curl --fail --location --silent --show-error --retry 5 \
+              "$FIXTURE_BASE_URL/$dataset_path" --output "ci-artifacts/fixture/$local_name"
+            awk -v target="$dataset_path" -v local="ci-artifacts/fixture/$local_name" \
+              '$2 == target { $2 = local; print }' ci-artifacts/checksums.sha256 \
+              > "ci-artifacts/fixture/$local_name.sha256"
+            test -s "ci-artifacts/fixture/$local_name.sha256"
+            sha256sum --check "ci-artifacts/fixture/$local_name.sha256"
+          }
+          fetch_fixture xenofilx/gate-c/bs-pdx-graft-hg38/input.bam original_graft.bam
+          fetch_fixture xenofilx/gate-c/bs-pdx-srr36187610-host/mm10/input.bam original_host.bam
+          fetch_fixture xenofilx/gate-d/bs-pdx-srr36187610/modern_filtered.bam modern_filtered.bam
+          fetch_fixture xenofilx/gate-d/bs-pdx-srr36187610/legacy_filtered.bam legacy_filtered.bam
+          fetch_fixture xenofilx/gate-d/bs-pdx-srr36187610/score-decision-comparison.json score-decision-comparison.json
+
+      - name: Recompute fragment membership
+        run: |
+          set -euo pipefail
+          samtools_path="$(.ci/enva/target/release/enva run --name gate-d-samtools --command 'command -v samtools' | tail -n 1)"
+          test -n "$samtools_path"
+          .ci/enva/target/release/enva run --name gate-d-samtools \
+            --command "python3 scripts/gate6/gate6-fragment-membership-compare.py --samtools '$samtools_path' --original-graft ci-artifacts/fixture/original_graft.bam --modern-filtered ci-artifacts/fixture/modern_filtered.bam --legacy-filtered ci-artifacts/fixture/legacy_filtered.bam --report ci-artifacts/evidence/membership-comparison.json --disagreements ci-artifacts/evidence/disagreements.tsv.gz --temporary-directory ci-artifacts/tmp" \
+            2>&1 | tee ci-artifacts/logs/membership-compare.log
+
+      - name: Assert membership agreement and disagreement contract
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path('ci-artifacts/evidence/membership-comparison.json').read_text())
+          assert report['total_input_fragments'] == 45160030, report['total_input_fragments']
+          assert report['modern_graft_fragments'] == 45120923, report['modern_graft_fragments']
+          assert report['legacy_graft_fragments'] == 44005685, report['legacy_graft_fragments']
+          assert report['agreements'] == {'discarded/discarded': 39106, 'graft/graft': 44005684}, report['agreements']
+          assert report['disagreements'] == 1115240, report['disagreements']
+          assert report['modern_only_graft'] == 1115239, report['modern_only_graft']
+          assert report['legacy_only_graft'] == 1, report['legacy_only_graft']
+          assert report['selected_subset_failures'] == {}, report['selected_subset_failures']
+          print('Gate D membership contract passed')
+          PY
+
+      - name: Stratify modern-only disagreements
+        run: |
+          set -euo pipefail
+          samtools_path="$(.ci/enva/target/release/enva run --name gate-d-samtools --command 'command -v samtools' | tail -n 1)"
+          .ci/enva/target/release/enva run --name gate-d-samtools \
+            --command "python3 scripts/gate6/gate6-fragment-disagreement-stratify.py --samtools '$samtools_path' --disagreements ci-artifacts/evidence/disagreements.tsv.gz --original-graft ci-artifacts/fixture/original_graft.bam --original-host ci-artifacts/fixture/original_host.bam --modern-filtered ci-artifacts/fixture/modern_filtered.bam --legacy-filtered ci-artifacts/fixture/legacy_filtered.bam --report ci-artifacts/evidence/stratification.json --samples ci-artifacts/evidence/sampled-fragments.tsv --sample-size 1115239" \
+            2>&1 | tee ci-artifacts/logs/disagreement-stratify.log
+
+      - name: Assert full-disagreement stratification closure
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path('ci-artifacts/evidence/stratification.json').read_text())
+          assert report['matching_disagreements'] == 1115239, report['matching_disagreements']
+          assert report['sample_size'] == 1115239, report['sample_size']
+          assert report['classification'] == 'graft/discarded', report['classification']
+          assert report['categories']['output_membership'] == {
+              'modern=complete_pair;legacy=none': 1115239
+          }, report['categories']['output_membership']
+          assert report['categories']['modern_filtered'] == {'complete_pair': 1115239}
+          assert report['categories']['legacy_filtered'] == {'none': 1115239}
+          joint = report['categories']['joint_original_alignment_shape']
+          assert sum(joint.values()) == 1115239, joint
+          print('Gate D stratification closure passed')
+          PY
+
+      - name: Cross-check the score-decision accounting
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          decisions = json.loads(Path('ci-artifacts/fixture/score-decision-comparison.json').read_text())['decision_pairs']
+          expected = {
+              'modern=graft_host_absent;legacy=discarded_host_absent_both_mates_at_or_above_threshold': 1025732,
+              'modern=graft_better_total;legacy=discarded_threshold': 88923,
+              'modern=discarded_threshold;legacy=discarded_host_absent_both_mates_at_or_above_threshold': 584,
+          }
+          assert decisions == expected, decisions
+          assert sum(decisions.values()) == 1115239, sum(decisions.values())
+          print('Gate D score-decision accounting closes on all 1,115,239 modern-only disagreements')
+          PY
+
+      - name: Remove the Samtools environment through enva
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -x .ci/enva/target/release/enva ]; then
+            if .ci/enva/target/release/enva validate --name gate-d-samtools \
+              > ci-artifacts/logs/enva-pre-remove-validate.log 2>&1; then
+              .ci/enva/target/release/enva remove gate-d-samtools \
+                2>&1 | tee ci-artifacts/logs/enva-remove.log
+            fi
+          fi
+
+      - name: Upload Gate D evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xenofilx-gate-d-bs-pdx
+          path: ci-artifacts/evidence/
+          if-no-files-found: warn
+          retention-days: 90

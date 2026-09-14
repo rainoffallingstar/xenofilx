@@ -1,0 +1,264 @@
+name: Xenofilx Gate C
+
+# Gate C checks that Xenofilx's reference-aware NM/classification score matches an
+# independent oracle (`bamdriver/cmd/nmoracle`) record for record, on the original
+# reference (primary arm) and on strand-converted CT/GA references (control arms).
+#
+# NOTE: `FIXTURE_BASE_URL` still contains 0b0c627cb0fdb2394577bb9c6cdc969646ed668f. Replace it with the
+# immutable Hugging Face dataset revision after the Gate C fixture BAMs are published to
+# `fallingstar10/otter-data`. The workflow is otherwise complete.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FIXTURE_BASE_URL: https://huggingface.co/datasets/fallingstar10/otter-data/resolve/0b0c627cb0fdb2394577bb9c6cdc969646ed668f
+  GATE_C_RECORD_LIMIT: '200000'
+  ENVA_COMMIT: d93b7fc7c82593dcaffa56f28b50aad02cca1108
+  BAMDRIVER_COMMIT: 56d3f05f569bed00ce7d2d37bf636af7112a3b63
+
+jobs:
+  nm-oracle-parity:
+    name: Gate C ${{ matrix.cell }}
+    runs-on: ubuntu-latest
+    # The reference FASTA is ~3 GB and the fixture BAMs are up to ~3 GB, so this job is
+    # bandwidth-heavy by design. It is a correctness gate, not a fast smoke test.
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - cell: rna-hg38
+            bam_dataset_path: xenofilx/gate-c/rna-hg38/input.bam
+            bam_sha256: ed2ca502d64c1bc35e3897dc629dc3d7cf2cbc6264aab39f32f30e1c7ec605af
+            bam_size: '2333732716'
+            reference: hg38
+            mode: rna
+          - cell: bs-pdx-host-mm10
+            bam_dataset_path: xenofilx/gate-c/bs-pdx-srr36187610-host/mm10/input.bam
+            bam_sha256: 5a4287df6c8be3bb443c1864b70be9a52ded4a55e3158394b9642a9f2dce5c81
+            bam_size: '91850996'
+            reference: mm10
+            mode: bsseq
+          - cell: bs-pdx-graft-hg38
+            bam_dataset_path: xenofilx/gate-c/bs-pdx-graft-hg38/input.bam
+            bam_sha256: ecaf4a19359074fafafd20f0baa5f994092d3af36437e538a726febfa4be61e6
+            bam_size: '3125450579'
+            reference: hg38
+            mode: bsseq
+    steps:
+      - name: Checkout xenofilx
+        uses: actions/checkout@v4
+
+      - name: Checkout bamdriver for the independent NM oracle
+        uses: actions/checkout@v4
+        with:
+          repository: rainoffallingstar/bamdriver
+          ref: ${{ env.BAMDRIVER_COMMIT }}
+          path: .ci/bamdriver
+
+      - name: Checkout pinned enva for Samtools
+        uses: actions/checkout@v4
+        with:
+          repository: rainoffallingstar/enva
+          ref: ${{ env.ENVA_COMMIT }}
+          path: .ci/enva
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Prepare evidence directory
+        run: mkdir -p ci-artifacts/fixture ci-artifacts/reference ci-artifacts/evidence
+
+      - name: Build the independent NM oracle
+        run: |
+          set -euo pipefail
+          go build -buildvcs=false -o "$GITHUB_WORKSPACE/ci-artifacts/nmoracle" ./cmd/nmoracle
+        working-directory: .ci/bamdriver
+
+      - name: Build the Xenofilx score audit
+        run: go build -buildvcs=false -o ci-artifacts/gate6-xenofilx-scoreaudit ./cmd/scoreaudit
+
+      - name: Build enva and create the Samtools environment
+        env:
+          RATTLER_CACHE_DIR: ${{ runner.temp }}/rattler-cache
+        run: |
+          set -euo pipefail
+          mkdir -p "$RATTLER_CACHE_DIR"
+          (cd .ci/enva && cargo build --release --locked --bin enva) 2>&1 | tee ci-artifacts/enva-build.log
+          cat > ci-artifacts/samtools-env.yaml <<'YAML'
+          channels:
+            - conda-forge
+            - bioconda
+          dependencies:
+            - samtools=1.15.1
+          YAML
+          .ci/enva/target/release/enva create \
+            --yaml ci-artifacts/samtools-env.yaml \
+            --name gate-c-samtools \
+            --force \
+            --output summary \
+            2>&1 | tee ci-artifacts/enva-create.log
+          .ci/enva/target/release/enva run --name gate-c-samtools \
+            --command 'samtools --version | head -n 1' \
+            2>&1 | tee ci-artifacts/samtools-version.log
+          grep -q '^samtools 1.15.1' ci-artifacts/samtools-version.log
+
+      - name: Download and verify the fixture BAM
+        run: |
+          set -euo pipefail
+          bam="$GITHUB_WORKSPACE/ci-artifacts/fixture/input.bam"
+          curl --fail --location --silent --show-error --retry 5 \
+            "$FIXTURE_BASE_URL/${{ matrix.bam_dataset_path }}" \
+            --output "$bam"
+          printf '%s  %s\n' "${{ matrix.bam_sha256 }}" "$bam" | sha256sum --check -
+          test "$(stat -c %s "$bam")" = "${{ matrix.bam_size }}"
+
+      - name: Acquire and verify the reference FASTA
+        env:
+          REFERENCE: ${{ matrix.reference }}
+        run: |
+          set -euo pipefail
+          reference_directory="$GITHUB_WORKSPACE/ci-artifacts/reference"
+          mkdir -p "$reference_directory"
+          if [ "$REFERENCE" = "mm10" ]; then
+            url="https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/GRCm38.primary_assembly.genome.fa.gz"
+            expected_gz_md5="3bc591be24b77f710b6ba5d41022fc5a"
+            expected_fa_sha256="767f48e8ae5bda117ad519fb694cbf7e24f161bf094c274bbbcd16e52aedf802"
+            expected_fa_size="2776387546"
+          else
+            url="https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_44/GRCh38.primary_assembly.genome.fa.gz"
+            expected_gz_md5="9c3fc2ca260a767530dddb0f26721a6b"
+            expected_fa_sha256="e49b92b3e4f321bf254c042f25b726d9931c4d74c7523e8b6bb530e63b0cfd4b"
+            expected_fa_size="3151417447"
+          fi
+          gz="$reference_directory/reference.fa.gz"
+          curl --fail --location --silent --show-error --retry 5 --continue-at - \
+            "$url" --output "$gz"
+          printf '%s  %s\n' "$expected_gz_md5" "$gz" | md5sum --check -
+          gunzip -c "$gz" > "$reference_directory/reference.fa"
+          printf '%s  %s\n' "$expected_fa_sha256" "$reference_directory/reference.fa" | sha256sum --check -
+          test "$(stat -c %s "$reference_directory/reference.fa")" = "$expected_fa_size"
+          rm -f "$gz"
+
+      - name: Primary arm - independent oracle
+        run: |
+          set -euo pipefail
+          ./ci-artifacts/nmoracle \
+            --input ci-artifacts/fixture/input.bam \
+            --reference ci-artifacts/reference/reference.fa \
+            --limit "$GATE_C_RECORD_LIMIT" \
+            --report ci-artifacts/evidence/oracle-summary.json \
+            --records ci-artifacts/evidence/oracle-records.tsv
+
+      - name: Primary arm - Xenofilx score audit
+        run: |
+          set -euo pipefail
+          extra_args=()
+          if [ "${{ matrix.mode }}" = "bsseq" ]; then
+            extra_args+=(--bisulfite)
+          fi
+          ./ci-artifacts/gate6-xenofilx-scoreaudit \
+            --input ci-artifacts/fixture/input.bam \
+            --reference ci-artifacts/reference/reference.fa \
+            --limit "$GATE_C_RECORD_LIMIT" \
+            --report ci-artifacts/evidence/xenofilx-records.tsv \
+            "${extra_args[@]}"
+
+      - name: Primary arm - assert oracle equality
+        run: |
+          set -euo pipefail
+          python3 scripts/gate6/gate6-nm-score-compare.py \
+            --oracle ci-artifacts/evidence/oracle-records.tsv \
+            --xenofilx ci-artifacts/evidence/xenofilx-records.tsv \
+            --xenofilx-mode bisulfite \
+            --report ci-artifacts/evidence/xenofilx-oracle-comparison.json
+
+      - name: Control arms - convert the reference for CT and GA
+        if: matrix.mode == 'bsseq'
+        run: |
+          set -euo pipefail
+          for conversion in ct ga; do
+            python3 scripts/gate6/gate6-bisulfite-reference.py \
+              --input ci-artifacts/reference/reference.fa \
+              --output "ci-artifacts/reference/reference.$conversion.fa" \
+              --conversion "$conversion"
+          done
+
+      - name: Control arms - split the BAM by the Bismark XG tag
+        if: matrix.mode == 'bsseq'
+        run: |
+          set -euo pipefail
+          for context in CT GA; do
+            low="$(printf '%s' "$context" | tr 'A-Z' 'a-z')"
+            .ci/enva/target/release/enva run --name gate-c-samtools \
+              --command "samtools view -h ci-artifacts/fixture/input.bam" \
+              > "ci-artifacts/fixture/input.$low.sam"
+            awk -F'\t' -v tag="XG:Z:$context" \
+              'BEGIN{OFS="\t"} /^@/{print; next} {for(i=12;i<=NF;i++) if($i==tag){print; next}}' \
+              "ci-artifacts/fixture/input.$low.sam" > "ci-artifacts/fixture/input.$low.filtered.sam"
+            .ci/enva/target/release/enva run --name gate-c-samtools \
+              --command "samtools view -bh ci-artifacts/fixture/input.$low.filtered.sam" \
+              > "ci-artifacts/fixture/input.xg-$low.bam"
+            .ci/enva/target/release/enva run --name gate-c-samtools \
+              --command "samtools view -c ci-artifacts/fixture/input.xg-$low.bam" \
+              | tee "ci-artifacts/evidence/xg-$low-record-count.txt"
+          done
+
+      - name: Control arms - oracle and audit on converted references
+        if: matrix.mode == 'bsseq'
+        run: |
+          set -euo pipefail
+          for context in CT GA; do
+            low="$(printf '%s' "$context" | tr 'A-Z' 'a-z')"
+            ./ci-artifacts/nmoracle \
+              --input "ci-artifacts/fixture/input.xg-$low.bam" \
+              --reference "ci-artifacts/reference/reference.$low.fa" \
+              --limit "$GATE_C_RECORD_LIMIT" \
+              --report "ci-artifacts/evidence/oracle-xg-$low-summary.json" \
+              --records "ci-artifacts/evidence/oracle-xg-$low-records.tsv"
+            ./ci-artifacts/gate6-xenofilx-scoreaudit \
+              --input "ci-artifacts/fixture/input.xg-$low.bam" \
+              --reference "ci-artifacts/reference/reference.$low.fa" \
+              --limit "$GATE_C_RECORD_LIMIT" \
+              --report "ci-artifacts/evidence/xenofilx-xg-$low-records.tsv"
+            python3 scripts/gate6/gate6-nm-score-compare.py \
+              --oracle "ci-artifacts/evidence/oracle-xg-$low-records.tsv" \
+              --xenofilx "ci-artifacts/evidence/xenofilx-xg-$low-records.tsv" \
+              --xenofilx-mode conventional \
+              --report "ci-artifacts/evidence/xg-$low-xenofilx-oracle-comparison.json"
+          done
+
+      - name: Remove the Samtools environment through enva
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -x .ci/enva/target/release/enva ]; then
+            if .ci/enva/target/release/enva validate --name gate-c-samtools \
+              > ci-artifacts/enva-pre-remove-validate.log 2>&1; then
+              .ci/enva/target/release/enva remove gate-c-samtools \
+                2>&1 | tee ci-artifacts/enva-remove.log
+            fi
+          fi
+
+      - name: Upload Gate C evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xenofilx-gate-c-${{ matrix.cell }}
+          path: ci-artifacts/
+          if-no-files-found: warn
+          retention-days: 90

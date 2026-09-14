@@ -1,0 +1,231 @@
+name: Xenofilx Note 4 Parameter Grid
+
+# Reproduces Supplementary Table S7: the 4x3 factorial audit of mismatch threshold
+# (5-8) against unmapped-read penalty (8-12) on the matched 60% human BS-seq mixtures
+# (n=3 replicates, 36 evaluation runs).
+#
+# Scope policy:
+#   push / pull_request      -> replicate 1 only (12 runs) as a fast gate
+#   workflow_dispatch (full) -> all three replicates (36 runs), sharded per replicate
+#
+# Both arms are evaluated: modern `xenofilx` (strand-aware bisulfite NM) and the `xdxtools`
+# prototype (Picard `SetNmMdAndUqTags` with `IS_BISULFITE_SEQUENCE=true` + R `XenofilteR`).
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      full_sweep:
+        description: 'Run all three replicates instead of replicate 1 only'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  FIXTURE_BASE_URL: https://huggingface.co/datasets/fallingstar10/otter-data/resolve/0b0c627cb0fdb2394577bb9c6cdc969646ed668f
+  ENVA_COMMIT: d93b7fc7c82593dcaffa56f28b50aad02cca1108
+  XENOFILTER_COMMIT: de0bbe4c706766702b0fe15a676893639f96d50d
+  HG19_URL: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/GRCh37.p13.genome.fa.gz
+  HG19_FA_SHA256: b22e74cdd8b90a1228474ce31739aa76d71be55735f93de1471e3886790b9256
+  HG19_FA_SIZE: '3234842113'
+  MM10_URL: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/GRCm38.primary_assembly.genome.fa.gz
+  MM10_FA_SHA256: 767f48e8ae5bda117ad519fb694cbf7e24f161bf094c274bbbcd16e52aedf802
+  MM10_FA_SIZE: '2776387546'
+
+jobs:
+  plan:
+    name: Plan the replicate scope
+    runs-on: ubuntu-latest
+    outputs:
+      replicates: ${{ steps.scope.outputs.replicates }}
+    steps:
+      - name: Resolve the requested replicate scope
+        id: scope
+        env:
+          FULL_SWEEP: ${{ github.event_name == 'workflow_dispatch' && inputs.full_sweep || 'false' }}
+        run: |
+          set -euo pipefail
+          if [ "$FULL_SWEEP" = "true" ]; then
+            echo 'replicates=[1, 2, 3]' >> "$GITHUB_OUTPUT"
+          else
+            echo 'replicates=[1]' >> "$GITHUB_OUTPUT"
+          fi
+
+  parameter-grid:
+    name: Grid replicate ${{ matrix.replicate }}
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        replicate: ${{ fromJSON(needs.plan.outputs.replicates) }}
+    steps:
+      - name: Checkout xenofilx
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned enva
+        uses: actions/checkout@v4
+        with:
+          repository: rainoffallingstar/enva
+          ref: ${{ env.ENVA_COMMIT }}
+          path: .ci/enva
+
+      - name: Checkout pinned XenofilteR source
+        uses: actions/checkout@v4
+        with:
+          repository: PeeperLab/XenofilteR
+          ref: ${{ env.XENOFILTER_COMMIT }}
+          path: .ci/XenofilteR
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Prepare evidence directory
+        run: mkdir -p ci-artifacts/{reference,evidence,logs}
+
+      - name: Build xenofilx and enva
+        run: |
+          set -euo pipefail
+          go build -buildvcs=false -o ci-artifacts/xenofilx ./cmd/xenofilx
+          (cd .ci/enva && cargo build --release --locked --bin enva) 2>&1 | tee ci-artifacts/logs/enva-build.log
+
+      - name: Create the analysis environment through enva
+        env:
+          RATTLER_CACHE_DIR: ${{ runner.temp }}/rattler-cache
+        run: |
+          set -euo pipefail
+          mkdir -p "$RATTLER_CACHE_DIR"
+          cat > ci-artifacts/grid-analysis.yaml <<'YAML'
+          channels:
+            - conda-forge
+            - bioconda
+          dependencies:
+            - samtools=1.15.1
+            - picard=3.4.0
+            - r-base=4.3
+            - bioconductor-biocparallel
+            - bioconductor-genomicalignments
+            - bioconductor-genomicranges
+            - bioconductor-iranges
+            - bioconductor-s4vectors
+            - bioconductor-rsamtools
+            - r-futile.logger
+            - r-jsonlite
+          YAML
+          .ci/enva/target/release/enva create \
+            --yaml ci-artifacts/grid-analysis.yaml \
+            --name grid-analysis \
+            --force \
+            --output summary \
+            2>&1 | tee ci-artifacts/logs/enva-create.log
+
+      - name: Install XenofilteR from the pinned source
+        run: |
+          set -euo pipefail
+          .ci/enva/target/release/enva run --name grid-analysis \
+            --command "R CMD INSTALL '$GITHUB_WORKSPACE/.ci/XenofilteR'" \
+            2>&1 | tee ci-artifacts/logs/xenofilter-install.log
+
+      - name: Acquire and verify reference FASTAs
+        run: |
+          set -euo pipefail
+          fetch_reference () {
+            local label="$1" url="$2" fa_sha="$3" fa_size="$4"
+            curl --fail --location --silent --show-error --retry 5 "$url" \
+              | gunzip -c > "ci-artifacts/reference/${label}.fa"
+            printf '%s  %s\n' "$fa_sha" "ci-artifacts/reference/${label}.fa" | sha256sum --check -
+            test "$(stat -c %s "ci-artifacts/reference/${label}.fa")" = "$fa_size"
+          }
+          fetch_reference hg19 "$HG19_URL" "$HG19_FA_SHA256" "$HG19_FA_SIZE"
+          fetch_reference mm10 "$MM10_URL" "$MM10_FA_SHA256" "$MM10_FA_SIZE"
+
+      - name: Sweep the 4x3 parameter grid
+        run: |
+          set -euo pipefail
+          for threshold in 5 6 7 8; do
+            for penalty in 8 10 12; do
+              cell="human0p6-replicate${{ matrix.replicate }}"
+              python3 scripts/gate6/run-note4-gradient-cell.py \
+                --contract benchmark/note4/mixture-cells.json \
+                --cell "$cell" \
+                --fixture-base-url "$FIXTURE_BASE_URL" \
+                --reference-directory ci-artifacts/reference \
+                --xenofilx ci-artifacts/xenofilx \
+                --enva .ci/enva/target/release/enva \
+                --environment grid-analysis \
+                --work-directory ci-artifacts/evidence \
+                --mm-threshold "$threshold" \
+                --unmapped-penalty "$penalty" \
+                --skip-conventional-control \
+                2>&1 | tee "ci-artifacts/logs/${cell}-t${threshold}-p${penalty}.log"
+            done
+          done
+
+      - name: Compare the grid with the published Supplementary Table S7
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee ci-artifacts/logs/grid-comparison.log
+          import json, pathlib, re, statistics
+          evidence = pathlib.Path('ci-artifacts/evidence')
+          expected = {}
+          lines = pathlib.Path('benchmark/note4/table-s7-parameter-grid.tsv').read_text().splitlines()
+          header = lines[0].split('\t')
+          for line in lines[1:]:
+              if not line.strip():
+                  continue
+              row = dict(zip(header, line.split('\t')))
+              expected[(int(row['t']), int(row['p']))] = row
+          grouped = {}
+          for report_path in sorted(evidence.glob('*/source-performance.json')):
+              match = re.search(r'-t(\d+)-p(\d+)$', report_path.parent.name)
+              if not match:
+                  continue
+              grouped.setdefault((int(match.group(1)), int(match.group(2))), []).append(
+                  json.loads(report_path.read_text()))
+          def mean(payloads, tool, key):
+              values = [p['tools'][tool][key] for p in payloads
+                        if tool in p.get('tools', {}) and p['tools'][tool].get(key) is not None]
+              return statistics.fmean(values) if values else None
+          tolerance = 0.05
+          failures = []
+          for (threshold, penalty) in sorted(grouped):
+              payloads = grouped[(threshold, penalty)]
+              reference = expected.get((threshold, penalty))
+              modern = mean(payloads, 'modern_xenofilx', 'sensitivity_graft_recall')
+              legacy = mean(payloads, 'legacy_picard_xenofilter', 'sensitivity_graft_recall')
+              modern_points = None if modern is None else round(modern * 100, 4)
+              legacy_points = None if legacy is None else round(legacy * 100, 4)
+              print(f"t={threshold} p={penalty} n={len(payloads)} "
+                    f"modern={modern_points} legacy={legacy_points} expected={reference['modern_recall']}/{reference['legacy_recall']}")
+              if reference and modern_points is not None:
+                  if abs(modern_points - float(reference['modern_recall'])) > tolerance:
+                      failures.append(f"t{threshold}p{penalty} modern")
+                  if legacy_points is not None and abs(legacy_points - float(reference['legacy_recall'])) > tolerance:
+                      failures.append(f"t{threshold}p{penalty} legacy")
+          print('failures:', failures)
+          if failures:
+              raise SystemExit('parameter grid deviates beyond tolerance')
+          PY
+
+      - name: Upload parameter grid evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xenofilx-note4-parameter-grid-replicate-${{ matrix.replicate }}
+          path: |
+            ci-artifacts/evidence/
+            ci-artifacts/logs/
+          if-no-files-found: warn
+          retention-days: 90

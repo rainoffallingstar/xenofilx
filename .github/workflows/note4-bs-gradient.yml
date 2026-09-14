@@ -1,0 +1,215 @@
+name: Xenofilx Note 4 BS Gradient
+
+# Reproduces Supplementary Table S6 (0-99% BS-seq composition gradient, 43 cells) from the
+# published `fallingstar10/otter-data` fixtures. Each cell runs the three pipelines compared
+# in the manuscript: modern `xenofilx` (strand-aware bisulfite NM), the `xdxtools` prototype
+# (Picard `SetNmMdAndUqTags` with `IS_BISULFITE_SEQUENCE=true` + R `XenofilteR`), and the
+# unpatched conventional Picard control.
+#
+# Scope policy:
+#   push / pull_request          -> representative slice (3 cells) so the gradient stays a fast gate
+#   workflow_dispatch (full)     -> all 43 cells, sharded across parallel jobs
+#
+# The fixture contract (labels, sizes, SHA-256) lives in `benchmark/note4/mixture-cells.json`;
+# the expected aggregate metrics live in `benchmark/note4/table-s6-gradient.tsv`.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      full_sweep:
+        description: 'Run all 43 gradient cells instead of the 3-cell representative slice'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  FIXTURE_BASE_URL: https://huggingface.co/datasets/fallingstar10/otter-data/resolve/0b0c627cb0fdb2394577bb9c6cdc969646ed668f
+  ENVA_COMMIT: d93b7fc7c82593dcaffa56f28b50aad02cca1108
+  XENOFILTER_COMMIT: de0bbe4c706766702b0fe15a676893639f96d50d
+  HG19_URL: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/GRCh37.p13.genome.fa.gz
+  HG19_FA_SHA256: b22e74cdd8b90a1228474ce31739aa76d71be55735f93de1471e3886790b9256
+  HG19_FA_SIZE: '3234842113'
+  MM10_URL: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/GRCm38.primary_assembly.genome.fa.gz
+  MM10_FA_SHA256: 767f48e8ae5bda117ad519fb694cbf7e24f161bf094c274bbbcd16e52aedf802
+  MM10_FA_SIZE: '2776387546'
+
+jobs:
+  plan:
+    name: Plan the gradient scope
+    runs-on: ubuntu-latest
+    outputs:
+      cells: ${{ steps.scope.outputs.cells }}
+      shards: ${{ steps.scope.outputs.shards }}
+    steps:
+      - name: Checkout xenofilx
+        uses: actions/checkout@v4
+
+      - name: Resolve the requested cell scope
+        id: scope
+        env:
+          FULL_SWEEP: ${{ github.event_name == 'workflow_dispatch' && inputs.full_sweep || 'false' }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, pathlib, math
+          contract = json.loads(pathlib.Path('benchmark/note4/mixture-cells.json').read_text())
+          labels = [cell['label'] for cell in contract['cells']]
+          if os.environ.get('FULL_SWEEP', 'false').lower() == 'true':
+              selected = labels
+              shard_count = 6
+          else:
+              selected = ['human0p001-replicate1', 'human0p5-replicate1', 'human0p99-replicate1']
+              shard_count = len(selected)
+          print(f"cells={json.dumps(selected)}")
+          print(f"shards={json.dumps(list(range(1, shard_count + 1)))}")
+          PY
+
+  gradient:
+    name: Gradient shard ${{ matrix.shard }}
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(needs.plan.outputs.shards) }}
+    steps:
+      - name: Checkout xenofilx
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned enva
+        uses: actions/checkout@v4
+        with:
+          repository: rainoffallingstar/enva
+          ref: ${{ env.ENVA_COMMIT }}
+          path: .ci/enva
+
+      - name: Checkout pinned XenofilteR source
+        uses: actions/checkout@v4
+        with:
+          repository: PeeperLab/XenofilteR
+          ref: ${{ env.XENOFILTER_COMMIT }}
+          path: .ci/XenofilteR
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Prepare evidence directory
+        run: mkdir -p ci-artifacts/{fixture,reference,evidence,logs}
+
+      - name: Build xenofilx and enva
+        run: |
+          set -euo pipefail
+          go build -buildvcs=false -o ci-artifacts/xenofilx ./cmd/xenofilx
+          (cd .ci/enva && cargo build --release --locked --bin enva) 2>&1 | tee ci-artifacts/logs/enva-build.log
+
+      - name: Create the analysis environment through enva
+        env:
+          RATTLER_CACHE_DIR: ${{ runner.temp }}/rattler-cache
+        run: |
+          set -euo pipefail
+          mkdir -p "$RATTLER_CACHE_DIR"
+          cat > ci-artifacts/gradient-analysis.yaml <<'YAML'
+          channels:
+            - conda-forge
+            - bioconda
+          dependencies:
+            - samtools=1.15.1
+            - picard=3.4.0
+            - r-base=4.3
+            - bioconductor-biocparallel
+            - bioconductor-genomicalignments
+            - bioconductor-genomicranges
+            - bioconductor-iranges
+            - bioconductor-s4vectors
+            - bioconductor-rsamtools
+            - r-futile.logger
+            - r-jsonlite
+          YAML
+          .ci/enva/target/release/enva create \
+            --yaml ci-artifacts/gradient-analysis.yaml \
+            --name gradient-analysis \
+            --force \
+            --output summary \
+            2>&1 | tee ci-artifacts/logs/enva-create.log
+
+      - name: Install XenofilteR from the pinned source
+        run: |
+          set -euo pipefail
+          .ci/enva/target/release/enva run --name gradient-analysis \
+            --command "R CMD INSTALL '$GITHUB_WORKSPACE/.ci/XenofilteR'" \
+            2>&1 | tee ci-artifacts/logs/xenofilter-install.log
+
+      - name: Acquire and verify reference FASTAs
+        run: |
+          set -euo pipefail
+          fetch_reference () {
+            local label="$1" url="$2" fa_sha="$3" fa_size="$4"
+            curl --fail --location --silent --show-error --retry 5 "$url" \
+              | gunzip -c > "ci-artifacts/reference/${label}.fa"
+            printf '%s  %s\n' "$fa_sha" "ci-artifacts/reference/${label}.fa" | sha256sum --check -
+            test "$(stat -c %s "ci-artifacts/reference/${label}.fa")" = "$fa_size"
+          }
+          fetch_reference hg19 "$HG19_URL" "$HG19_FA_SHA256" "$HG19_FA_SIZE"
+          fetch_reference mm10 "$MM10_URL" "$MM10_FA_SHA256" "$MM10_FA_SIZE"
+
+      - name: Run the assigned gradient cells
+        run: |
+          set -euo pipefail
+          shard=${{ matrix.shard }}
+          shard_count=${{ strategy.job-total }}
+          python3 - "$shard" "$shard_count" <<'PY' > ci-artifacts/assigned-cells.txt
+          import json, pathlib, sys
+          contract = json.loads(pathlib.Path('benchmark/note4/mixture-cells.json').read_text())
+          labels = [cell['label'] for cell in contract['cells']]
+          shard, shard_count = int(sys.argv[1]), int(sys.argv[2])
+          step = -(-len(labels) // shard_count)
+          for label in labels[(shard - 1) * step : shard * step]:
+              print(label)
+          PY
+          while read -r cell; do
+            [ -z "$cell" ] && continue
+            python3 scripts/gate6/run-note4-gradient-cell.py \
+              --contract benchmark/note4/mixture-cells.json \
+              --cell "$cell" \
+              --fixture-base-url "$FIXTURE_BASE_URL" \
+              --reference-directory ci-artifacts/reference \
+              --xenofilx ci-artifacts/xenofilx \
+              --enva .ci/enva/target/release/enva \
+              --environment gradient-analysis \
+              --work-directory ci-artifacts/evidence \
+              2>&1 | tee "ci-artifacts/logs/cell-${cell}.log"
+          done < ci-artifacts/assigned-cells.txt
+
+      - name: Verify the gradient reproduces the published table
+        run: |
+          set -euo pipefail
+          python3 scripts/gate6/compare-note4-gradient.py \
+            --metrics-directory ci-artifacts/evidence \
+            --expected benchmark/note4/table-s6-gradient.tsv \
+            --report ci-artifacts/gradient-comparison.json \
+            2>&1 | tee ci-artifacts/logs/gradient-comparison.log
+
+      - name: Upload gradient evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xenofilx-note4-gradient-shard-${{ matrix.shard }}
+          path: |
+            ci-artifacts/evidence/
+            ci-artifacts/logs/
+            ci-artifacts/gradient-comparison.json
+          if-no-files-found: warn
+          retention-days: 90
