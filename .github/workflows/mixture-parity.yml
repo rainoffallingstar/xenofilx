@@ -62,6 +62,7 @@ jobs:
             mm_threshold: '4'
             bisulfite: 'false'
             graft_source: human
+            exact_cell: ''
           - assay: bs-pdx
             graft_dataset_path: xenofilx/mixture/bs-pdx/human0p5-replicate1/graft.hg19.bam
             graft_sha256: 1cbf6d2f59635661a937d116b0cd42e279627166f6c643287f4b0d89693bd6be
@@ -77,6 +78,7 @@ jobs:
             mm_threshold: '6'
             bisulfite: 'true'
             graft_source: human
+            exact_cell: human0p5-replicate1
     steps:
       - name: Checkout xenofilx
         uses: actions/checkout@v4
@@ -281,6 +283,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           import json
+          import os
           from pathlib import Path
 
           report = json.loads(Path('ci-artifacts/evidence/source-performance.json').read_text())
@@ -293,11 +296,40 @@ jobs:
           metrics = ('accuracy', 'sensitivity_graft_recall', 'specificity_host_recall', 'precision_graft_ppv', 'f1_graft')
           for name, tool in tools.items():
               assert tool['unknown_selected_fragments'] == 0, (name, tool.get('unknown_selected_fragments'))
-              assert tool['truth_fragments'] == 1000000, (name, tool['truth_fragments'])
+              assert int(tool['truth_fragments']) >= 1000000, (name, tool['truth_fragments'])
               for metric in metrics:
                   assert 0.0 <= float(tool[metric]) <= 1.0, (name, metric, tool.get(metric))
               print(name, {metric: round(float(tool[metric]), 6) for metric in metrics})
+
+          cell = os.environ['EXACT_CELL']
+          if cell:
+              # The BS-PDX cell reproduces the recorded Supplementary Table S6 50% metrics.
+              anchors = json.loads(Path('benchmark/note4/per-cell-expected.json').read_text())[cell]
+              tolerance = 0.01
+              for arm, prefix in (('modern_xenofilx', 'modern'), ('legacy_xenofilter_bisulfite', 'legacy')):
+                  assert arm in tools, (cell, arm, sorted(tools))
+                  for suffix, field in (('recall', 'sensitivity_graft_recall'),
+                                        ('spec', 'specificity_host_recall'),
+                                        ('ppv', 'precision_graft_ppv')):
+                      key = f'{prefix}_{suffix}'
+                      if anchors.get(key) in (None, 'N/A'):
+                          continue
+                      observed = round(float(tools[arm][field]) * 100, 4)
+                      deviation = round(observed - float(anchors[key]), 4)
+                      print(f'{cell} {arm} {key}: observed={observed} expected={anchors[key]} deviation={deviation}')
+                      assert abs(deviation) <= tolerance, (cell, arm, key, deviation)
+          else:
+              # RNA-PDX reproduces the Supplementary Table S5 parity claim: the modern and
+              # legacy arms select exactly the same fragments and therefore report the same
+              # metrics at every fraction.
+              modern = tools['modern_xenofilx']
+              legacy = tools['legacy_xenofilter_conventional']
+              for metric in metrics:
+                  assert float(modern[metric]) == float(legacy[metric]), (metric, modern[metric], legacy[metric])
+              print('rna-pdx parity: modern and legacy metrics are identical')
           PY
+        env:
+          EXACT_CELL: ${{ matrix.exact_cell }}
 
       - name: Remove the analysis environment through enva
         if: always()

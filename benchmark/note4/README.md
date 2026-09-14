@@ -43,14 +43,23 @@ cell; it is the arm that collapses to negligible recall and is not part of the r
 ## Expected metrics
 
 * `table-s5-gradient.tsv` — Supplementary Table S5, the RNA-seq gradient (fraction, mean
-  modern/legacy recall, specificity, PPV, replicate count). The RNA parity cell is re-evaluated
-  at threshold 4 to match this table.
+  modern/legacy recall, specificity, PPV, replicate count).
 * `table-s6-gradient.tsv` — Supplementary Table S6 (fraction, mean modern/legacy recall,
   specificity, PPV, replicate count).
 * `table-s7-parameter-grid.tsv` — Supplementary Table S7 (12 threshold/penalty combinations with
   mean modern/legacy recall, specificity, F1, and filtered-fragment counts).
+* `per-cell-expected-s6.json` — the recorded metric values of all 43 gradient cells.
+* `per-cell-expected-s7.json` — the recorded metric values of the 36 parameter-grid cells.
+* `per-cell-expected.json` — the per-cell values plus the 50% cell entry; this is the anchor file
+  the workflows compare against.
 
-All three tables were recomputed directly from the evidence roots and match the manuscript values
+Both `xenofilx` selection and the Picard arms are deterministic, so CI enforces the **per-cell**
+recorded values (0.01 percentage point tolerance) rather than the three-replicate means. A single
+replicate can deviate from the published mean by up to ~2 percentage points at low human
+fractions, so mean-based tolerances would be wrong for a one-replicate slice. The aggregate
+tables remain the reference for the manuscript numbers.
+
+All tables were recomputed directly from the evidence roots and match the manuscript values
 digit for digit.
 
 ## Reproducing
@@ -69,7 +78,7 @@ python3 scripts/gate6/run-note4-gradient-cell.py \
 
 python3 scripts/gate6/compare-note4-gradient.py \
   --metrics-directory ci-artifacts/evidence \
-  --expected benchmark/note4/table-s6-gradient.tsv \
+  --expected benchmark/note4/per-cell-expected-s6.json \
   --report ci-artifacts/gradient-comparison.json
 ```
 

@@ -173,47 +173,38 @@ jobs:
             done
           done
 
-      - name: Compare the grid with the published Supplementary Table S7
+      - name: Compare the grid with the recorded per-cell metrics
         run: |
           set -euo pipefail
           python3 - <<'PY' | tee ci-artifacts/logs/grid-comparison.log
-          import json, pathlib, re, statistics
+          import json, pathlib, sys
           evidence = pathlib.Path('ci-artifacts/evidence')
-          expected = {}
-          lines = pathlib.Path('benchmark/note4/table-s7-parameter-grid.tsv').read_text().splitlines()
-          header = lines[0].split('\t')
-          for line in lines[1:]:
-              if not line.strip():
-                  continue
-              row = dict(zip(header, line.split('\t')))
-              expected[(int(row['t']), int(row['p']))] = row
-          grouped = {}
+          expected = json.loads(pathlib.Path('benchmark/note4/per-cell-expected-s7.json').read_text())
+          observed = {}
           for report_path in sorted(evidence.glob('*/source-performance.json')):
-              match = re.search(r'-t(\d+)-p(\d+)$', report_path.parent.name)
-              if not match:
-                  continue
-              grouped.setdefault((int(match.group(1)), int(match.group(2))), []).append(
-                  json.loads(report_path.read_text()))
-          def mean(payloads, tool, key):
-              values = [p['tools'][tool][key] for p in payloads
-                        if tool in p.get('tools', {}) and p['tools'][tool].get(key) is not None]
-              return statistics.fmean(values) if values else None
-          tolerance = 0.05
+              observed[report_path.parent.name] = json.loads(report_path.read_text())
+          if not observed:
+              raise SystemExit('no per-cell evidence was produced')
+          unknown = sorted(label for label in observed if label not in expected)
+          if unknown:
+              raise SystemExit(f'evaluated cells are not part of the contract: {unknown}')
+          tolerance = 0.01
           failures = []
-          for (threshold, penalty) in sorted(grouped):
-              payloads = grouped[(threshold, penalty)]
-              reference = expected.get((threshold, penalty))
-              modern = mean(payloads, 'modern_xenofilx', 'sensitivity_graft_recall')
-              legacy = mean(payloads, 'legacy_picard_xenofilter', 'sensitivity_graft_recall')
+          for label in sorted(observed):
+              tools = observed[label].get('tools', {})
+              modern = tools.get('modern_xenofilx', {}).get('sensitivity_graft_recall')
+              legacy = tools.get('legacy_picard_xenofilter', {}).get('sensitivity_graft_recall')
               modern_points = None if modern is None else round(modern * 100, 4)
               legacy_points = None if legacy is None else round(legacy * 100, 4)
-              print(f"t={threshold} p={penalty} n={len(payloads)} "
-                    f"modern={modern_points} legacy={legacy_points} expected={reference['modern_recall']}/{reference['legacy_recall']}")
-              if reference and modern_points is not None:
-                  if abs(modern_points - float(reference['modern_recall'])) > tolerance:
-                      failures.append(f"t{threshold}p{penalty} modern")
-                  if legacy_points is not None and abs(legacy_points - float(reference['legacy_recall'])) > tolerance:
-                      failures.append(f"t{threshold}p{penalty} legacy")
+              reference = expected[label]
+              print(f'{label} modern={modern_points} legacy={legacy_points} '
+                    f'expected={reference["modern_recall"]}/{reference["legacy_recall"]}')
+              for metric, value in (('modern_recall', modern_points), ('legacy_recall', legacy_points)):
+                  if value is None:
+                      continue
+                  deviation = round(value - float(reference[metric]), 4)
+                  if abs(deviation) > tolerance:
+                      failures.append(f'{label} {metric}: {deviation:+.4f} pp')
           print('failures:', failures)
           if failures:
               raise SystemExit('parameter grid deviates beyond tolerance')

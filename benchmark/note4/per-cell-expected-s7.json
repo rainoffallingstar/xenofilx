@@ -1,0 +1,218 @@
+{
+  "human0p6-replicate1-t5-p10": {
+    "legacy_recall": "50.5105",
+    "legacy_spec": "99.9183",
+    "modern_recall": "51.5970",
+    "modern_spec": "99.9178"
+  },
+  "human0p6-replicate1-t5-p12": {
+    "legacy_recall": "50.5105",
+    "legacy_spec": "99.9183",
+    "modern_recall": "51.5970",
+    "modern_spec": "99.9178"
+  },
+  "human0p6-replicate1-t5-p8": {
+    "legacy_recall": "50.5105",
+    "legacy_spec": "99.9183",
+    "modern_recall": "51.5970",
+    "modern_spec": "99.9178"
+  },
+  "human0p6-replicate1-t6-p10": {
+    "legacy_recall": "51.3337",
+    "legacy_spec": "99.9180",
+    "modern_recall": "51.9847",
+    "modern_spec": "99.9178"
+  },
+  "human0p6-replicate1-t6-p12": {
+    "legacy_recall": "51.3337",
+    "legacy_spec": "99.9180",
+    "modern_recall": "51.9847",
+    "modern_spec": "99.9178"
+  },
+  "human0p6-replicate1-t6-p8": {
+    "legacy_recall": "51.3337",
+    "legacy_spec": "99.9180",
+    "modern_recall": "51.9847",
+    "modern_spec": "99.9178"
+  },
+  "human0p6-replicate1-t7-p10": {
+    "legacy_recall": "51.6868",
+    "legacy_spec": "99.9175",
+    "modern_recall": "52.2178",
+    "modern_spec": "99.9175"
+  },
+  "human0p6-replicate1-t7-p12": {
+    "legacy_recall": "51.6868",
+    "legacy_spec": "99.9175",
+    "modern_recall": "52.2178",
+    "modern_spec": "99.9175"
+  },
+  "human0p6-replicate1-t7-p8": {
+    "legacy_recall": "51.6868",
+    "legacy_spec": "99.9175",
+    "modern_recall": "52.2178",
+    "modern_spec": "99.9175"
+  },
+  "human0p6-replicate1-t8-p10": {
+    "legacy_recall": "51.8288",
+    "legacy_spec": "99.9170",
+    "modern_recall": "52.2858",
+    "modern_spec": "99.9175"
+  },
+  "human0p6-replicate1-t8-p12": {
+    "legacy_recall": "51.8288",
+    "legacy_spec": "99.9170",
+    "modern_recall": "52.2858",
+    "modern_spec": "99.9175"
+  },
+  "human0p6-replicate1-t8-p8": {
+    "legacy_recall": "51.8288",
+    "legacy_spec": "99.9170",
+    "modern_recall": "52.2858",
+    "modern_spec": "99.9175"
+  },
+  "human0p6-replicate2-t5-p10": {
+    "legacy_recall": "50.5425",
+    "legacy_spec": "99.9165",
+    "modern_recall": "51.6398",
+    "modern_spec": "99.9162"
+  },
+  "human0p6-replicate2-t5-p12": {
+    "legacy_recall": "50.5425",
+    "legacy_spec": "99.9165",
+    "modern_recall": "51.6398",
+    "modern_spec": "99.9162"
+  },
+  "human0p6-replicate2-t5-p8": {
+    "legacy_recall": "50.5425",
+    "legacy_spec": "99.9165",
+    "modern_recall": "51.6398",
+    "modern_spec": "99.9162"
+  },
+  "human0p6-replicate2-t6-p10": {
+    "legacy_recall": "51.3765",
+    "legacy_spec": "99.9165",
+    "modern_recall": "52.0303",
+    "modern_spec": "99.9160"
+  },
+  "human0p6-replicate2-t6-p12": {
+    "legacy_recall": "51.3765",
+    "legacy_spec": "99.9165",
+    "modern_recall": "52.0303",
+    "modern_spec": "99.9160"
+  },
+  "human0p6-replicate2-t6-p8": {
+    "legacy_recall": "51.3765",
+    "legacy_spec": "99.9165",
+    "modern_recall": "52.0303",
+    "modern_spec": "99.9160"
+  },
+  "human0p6-replicate2-t7-p10": {
+    "legacy_recall": "51.7258",
+    "legacy_spec": "99.9165",
+    "modern_recall": "52.2545",
+    "modern_spec": "99.9160"
+  },
+  "human0p6-replicate2-t7-p12": {
+    "legacy_recall": "51.7258",
+    "legacy_spec": "99.9165",
+    "modern_recall": "52.2545",
+    "modern_spec": "99.9160"
+  },
+  "human0p6-replicate2-t7-p8": {
+    "legacy_recall": "51.7258",
+    "legacy_spec": "99.9165",
+    "modern_recall": "52.2545",
+    "modern_spec": "99.9160"
+  },
+  "human0p6-replicate2-t8-p10": {
+    "legacy_recall": "51.8618",
+    "legacy_spec": "99.9162",
+    "modern_recall": "52.3257",
+    "modern_spec": "99.9158"
+  },
+  "human0p6-replicate2-t8-p12": {
+    "legacy_recall": "51.8618",
+    "legacy_spec": "99.9162",
+    "modern_recall": "52.3257",
+    "modern_spec": "99.9158"
+  },
+  "human0p6-replicate2-t8-p8": {
+    "legacy_recall": "51.8618",
+    "legacy_spec": "99.9162",
+    "modern_recall": "52.3257",
+    "modern_spec": "99.9158"
+  },
+  "human0p6-replicate3-t5-p10": {
+    "legacy_recall": "50.5202",
+    "legacy_spec": "99.9207",
+    "modern_recall": "51.6162",
+    "modern_spec": "99.9202"
+  },
+  "human0p6-replicate3-t5-p12": {
+    "legacy_recall": "50.5202",
+    "legacy_spec": "99.9207",
+    "modern_recall": "51.6162",
+    "modern_spec": "99.9202"
+  },
+  "human0p6-replicate3-t5-p8": {
+    "legacy_recall": "50.5202",
+    "legacy_spec": "99.9207",
+    "modern_recall": "51.6162",
+    "modern_spec": "99.9202"
+  },
+  "human0p6-replicate3-t6-p10": {
+    "legacy_recall": "51.3400",
+    "legacy_spec": "99.9207",
+    "modern_recall": "51.9922",
+    "modern_spec": "99.9200"
+  },
+  "human0p6-replicate3-t6-p12": {
+    "legacy_recall": "51.3400",
+    "legacy_spec": "99.9207",
+    "modern_recall": "51.9922",
+    "modern_spec": "99.9200"
+  },
+  "human0p6-replicate3-t6-p8": {
+    "legacy_recall": "51.3400",
+    "legacy_spec": "99.9207",
+    "modern_recall": "51.9922",
+    "modern_spec": "99.9200"
+  },
+  "human0p6-replicate3-t7-p10": {
+    "legacy_recall": "51.6853",
+    "legacy_spec": "99.9202",
+    "modern_recall": "52.2013",
+    "modern_spec": "99.9195"
+  },
+  "human0p6-replicate3-t7-p12": {
+    "legacy_recall": "51.6853",
+    "legacy_spec": "99.9202",
+    "modern_recall": "52.2013",
+    "modern_spec": "99.9195"
+  },
+  "human0p6-replicate3-t7-p8": {
+    "legacy_recall": "51.6853",
+    "legacy_spec": "99.9202",
+    "modern_recall": "52.2013",
+    "modern_spec": "99.9195"
+  },
+  "human0p6-replicate3-t8-p10": {
+    "legacy_recall": "51.8160",
+    "legacy_spec": "99.9197",
+    "modern_recall": "52.2708",
+    "modern_spec": "99.9195"
+  },
+  "human0p6-replicate3-t8-p12": {
+    "legacy_recall": "51.8160",
+    "legacy_spec": "99.9197",
+    "modern_recall": "52.2708",
+    "modern_spec": "99.9195"
+  },
+  "human0p6-replicate3-t8-p8": {
+    "legacy_recall": "51.8160",
+    "legacy_spec": "99.9197",
+    "modern_recall": "52.2708",
+    "modern_spec": "99.9195"
+  }
+}

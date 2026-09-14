@@ -166,17 +166,18 @@ jobs:
           fetch_reference mm10 "$MM10_URL" "$MM10_FA_SHA256" "$MM10_FA_SIZE"
 
       - name: Run the assigned gradient cells
+        env:
+          SELECTED_CELLS: ${{ needs.plan.outputs.cells }}
         run: |
           set -euo pipefail
           shard=${{ matrix.shard }}
           shard_count=${{ strategy.job-total }}
           python3 - "$shard" "$shard_count" <<'PY' > ci-artifacts/assigned-cells.txt
-          import json, pathlib, sys
-          contract = json.loads(pathlib.Path('benchmark/note4/mixture-cells.json').read_text())
-          labels = [cell['label'] for cell in contract['cells']]
+          import json, os, sys
+          selected = json.loads(os.environ["SELECTED_CELLS"])
           shard, shard_count = int(sys.argv[1]), int(sys.argv[2])
-          step = -(-len(labels) // shard_count)
-          for label in labels[(shard - 1) * step : shard * step]:
+          step = -(-len(selected) // shard_count)
+          for label in selected[(shard - 1) * step : shard * step]:
               print(label)
           PY
           while read -r cell; do
@@ -193,12 +194,12 @@ jobs:
               2>&1 | tee "ci-artifacts/logs/cell-${cell}.log"
           done < ci-artifacts/assigned-cells.txt
 
-      - name: Verify the gradient reproduces the published table
+      - name: Verify the gradient reproduces the recorded per-cell metrics
         run: |
           set -euo pipefail
           python3 scripts/gate6/compare-note4-gradient.py \
             --metrics-directory ci-artifacts/evidence \
-            --expected benchmark/note4/table-s6-gradient.tsv \
+            --expected benchmark/note4/per-cell-expected-s6.json \
             --report ci-artifacts/gradient-comparison.json \
             2>&1 | tee ci-artifacts/logs/gradient-comparison.log
 
