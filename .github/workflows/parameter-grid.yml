@@ -117,6 +117,7 @@ jobs:
             - r-base=4.3
             - bioconductor-biocparallel
             - bioconductor-genomicalignments
+            - bioconductor-genomeinfodbdata
             - bioconductor-genomicranges
             - bioconductor-iranges
             - bioconductor-s4vectors
