@@ -314,6 +314,7 @@ jobs:
           primary="$(read_compare "${reports}/xenofilx-oracle-comparison.json")"
           ct="$(read_compare "${reports}/xg-ct-xenofilx-oracle-comparison.json")"
           ga="$(read_compare "${reports}/xg-ga-xenofilx-oracle-comparison.json")"
+          if [ "${{ job.status }}" = "success" ]; then gate_result="PASS"; else gate_result="-"; fi
           bash scripts/ci/job-summary.sh \
             --verdict "${{ job.status }}" \
             --title "Xenofilx Gate C — NM oracle parity" \
@@ -322,7 +323,7 @@ jobs:
             --check "Primary arm oracle equality|all compared records equal|${primary%%|*}|${primary##*|}" \
             --check "CT control arm equality|all compared records equal|${ct%%|*}|${ct##*|}" \
             --check "GA control arm equality|all compared records equal|${ga%%|*}|${ga##*|}" \
-            --check "Fixture verified against pinned digest|sha256 matches|see step log|-" \
+            --check "Fixture verified against pinned digest|sha256 matches|see step log|${gate_result}" \
             --metric "Fixture|${{ matrix.bam_dataset_path }}" \
             --metric "Fixture size|${{ matrix.bam_size }} bytes" \
             --metric "Reference|${{ matrix.reference }} (GENCODE, checksum-pinned)" \

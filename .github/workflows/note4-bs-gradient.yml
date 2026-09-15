@@ -74,12 +74,13 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
+          if [ "${{ job.status }}" = "success" ]; then gate_result="PASS"; else gate_result="-"; fi
           bash scripts/ci/job-summary.sh \
             --verdict "${{ job.status }}" \
             --title "Xenofilx Note 4 — gradient scope planning" \
             --checked "Resolves which cells of the Table S6 gradient this run evaluates, reads the cell contract from benchmark/note4/mixture-cells.json, and publishes the cell list plus the shard count for the matrix job." \
-            --check "Scope resolved from the committed contract|cell list produced|see step log|-" \
-            --check "Shard plan produced|shard indices emitted|see step log|-" \
+            --check "Scope resolved from the committed contract|cell list produced|see step log|${gate_result}" \
+            --check "Shard plan produced|shard indices emitted|see step log|${gate_result}" \
             --metric "Trigger|${{ github.event_name }}" \
             --metric "Full sweep requested|${{ github.event_name == 'workflow_dispatch' && inputs.full_sweep || 'false' }}" \
             --limit "Planning only: this job evaluates no cells and produces no scientific evidence. It exists so the matrix size is decided from the contract rather than duplicated in the workflow." \
@@ -251,6 +252,7 @@ jobs:
           field() { rg -N "^$1=" ci-artifacts/summary-fields.txt 2>/dev/null | head -n 1 | cut -d= -f2- || echo "-"; }
           evaluated="$([ -f ci-artifacts/evidence/source-performance.json ] && echo 1 || find ci-artifacts/evidence -name source-performance.json 2>/dev/null | wc -l | tr -d ' ')"
           outcome_note="within $(field within_range), deviation $(field deviation), large $(field large_deviation)"
+          if [ "${{ job.status }}" = "success" ]; then gate_result="PASS"; else gate_result="-"; fi
           bash scripts/ci/job-summary.sh \
             --verdict "${{ job.status }}" \
             --title "Xenofilx Note 4 — bisulfite gradient (Table S6)" \

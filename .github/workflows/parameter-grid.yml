@@ -60,11 +60,12 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
+          if [ "${{ job.status }}" = "success" ]; then gate_result="PASS"; else gate_result="-"; fi
           bash scripts/ci/job-summary.sh \
             --verdict "${{ job.status }}" \
             --title "Xenofilx Note 4 — parameter grid scope planning" \
             --checked "Decides which 60% human replicates the Table S7 grid evaluates and publishes the replicate list for the matrix job." \
-            --check "Replicate scope resolved|replicate list emitted|see step log|-" \
+            --check "Replicate scope resolved|replicate list emitted|see step log|${gate_result}" \
             --metric "Trigger|${{ github.event_name }}" \
             --metric "Full sweep requested|${{ github.event_name == 'workflow_dispatch' && inputs.full_sweep || 'false' }}" \
             --limit "Planning only: no evaluation run happens here. A push audits replicate 1 (12 runs); workflow_dispatch with full_sweep covers all three replicates (36 runs)." \
@@ -261,6 +262,7 @@ jobs:
           # Report the outcome tally from the comparison log, which carries the notice line and
           # one warning per metric that left the tolerance band.
           deviation_count="$(rg -c '::warning::' ci-artifacts/logs/grid-comparison.log 2>/dev/null || echo 0)"
+          if [ "${{ job.status }}" = "success" ]; then gate_result="PASS"; else gate_result="-"; fi
           bash scripts/ci/job-summary.sh \
             --verdict "${{ job.status }}" \
             --title "Xenofilx Note 4 — parameter grid (Table S7)" \

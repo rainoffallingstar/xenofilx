@@ -72,13 +72,22 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
+          # These gates are pass/fail with no numeric comparison to report, so the result comes
+          # from the job verdict: a green job means every preceding step passed. A non-green job
+          # is left un-attributed rather than guessing which gate failed.
+          if [ "${{ job.status }}" = "success" ]; then
+            gate_result="PASS"
+          else
+            gate_result="-"
+          fi
           bash scripts/ci/job-summary.sh \
             --verdict "${{ job.status }}" \
             --title "xenofilx — unit contract and classifier smoke" \
             --checked "Go quality gates, a race run, a vulnerability scan, and a classifier smoke test that filters a small graft/host pair and validates the output with samtools." \
-            --check "Go quality gates|gofmt, vet and tests pass|see step log|-" \
-            --check "Race detector|null races reported|see step log|-" \
-            --check "Vulnerability scan|govulncheck reports no reachable issue|see step log|-" \
-            --check "Classifier smoke|output BAM, index and coordinate sort present|see step log|-" \
+            --check "Go quality gates|gofmt, vet and tests pass|see step log|${gate_result}" \
+            --check "Race detector|null races reported|see step log|${gate_result}" \
+            --check "Vulnerability scan|govulncheck reports no reachable issue|see step log|${gate_result}" \
+            --check "Classifier smoke|output BAM, index and coordinate sort present|see step log|${gate_result}" \
             --limit "Unit and small-fixture coverage. Real-BAM NM parity is Gate C, mixture performance is the mixture workflow, and fragment-level accounting is Gate D." \
+            --limit "These four checks are boolean gates, so the briefing reports the job verdict for each and points at the step log; there is no numeric comparison to display." \
             --note "The race run uses -short because the real-BAM/BGZF tests exceed runner budgets under the race detector."
