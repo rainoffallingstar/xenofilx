@@ -263,6 +263,7 @@ jobs:
             --check "Metric outcomes at tolerance $(field tolerance_percentage_points) pp|reported, never enforced|${outcome_note}|-" \
             --metric "Assigned cells|${cells}" \
             --metric "Fixture revision|0b0c627c (immutable)" \
+            --limit "These rows are pass/fail gates with no numeric comparison, so the Result column carries the job verdict and the Observed column points at the step log." \
             --artifact "xenofilx-note4-gradient-shard-${{ matrix.shard }}" \
             --limit "Metric differences are reported rather than enforced: a single replicate can deviate from the published three-replicate mean, so the job records the spread and keeps the evidence. Only a missing or structurally invalid evidence set fails." \
             --note "A representative three-cell slice runs on push; workflow_dispatch with full_sweep covers all 43 cells."

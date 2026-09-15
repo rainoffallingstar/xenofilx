@@ -328,6 +328,7 @@ jobs:
             --metric "Fixture size|${{ matrix.bam_size }} bytes" \
             --metric "Reference|${{ matrix.reference }} (GENCODE, checksum-pinned)" \
             --metric "Record limit per arm|$GATE_C_RECORD_LIMIT" \
+            --limit "These rows are pass/fail gates with no numeric comparison, so the Result column carries the job verdict and the Observed column points at the step log." \
             --artifact "xenofilx-gate-c-${{ matrix.cell }}" \
             --limit "A bounded contract audit at $GATE_C_RECORD_LIMIT records per arm: it asserts NM and score semantics, not classification performance or production-scale throughput." \
             --limit "${{ matrix.mode == 'bsseq' && 'The CT/GA control arms use the conventional NM contract by design, because the converted reference removes the ambiguity that bisulfite mode exists to model.' || 'This RNA cell has no converted-reference control arms.' }}" \

@@ -274,6 +274,7 @@ jobs:
             --metric "Evaluations per replicate|12 (4 thresholds x 3 penalties)" \
             --metric "Decision parameters swept|threshold 5-8, penalty 8-12" \
             --metric "Fixture revision|0b0c627c (immutable)" \
+            --limit "These rows are pass/fail gates with no numeric comparison, so the Result column carries the job verdict and the Observed column points at the step log." \
             --artifact "xenofilx-note4-parameter-grid-replicate-${{ matrix.replicate }}" \
             --limit "Metric differences are reported rather than enforced, exactly as for the gradient: a single replicate can deviate from the published three-replicate mean, so the spread is recorded and the evidence kept." \
             --note "The conventional unpatched control is skipped in this workflow because the grid audits decision parameters, which the legacy bisulfite arm already covers."
