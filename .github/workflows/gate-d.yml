@@ -200,32 +200,37 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
-          membership="ci-artifacts/evidence/membership-comparison.json"
-          stratify="ci-artifacts/evidence/stratification.json"
-          describe() {
-            python3 -c '
-          import json, pathlib, sys
-          path = pathlib.Path(sys.argv[1])
-          if not path.is_file():
-              print("not produced")
-              raise SystemExit(0)
-          report = json.loads(path.read_text())
-          summary = report.get("summary", report)
-          interesting = {
-              key: value for key, value in summary.items()
-              if isinstance(value, (int, float)) and "unexplained" in key
-          }
-          print(", ".join(f"{k}={v}" for k, v in sorted(interesting.items())) or "see artifact")
-          ' "$1"
-          }
+          # Read the real Gate D reports. The membership report is a flat summary of fragment
+          # counts; the stratification report holds nested category maps, which the field helper
+          # deliberately reports as absent because a container has no place in a table cell.
+          bash scripts/ci/summary-field.sh \
+            ci-artifacts/evidence/membership-comparison.json#total_input_fragments \
+            ci-artifacts/evidence/membership-comparison.json#modern_graft_fragments \
+            ci-artifacts/evidence/membership-comparison.json#legacy_graft_fragments \
+            ci-artifacts/evidence/membership-comparison.json#disagreements \
+            ci-artifacts/evidence/membership-comparison.json#modern_only_graft \
+            ci-artifacts/evidence/membership-comparison.json#legacy_only_graft \
+            ci-artifacts/evidence/stratification.json#matching_disagreements \
+            ci-artifacts/evidence/stratification.json#sample_size \
+            ci-artifacts/evidence/stratification.json#classification \
+            > ci-artifacts/evidence/summary-fields.txt
+          field() { rg -N "^$1=" ci-artifacts/evidence/summary-fields.txt | head -n 1 | cut -d= -f2-; }
+          agreement_note="graft/graft + discarded/discarded"
           bash scripts/ci/job-summary.sh \
             --verdict "${{ job.status }}" \
             --title "Xenofilx Gate D — fragment disagreement accounting" \
             --scope "BS-PDX" \
-            --checked "Recomputes fragment membership from the published BAM intermediates and cross-checks the score-decision accounting, asserting that every modern-only disagreement is assigned a reproducible category." \
-            --check "Fragment membership recomputed|comparison completes|see step log|-" \
-            --check "Unexplained disagreements|zero|$(describe "${membership}")|-" \
-            --check "Stratification closure|every modern-only disagreement categorised|$(describe "${stratify}")|-" \
+            --checked "Recomputes fragment membership from the published BAM intermediates and cross-checks the score-decision accounting, asserting that every modern-only disagreement is assigned a reproducible mapping or score-decision category." \
+            --check "Input fragments in the universe|45160030|$(field total_input_fragments)|-" \
+            --check "Modern graft fragments|45120923|$(field modern_graft_fragments)|-" \
+            --check "Legacy graft fragments|44005685|$(field legacy_graft_fragments)|-" \
+            --check "Total disagreements|1115240|$(field disagreements)|-" \
+            --check "Modern-only graft|1115239|$(field modern_only_graft)|-" \
+            --check "Legacy-only graft|1|$(field legacy_only_graft)|-" \
+            --check "Disagreements stratified|all ${agreement_note} accounted|$(field matching_disagreements) of $(field sample_size)|-" \
+            --check "Disagreement class|modern graft vs legacy discard|$(field classification)|-" \
+            --metric "Comparison unit|unique fragment membership" \
             --artifact "xenofilx-gate-d-bs-pdx" \
-            --limit "Accounting closure for the modern-versus-legacy membership difference: the disagreement is explained, not eliminated. It remains a documented semantic limitation rather than an implementation failure." \
+            --limit "This closes the accounting, it does not remove the difference: every modern-only disagreement is explained by a reproducible category, and the remaining membership gap is a documented modern-versus-legacy semantic limitation rather than an implementation failure." \
+            --limit "Category counts are asserted in the workflow steps and carried in the artifacts; the briefing states the totals and the closure, not the full per-category breakdown." \
             --note "Fixture intermediates are downloaded from the pinned dataset revision, so this gate re-derives the numbers instead of trusting a stored claim."
