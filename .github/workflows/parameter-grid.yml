@@ -254,16 +254,20 @@ jobs:
         run: |
           evaluated="$(find ci-artifacts/evidence -name source-performance.json 2>/dev/null | wc -l | tr -d ' ')"
           comparison="-"
-          if [[ -f ci-artifacts/logs/grid-comparison.log ]]; then
-            comparison="$(rg -o '::notice::.*' ci-artifacts/logs/grid-comparison.log | tail -n 1 | sed 's/::notice:://' || echo 'see artifact')"
+          if [ -f ci-artifacts/logs/grid-comparison.log ]; then
+            extracted="$(rg -o '::notice::.*' ci-artifacts/logs/grid-comparison.log 2>/dev/null | tail -n 1 | sed 's/::notice:://' || true)"
+            [ -n "${extracted}" ] && comparison="${extracted}"
           fi
+          # Report the outcome tally from the comparison log, which carries the notice line and
+          # one warning per metric that left the tolerance band.
+          deviation_count="$(rg -c '::warning::' ci-artifacts/logs/grid-comparison.log 2>/dev/null || echo 0)"
           bash scripts/ci/job-summary.sh \
             --verdict "${{ job.status }}" \
             --title "Xenofilx Note 4 — parameter grid (Table S7)" \
             --scope "replicate ${{ matrix.replicate }}" \
-            --checked "Sweeps the 4x3 factorial of mismatch threshold {5,6,7,8} against unmapped penalty {8,10,12} on the matched 60% human mixtures, evaluating the modern xenofilx arm and the legacy Picard+XenofilteR arm for every combination." \
+            --checked "Sweeps the 4x3 factorial of mismatch threshold {5,6,7,8} against unmapped penalty {8,10,12} on the matched 60% human mixtures, evaluating the modern xenofilx arm and the legacy Picard plus XenofilteR arm for every combination." \
             --check "Grid cells evaluated|12 of 12 produced source-performance.json|${evaluated} produced|-" \
-            --check "Evaluated cells are part of the contract|no unknown labels|see step log|-" \
+            --check "Metrics leaving the tolerance band|reported, never enforced|${deviation_count} warning(s)|-" \
             --check "Comparison against recorded values|differences reported, not enforced|${comparison}|-" \
             --metric "Evaluations per replicate|12 (4 thresholds x 3 penalties)" \
             --metric "Decision parameters swept|threshold 5-8, penalty 8-12" \

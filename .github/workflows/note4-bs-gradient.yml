@@ -239,25 +239,26 @@ jobs:
         continue-on-error: true
         run: |
           cells="$(tr '\n' ' ' < ci-artifacts/assigned-cells.txt 2>/dev/null || echo '-')"
-          comparison="-"
-          if [[ -f ci-artifacts/gradient-comparison.json ]]; then
-            comparison="$(python3 -c '
-          import json, sys
-          report = json.load(open(sys.argv[1]))
-          counts = report.get("status_counts")
-          if isinstance(counts, dict) and counts:
-              print(", ".join(f"{name}={value}" for name, value in sorted(counts.items())))
-          else:
-              print("cells=" + str(len(report.get("cells", {}))))
-          ' "ci-artifacts/gradient-comparison.json" 2>/dev/null || echo "see artifact")"
-          fi
+          # Read the comparator's real schema: it reports evaluated_cell_count and a
+          # metric_outcomes tally, not a `status_counts` map.
+          bash scripts/ci/summary-field.sh \
+            ci-artifacts/gradient-comparison.json#evaluated_cell_count \
+            ci-artifacts/gradient-comparison.json#metric_outcomes.within_range \
+            ci-artifacts/gradient-comparison.json#metric_outcomes.deviation \
+            ci-artifacts/gradient-comparison.json#metric_outcomes.large_deviation \
+            ci-artifacts/gradient-comparison.json#tolerance_percentage_points \
+            > ci-artifacts/summary-fields.txt 2>/dev/null || true
+          field() { rg -N "^$1=" ci-artifacts/summary-fields.txt 2>/dev/null | head -n 1 | cut -d= -f2- || echo "-"; }
+          evaluated="$([ -f ci-artifacts/evidence/source-performance.json ] && echo 1 || find ci-artifacts/evidence -name source-performance.json 2>/dev/null | wc -l | tr -d ' ')"
+          outcome_note="within $(field within_range), deviation $(field deviation), large $(field large_deviation)"
           bash scripts/ci/job-summary.sh \
             --verdict "${{ job.status }}" \
             --title "Xenofilx Note 4 — bisulfite gradient (Table S6)" \
             --scope "shard ${{ matrix.shard }}" \
-            --checked "Runs each assigned cell of the 0-99% bisulfite composition gradient through the modern xenofilx selection and the legacy Picard+XenofilteR arm on the same fixtures, then compares the per-cell metrics against the recorded values." \
-            --check "Assigned cells evaluated|all cells produced source-performance.json|see step log|-" \
-            --check "Comparison against recorded values|differences reported, not enforced|${comparison}|-" \
+            --checked "Runs each assigned cell of the 0-99% bisulfite composition gradient through the modern xenofilx selection and the legacy Picard plus XenofilteR arm on the same fixtures, then compares the per-cell metrics against the recorded values." \
+            --check "Cells evaluated by this shard|all assigned cells|${evaluated} produced source-performance.json|-" \
+            --check "Cells compared by the report|all evaluated cells|$(field evaluated_cell_count)|-" \
+            --check "Metric outcomes at tolerance $(field tolerance_percentage_points) pp|reported, never enforced|${outcome_note}|-" \
             --metric "Assigned cells|${cells}" \
             --metric "Fixture revision|0b0c627c (immutable)" \
             --artifact "xenofilx-note4-gradient-shard-${{ matrix.shard }}" \
