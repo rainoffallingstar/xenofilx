@@ -67,3 +67,18 @@ jobs:
           FIRST_REF="$(samtools view -H "$OUT_BAM" | awk '$1 == "@SQ" { sub(/^SN:/, "", $2); print $2; exit }')"
           test -n "$FIRST_REF"
           samtools view "$OUT_BAM" "${FIRST_REF}:1-1000000" >/dev/null
+
+      - name: Job summary
+        if: always()
+        continue-on-error: true
+        run: |
+          bash scripts/ci/job-summary.sh \
+            --verdict "${{ job.status }}" \
+            --title "xenofilx — unit contract and classifier smoke" \
+            --checked "Go quality gates, a race run, a vulnerability scan, and a classifier smoke test that filters a small graft/host pair and validates the output with samtools." \
+            --check "Go quality gates|gofmt, vet and tests pass|see step log|-" \
+            --check "Race detector|null races reported|see step log|-" \
+            --check "Vulnerability scan|govulncheck reports no reachable issue|see step log|-" \
+            --check "Classifier smoke|output BAM, index and coordinate sort present|see step log|-" \
+            --limit "Unit and small-fixture coverage. Real-BAM NM parity is Gate C, mixture performance is the mixture workflow, and fragment-level accounting is Gate D." \
+            --note "The race run uses -short because the real-BAM/BGZF tests exceed runner budgets under the race detector."

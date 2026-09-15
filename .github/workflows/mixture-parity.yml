@@ -370,3 +370,36 @@ jobs:
           path: ci-artifacts/evidence/
           if-no-files-found: warn
           retention-days: 90
+
+      - name: Job summary
+        if: always()
+        continue-on-error: true
+        run: |
+          report="ci-artifacts/evidence/source-performance.json"
+          metric() {
+            python3 -c '
+          import json, pathlib, sys
+          path = pathlib.Path(sys.argv[1])
+          tool, field = sys.argv[2], sys.argv[3]
+          if not path.is_file():
+              print("not produced")
+              raise SystemExit(0)
+          data = json.loads(path.read_text())
+          value = data.get("tools", {}).get(tool, {}).get(field)
+          print("n/a" if value is None else f"{value * 100:.2f} pp")
+          ' "${report}" "$1" "$2"
+          }
+          bash scripts/ci/job-summary.sh \
+            --verdict "${{ job.status }}" \
+            --title "Xenofilx — mixture parity against construction truth" \
+            --scope "${{ matrix.assay }}" \
+            --checked "Evaluates graft selection on a real human/mouse mixture against the per-fragment construction truth, comparing the modern xenofilx selection with the legacy Picard+XenofilteR arm driven by each Picard NM variant." \
+            --check "Evaluated arms match the declared set|exactly the expected arms|see step log|-" \
+            --check "Unknown selected fragments|0|see step log|-" \
+            --check "Truth manifest size|>= 1,000,000 fragments|see step log|-" \
+            --check "All metrics within [0, 1]|true|see step log|-" \
+            --metric "Modern xenofilx graft recall|$(metric modern_xenofilx sensitivity_graft_recall)" \
+            --metric "Legacy Picard+XenofilteR graft recall|$(metric legacy_picard_xenofilter sensitivity_graft_recall)" \
+            --artifact "xenofilx-mixture-${{ matrix.assay }}" \
+            --limit "Structural checks are enforced; metric differences from the recorded values are reported, not enforced, because a single replicate can deviate from the published three-replicate mean." \
+            --note "Both arms are computed in the same run on the same fixtures, so the comparison is internally controlled."

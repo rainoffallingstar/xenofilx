@@ -195,3 +195,37 @@ jobs:
           path: ci-artifacts/evidence/
           if-no-files-found: warn
           retention-days: 90
+
+      - name: Job summary
+        if: always()
+        continue-on-error: true
+        run: |
+          membership="ci-artifacts/evidence/membership-comparison.json"
+          stratify="ci-artifacts/evidence/stratification.json"
+          describe() {
+            python3 -c '
+          import json, pathlib, sys
+          path = pathlib.Path(sys.argv[1])
+          if not path.is_file():
+              print("not produced")
+              raise SystemExit(0)
+          report = json.loads(path.read_text())
+          summary = report.get("summary", report)
+          interesting = {
+              key: value for key, value in summary.items()
+              if isinstance(value, (int, float)) and "unexplained" in key
+          }
+          print(", ".join(f"{k}={v}" for k, v in sorted(interesting.items())) or "see artifact")
+          ' "$1"
+          }
+          bash scripts/ci/job-summary.sh \
+            --verdict "${{ job.status }}" \
+            --title "Xenofilx Gate D — fragment disagreement accounting" \
+            --scope "BS-PDX" \
+            --checked "Recomputes fragment membership from the published BAM intermediates and cross-checks the score-decision accounting, asserting that every modern-only disagreement is assigned a reproducible category." \
+            --check "Fragment membership recomputed|comparison completes|see step log|-" \
+            --check "Unexplained disagreements|zero|$(describe "${membership}")|-" \
+            --check "Stratification closure|every modern-only disagreement categorised|$(describe "${stratify}")|-" \
+            --artifact "xenofilx-gate-d-bs-pdx" \
+            --limit "Accounting closure for the modern-versus-legacy membership difference: the disagreement is explained, not eliminated. It remains a documented semantic limitation rather than an implementation failure." \
+            --note "Fixture intermediates are downloaded from the pinned dataset revision, so this gate re-derives the numbers instead of trusting a stored claim."

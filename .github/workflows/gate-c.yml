@@ -285,3 +285,49 @@ jobs:
             ci-artifacts/*.yaml
           if-no-files-found: warn
           retention-days: 90
+
+      - name: Job summary
+        if: always()
+        continue-on-error: true
+        run: |
+          reports="ci-artifacts/evidence"
+          # Report the comparator's own verdict instead of asserting anything here: the contract
+          # is enforced by the preceding steps, this step only describes what they produced.
+          read_compare() {
+            python3 -c '
+          import json, pathlib, sys
+          path = pathlib.Path(sys.argv[1])
+          if not path.is_file():
+              print("not produced|-")
+              raise SystemExit(0)
+          report = json.loads(path.read_text())
+          compared = report.get("records_compared", 0)
+          differences = report.get("difference_counts", {})
+          if report.get("equal") and compared:
+              print(f"{compared}/{compared} equal|PASS")
+          elif differences:
+              print(f"{compared} compared, {sum(differences.values())} difference(s)|FAIL")
+          else:
+              print("no records compared|FAIL")
+          ' "$1"
+          }
+          primary="$(read_compare "${reports}/xenofilx-oracle-comparison.json")"
+          ct="$(read_compare "${reports}/xg-ct-xenofilx-oracle-comparison.json")"
+          ga="$(read_compare "${reports}/xg-ga-xenofilx-oracle-comparison.json")"
+          bash scripts/ci/job-summary.sh \
+            --verdict "${{ job.status }}" \
+            --title "Xenofilx Gate C — NM oracle parity" \
+            --scope "${{ matrix.cell }} · ${{ matrix.mode }}" \
+            --checked "Compares the reference-aware NM and classification score against the independent bamdriver/cmd/nmoracle oracle, record for record, on the original reference (primary arm) and, for bisulfite cells, on strand-converted CT and GA references." \
+            --check "Primary arm oracle equality|all compared records equal|${primary%%|*}|${primary##*|}" \
+            --check "CT control arm equality|all compared records equal|${ct%%|*}|${ct##*|}" \
+            --check "GA control arm equality|all compared records equal|${ga%%|*}|${ga##*|}" \
+            --check "Fixture verified against pinned digest|sha256 matches|see step log|-" \
+            --metric "Fixture|${{ matrix.bam_dataset_path }}" \
+            --metric "Fixture size|${{ matrix.bam_size }} bytes" \
+            --metric "Reference|${{ matrix.reference }} (GENCODE, checksum-pinned)" \
+            --metric "Record limit per arm|$GATE_C_RECORD_LIMIT" \
+            --artifact "xenofilx-gate-c-${{ matrix.cell }}" \
+            --limit "A bounded contract audit at $GATE_C_RECORD_LIMIT records per arm: it asserts NM and score semantics, not classification performance or production-scale throughput." \
+            --limit "${{ matrix.mode == 'bsseq' && 'The CT/GA control arms use the conventional NM contract by design, because the converted reference removes the ambiguity that bisulfite mode exists to model.' || 'This RNA cell has no converted-reference control arms.' }}" \
+            --note "Fixtures resolve from the immutable dataset revision pinned in FIXTURE_BASE_URL and are verified against it before use."
