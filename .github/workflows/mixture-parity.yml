@@ -375,31 +375,47 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
-          report="ci-artifacts/evidence/source-performance.json"
-          metric() {
-            python3 -c '
-          import json, pathlib, sys
-          path = pathlib.Path(sys.argv[1])
-          tool, field = sys.argv[2], sys.argv[3]
-          if not path.is_file():
-              print("not produced")
-              raise SystemExit(0)
-          data = json.loads(path.read_text())
-          value = data.get("tools", {}).get(tool, {}).get(field)
-          print("n/a" if value is None else f"{value * 100:.2f} pp")
-          ' "${report}" "$1" "$2"
+          # The legacy arm is named per assay: the BS cell drives XenofilteR with the bisulfite
+          # Picard NM variant and the RNA cell with the conventional one.
+          if [ "${{ matrix.bisulfite }}" = "true" ]; then
+            legacy_arm="legacy_xenofilter_bisulfite"
+          else
+            legacy_arm="legacy_xenofilter_conventional"
+          fi
+          bash scripts/ci/summary-field.sh \
+            ci-artifacts/evidence/source-performance.json#tools.modern_xenofilx.sensitivity_graft_recall \
+            ci-artifacts/evidence/source-performance.json#tools.modern_xenofilx.specificity_host_recall \
+            ci-artifacts/evidence/source-performance.json#tools.modern_xenofilx.precision_graft_ppv \
+            "ci-artifacts/evidence/source-performance.json#tools.${legacy_arm}.sensitivity_graft_recall" \
+            > ci-artifacts/evidence/summary-fields.txt 2>/dev/null || true
+          # The report stores fractions; the briefing states percentage points. Read the two recall
+          # values positionally, because both arms expose a field called sensitivity_graft_recall
+          # and a name-based lookup would report the same arm twice.
+          modern_recall="$(sed -n '1p' ci-artifacts/evidence/summary-fields.txt | cut -d= -f2-)"
+          modern_specificity="$(sed -n '2p' ci-artifacts/evidence/summary-fields.txt | cut -d= -f2-)"
+          modern_precision="$(sed -n '3p' ci-artifacts/evidence/summary-fields.txt | cut -d= -f2-)"
+          legacy_recall="$(sed -n '4p' ci-artifacts/evidence/summary-fields.txt | cut -d= -f2-)"
+          as_points() {
+            if [ -z "$1" ] || [ "$1" = "-" ]; then printf '-'; else
+              awk -v v="$1" 'BEGIN { printf "%.2f pp", v * 100 }'
+            fi
           }
+          arms_total="$(python3 -c "import json,sys; print(len(json.load(open(sys.argv[1]))['tools']))" ci-artifacts/evidence/source-performance.json 2>/dev/null || echo '-')"
+          unknown_selected="$(python3 -c "import json,sys; t=json.load(open(sys.argv[1]))['tools']; print(sum(v.get('unknown_selected_fragments',0) for v in t.values()))" ci-artifacts/evidence/source-performance.json 2>/dev/null || echo '-')"
+          truth_fragments="$(python3 -c "import json,sys; t=json.load(open(sys.argv[1]))['tools']; print(max((v.get('truth_fragments',0) for v in t.values()), default=0))" ci-artifacts/evidence/source-performance.json 2>/dev/null || echo '-')"
           bash scripts/ci/job-summary.sh \
             --verdict "${{ job.status }}" \
             --title "Xenofilx — mixture parity against construction truth" \
             --scope "${{ matrix.assay }}" \
-            --checked "Evaluates graft selection on a real human/mouse mixture against the per-fragment construction truth, comparing the modern xenofilx selection with the legacy Picard+XenofilteR arm driven by each Picard NM variant." \
-            --check "Evaluated arms match the declared set|exactly the expected arms|see step log|-" \
-            --check "Unknown selected fragments|0|see step log|-" \
-            --check "Truth manifest size|>= 1,000,000 fragments|see step log|-" \
-            --check "All metrics within [0, 1]|true|see step log|-" \
-            --metric "Modern xenofilx graft recall|$(metric modern_xenofilx sensitivity_graft_recall)" \
-            --metric "Legacy Picard+XenofilteR graft recall|$(metric legacy_picard_xenofilter sensitivity_graft_recall)" \
+            --checked "Evaluates graft selection on a real human/mouse mixture against the per-fragment construction truth, comparing the modern xenofilx selection with the legacy Picard plus XenofilteR arm driven by the matching Picard NM variant." \
+            --check "Evaluated arms present|modern plus the declared legacy arm(s)|${arms_total} evaluated|-" \
+            --check "Unknown selected fragments|0|${unknown_selected}|-" \
+            --check "Truth manifest size|>= 1,000,000 fragments|${truth_fragments}|-" \
+            --metric "Modern xenofilx graft recall|$(as_points "${modern_recall}")" \
+            --metric "Legacy XenofilteR graft recall (${legacy_arm})|$(as_points "${legacy_recall}")" \
+            --metric "Modern xenofilx host specificity|$(as_points "${modern_specificity}")" \
+            --metric "Modern xenofilx graft precision|$(as_points "${modern_precision}")" \
+            --metric "Comparison unit|unique fragment membership" \
             --artifact "xenofilx-mixture-${{ matrix.assay }}" \
-            --limit "Structural checks are enforced; metric differences from the recorded values are reported, not enforced, because a single replicate can deviate from the published three-replicate mean." \
+            --limit "Structural checks are enforced: the evaluated arm set, zero unknown selected fragments, a truth manifest of at least 1,000,000 fragments, and every metric inside [0, 1]. Metric differences from the recorded values are reported rather than enforced, because a single replicate can deviate from the published three-replicate mean." \
             --note "Both arms are computed in the same run on the same fixtures, so the comparison is internally controlled."
